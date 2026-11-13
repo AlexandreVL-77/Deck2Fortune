@@ -95,3 +95,16 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
   box-shadow:0 8px 0 #a8743f,0 14px 18px #5a381f55,0 0 0 3px #fff1a8,0 0 18px 4px #ffe58a}
 .map-hint{color:#fff;text-shadow:0 2px 6px #0a5a6a,0 0 3px #0a5a6a;font-weight:600}
 #toast{background:linear-gradient(180deg,#fffaf0,#f3dfb4);border:2px solid #7d4c2d;box-shadow:0 4px 0 #6b3f25;color:#6a4630;font-weight:600}
+
+
+/* Personnalisation du bateau et du capitaine dans l'onglet Équipage */
+.identity-form{display:grid;gap:6px;margin:10px 0 12px;padding:11px;border:1.5px solid #c9965c;border-radius:15px;background:linear-gradient(145deg,#fff9e9,#f0ddb8);box-shadow:inset 0 0 0 2px #fff9e9}
+.identity-heading{margin-bottom:2px;font-size:8px;font-weight:900;letter-spacing:1.2px;color:#a36c3f}
+.identity-form label{margin-top:3px;font-size:9px;font-weight:800;color:#795234}
+.identity-form input{width:100%;min-height:37px;padding:8px 10px;border:1.5px solid #d2ae7b;border-radius:9px;background:#fffdf5;color:#68482f;font:600 12px 'Fredoka','DM Sans',sans-serif;outline:none;box-shadow:inset 0 1px 3px #7c593222}
+.identity-form input:focus{border-color:#bd7c3d;box-shadow:0 0 0 3px #e9bd6b55}
+.identity-form input::placeholder{color:#b79a76}
+.identity-save{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:5px;padding:10px;border:2px solid #7d4c2d;border-radius:10px;background:linear-gradient(180deg,#e8b878,#c98c52);color:#fff8e2;font-size:9px;font-weight:900;letter-spacing:.8px;box-shadow:0 3px 0 #6b3f25,inset 0 2px #fff3cf}
+.identity-save:active{transform:translateY(2px);box-shadow:0 1px 0 #6b3f25}
+.identity-save span{color:#ffe18a;font-size:13px}
+.identity-hint{font-size:8px;text-align:center;color:#a18460}
