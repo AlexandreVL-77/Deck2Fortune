@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#69cbd0" />
+  <title>Pirate Hex — Les mers oubliées</title>
+</head>
+<body>
+  <main id="game-shell">
+    <div id="game"></div>
+    <div id="hud">
+      <header class="topbar wood-panel">
+        <div><span class="eyebrow">JOUR 03 · ARCHIPEL DES BRUMES</span><strong>Les mers oubliées</strong></div>
+        <div class="gold-pill">✦ <span id="gold">120</span></div>
+      </header>
+      <section class="status-row">
+        <div class="status-pill">♥ <span id="hp">24 / 24</span></div>
+        <div class="status-pill">⚓ <span id="ship">La Mouette</span></div>
+      </section>
+      <div id="toast" role="status"></div>
+      <section id="combat-panel" class="parchment hidden">
+        <div class="combat-heading"><div><span class="eyebrow">RENCONTRE EN MER</span><strong id="enemy-name">Corsaire</strong></div><span id="enemy-hp">18 ♥</span></div>
+        <div class="enemy-bar"><div id="enemy-bar-fill"></div></div>
+        <div class="weapon-row"><span id="melee-label">Coutelas · prêt</span><span id="ranged-label">Mousquet · prêt</span></div>
+        <div class="cards" id="cards"></div>
+        <div class="combat-actions"><button id="end-turn" class="wood-button">Fin du tour</button><button id="flee" class="quiet-button">Fuir</button></div>
+      </section>
+      <nav class="bottom-nav wood-panel">
+        <button data-tab="map" class="nav-button active">⌖<small>Carte</small></button>
+        <button data-tab="crew" class="nav-button">♟<small>Équipage</small></button>
+        <button data-tab="shop" class="nav-button">✦<small>Boutique</small></button>
+      </nav>
+      <section id="drawer" class="parchment hidden"></section>
+    </div>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
