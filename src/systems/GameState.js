@@ -1,8 +1,26 @@
 import { createHand } from '../data/cards.js';
 import { WEAPONS } from '../data/weapons.js';
+
+const IDENTITY_KEY = 'deck2fortune.identity';
+const DEFAULT_IDENTITY = { shipName: 'La Mouette', captainName: 'Milo la Brise' };
+
+function loadIdentity() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(IDENTITY_KEY) || 'null');
+    return {
+      shipName: typeof saved?.shipName === 'string' && saved.shipName.trim() ? saved.shipName.trim().slice(0, 24) : DEFAULT_IDENTITY.shipName,
+      captainName: typeof saved?.captainName === 'string' && saved.captainName.trim() ? saved.captainName.trim().slice(0, 24) : DEFAULT_IDENTITY.captainName
+    };
+  } catch {
+    return { ...DEFAULT_IDENTITY };
+  }
+}
+
 export class GameState {
   constructor() {
-    this.gold=120; this.hp=24; this.maxHp=24; this.shipName='La Mouette';
+    const identity = loadIdentity();
+    this.gold=120; this.hp=24; this.maxHp=24;
+    this.shipName=identity.shipName; this.captainName=identity.captainName;
     this.player={q:0,r:0}; this.enemy={q:2,r:-1,hp:18,maxHp:18,name:'Corsaire des Brumes'};
     this.hand=createHand(); this.selectedCard=0; this.inCombat=false; this.turn=1;
     this.melee={...WEAPONS.cutlass}; this.ranged={...WEAPONS.musket};
@@ -11,6 +29,15 @@ export class GameState {
   }
   subscribe(fn){this.listeners.add(fn);return()=>this.listeners.delete(fn);}
   emit(){this.listeners.forEach(fn=>fn(this));}
+  saveIdentity(shipName,captainName){
+    const ship=String(shipName||'').trim().slice(0,24);
+    const captain=String(captainName||'').trim().slice(0,24);
+    if(!ship||!captain)return false;
+    this.shipName=ship; this.captainName=captain;
+    try { localStorage.setItem(IDENTITY_KEY,JSON.stringify({shipName:ship,captainName:captain})); } catch {}
+    this.emit();
+    return true;
+  }
   startCombat(){this.inCombat=true;this.emit();}
   endCombat(){this.inCombat=false;this.enemy.hp=18;this.emit();}
   spendGold(amount){if(this.gold<amount)return false;this.gold-=amount;this.emit();return true;}
