@@ -17,6 +17,6 @@ export class ShopSystem {
       this.state[slot]={...this.state[slot],...({boardingAxe:{name:'Hache d’abordage',damage:9,luck:78,maxCooldown:2,cooldown:0},flintlock:{name:'Pistolet à silex',damage:5,luck:85,maxCooldown:1,cooldown:0}}[reward.id])};
     }
     this.state.ownedBoosters++;this.state.emit();
-    return {ok:true,message:`Booster ouvert : ${reward.label} !`};
+    return {ok:true,message:`Booster ouvert : ${reward.label} !`,reward:reward.label};
   }
 }
