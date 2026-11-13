@@ -28,7 +28,29 @@ export function renderDrawer(state){
     drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">✧</span> La cale aux trésors</div><p class="drawer-note">Les capitaines y échangent des boosters scellés. Chaque paquet cache une surprise.</p><div class="shop-item"><span><b>Booster du large</b><br><small>Carte, équipement ou butin</small></span><button id="buy-booster">45 ✦</button></div><p class="drawer-note">Boosters ouverts : ${state.ownedBoosters}</p>`;
     $('buy-booster').onclick=()=>{const result=new ShopSystem(state).buyBooster();toast(result.message);renderCards(state);renderDrawer(state);};
   } else if(drawer.dataset.tab==='crew'){
-    drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">♟</span> Ton équipage</div><div class="crew-item"><div style="display:flex;align-items:center;gap:9px"><span class="crew-avatar">♜</span><span><b>Milo la Brise</b><br><small>Capitaine · courageux et curieux</small></span></div><b>ACTIF</b></div><div class="crew-item"><span>⚔ ${state.melee.name}<br><small>Arme de corps-à-corps</small></span><b>${state.melee.damage} ATQ</b></div><div class="crew-item"><span>➶ ${state.ranged.name}<br><small>Arme à distance</small></span><b>${state.ranged.damage} ATQ</b></div>`;
+    drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">♟</span> Ton équipage</div>
+      <div class="crew-item"><div style="display:flex;align-items:center;gap:9px"><span class="crew-avatar">♜</span><span><b id="crew-captain-name"></b><br><small>Capitaine · courageux et curieux</small></span></div><b>ACTIF</b></div>
+      <form id="identity-form" class="identity-form">
+        <div class="identity-heading">PERSONNALISER TON IDENTITÉ</div>
+        <label for="ship-name-input">Nom du bateau</label>
+        <input id="ship-name-input" name="shipName" type="text" maxlength="24" required autocomplete="off" placeholder="Ex. Le Flibustier">
+        <label for="captain-name-input">Nom du capitaine</label>
+        <input id="captain-name-input" name="captainName" type="text" maxlength="24" required autocomplete="off" placeholder="Ex. Capitaine Barbe-Rousse">
+        <button class="identity-save" type="submit">ENREGISTRER LES NOMS <span>✦</span></button>
+        <small class="identity-hint">Tes choix sont sauvegardés sur cet appareil.</small>
+      </form>
+      <div class="crew-item"><span>⚔ ${state.melee.name}<br><small>Arme de corps-à-corps</small></span><b>${state.melee.damage} ATQ</b></div>
+      <div class="crew-item"><span>➶ ${state.ranged.name}<br><small>Arme à distance</small></span><b>${state.ranged.damage} ATQ</b></div>`;
+    $('crew-captain-name').textContent=state.captainName;
+    $('ship-name-input').value=state.shipName;
+    $('captain-name-input').value=state.captainName;
+    $('identity-form').addEventListener('submit',event=>{
+      event.preventDefault();
+      const ship=$('ship-name-input').value.trim();
+      const captain=$('captain-name-input').value.trim();
+      if(!ship||!captain){toast('Les deux noms sont nécessaires.');return;}
+      if(state.saveIdentity(ship,captain))toast('Ton identité de capitaine est enregistrée !');
+    });
   } else if(drawer.dataset.tab==='arsenal'){
     drawer.innerHTML=`<div class="drawer-title">⚔ Arsenal du capitaine</div><div class="crew-item"><span><b>${state.melee.name}</b><br><small>Arme de mêlée · coups rapprochés</small></span><b>${state.melee.damage} ATQ</b></div><div class="crew-item"><span><b>${state.ranged.name}</b><br><small>Arme à distance · tir précis</small></span><b>${state.ranged.damage} ATQ</b></div><p class="drawer-note">Améliore ton équipement au fil de tes explorations.</p>`;
   } else drawer.innerHTML='';
