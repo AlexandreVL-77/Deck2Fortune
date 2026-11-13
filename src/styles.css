@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800;900&family=Rye&display=swap');
-:root{font-family:'DM Sans',system-ui,sans-serif;color:#f9edcf;background:#071d2b;--gold:#f4c66e;--paper:#fff1d1;--ink:#593c2b}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}body{background:#061a29}button{font:inherit;border:0;cursor:pointer;touch-action:manipulation}#game-shell{position:relative;width:100%;height:100dvh;max-width:600px;margin:auto;overflow:hidden;background:#0b5268;box-shadow:0 0 70px #0008}#game{position:absolute;inset:0}#game canvas{display:block;width:100%;height:100%;outline:none}.hidden{display:none!important}
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=DM+Sans:wght@500;600;700;800;900&family=Rye&display=swap');
+:root{font-family:'Fredoka','DM Sans',system-ui,sans-serif;color:#f9edcf;background:#071d2b;--gold:#f4c66e;--paper:#fff1d1;--ink:#593c2b}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}body{background:#061a29}button{font:inherit;border:0;cursor:pointer;touch-action:manipulation}#game-shell{position:relative;width:100%;height:100dvh;max-width:600px;margin:auto;overflow:hidden;background:#0b5268;box-shadow:0 0 70px #0008}#game{position:absolute;inset:0}#game canvas{display:block;width:100%;height:100%;outline:none}.hidden{display:none!important}
 .home-screen{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;justify-content:space-between;padding:max(25px,env(safe-area-inset-top)) 25px max(22px,env(safe-area-inset-bottom));background:linear-gradient(180deg,#04182733 0%,#04182722 35%,#041827dd 100%);transition:opacity .65s,transform .65s}.home-screen.home-hidden{opacity:0;transform:scale(1.035);pointer-events:none}.home-vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 43%,transparent 20%,#03152266 100%)}.home-top,.home-title,.home-actions,.home-footer{position:relative;z-index:1}.home-top{display:flex;align-items:center;gap:9px;font-size:9px;font-weight:900;letter-spacing:2px;color:#e9d7b2}.studio-mark{display:grid;place-items:center;width:29px;height:29px;border:1px solid #e5c17d;border-radius:50%;color:#f4c66f;font-size:17px}.home-version{margin-left:auto;padding:6px 9px;border:1px solid #e8d3a355;border-radius:20px;color:#e5c88f;font-size:8px}.home-title{margin:auto 0 24px;text-align:center;text-shadow:0 4px 20px #00101b}.title-kicker{font-size:10px;letter-spacing:5px;font-weight:900;color:#f3c979}.home-title h1{margin:12px 0 10px;font-family:'Rye',Georgia,serif;font-size:clamp(42px,13vw,72px);line-height:.94;letter-spacing:2px;color:#fff0cb;text-shadow:0 3px #98633d,0 6px #3c2b25,0 12px 25px #0009}.home-title h1 span{color:#e5b45f}.home-title p{font-family:Georgia,serif;font-style:italic;font-size:15px;color:#d7d9c9}.home-actions{display:grid;gap:11px;width:min(100%,350px);margin:0 auto 30px}.start-button{display:flex;align-items:center;justify-content:center;gap:25px;padding:17px 20px;border:1px solid #ffe3a1;border-radius:13px;background:linear-gradient(180deg,#f6d38c,#b9793e);color:#50321f;font-size:13px;font-weight:900;letter-spacing:1.8px;box-shadow:0 5px 0 #69412b,0 10px 25px #0006,inset 0 1px #fff9}.start-button:active{transform:translateY(3px)}.start-button b{font-size:19px}.continue-button{padding:10px;background:#071e2a77;border:1px solid #e7d3a366;border-radius:10px;color:#e8d8b7;font-size:9px;font-weight:800;letter-spacing:2px}.home-footer{display:flex;justify-content:space-between;font-size:7px;letter-spacing:1.5px;color:#c2c9bd99}
 #hud{position:absolute;inset:0;z-index:3;pointer-events:none;padding:max(13px,env(safe-area-inset-top)) 13px max(12px,env(safe-area-inset-bottom))}#hud>*{pointer-events:auto}.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border:1px solid #f5d49b88;border-radius:17px;background:linear-gradient(115deg,#123747ef,#1b4b58ef);box-shadow:0 7px 22px #032b3b55,inset 0 1px #ffffff22}.brand{display:flex;align-items:center;gap:10px}.brand-mark{width:39px;height:39px;display:grid;place-items:center;position:relative;border-radius:12px;background:linear-gradient(145deg,#f5d18a,#b7793d);color:#65402b;font-size:24px;box-shadow:inset 0 1px #fff9,0 3px #70442e}.brand-mark i{position:absolute;width:17px;height:17px;border:1px solid #70442e66;border-radius:50%}.eyebrow{display:block;font-size:8px;font-weight:900;letter-spacing:1.5px;color:#f3ca82}.brand strong{display:block;font-family:'Rye',Georgia,serif;font-size:15px;letter-spacing:1px;color:#fff1d0}.brand strong span{color:#f4c56c}.brand small{display:block;font-size:9px;color:#c3d6ca}.gold-pill{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:12px;background:linear-gradient(145deg,#f9dfa0,#d69b4d);color:#65432a;font-weight:900;box-shadow:0 3px #82512f;font-size:14px}.gold-pill small{font-size:8px}.coin{font-size:17px}.status-row{display:flex;gap:8px;margin-top:9px}.status-pill{display:flex;align-items:center;gap:8px;min-height:43px;padding:6px 10px;border:1px solid #e7d19a66;border-radius:13px;background:#123f50e8}.health{flex:1}.ship-status{min-width:43%}.status-icon{font-size:17px;color:#f5c779}.status-pill small{display:block;font-size:7px;letter-spacing:1.2px;font-weight:900;color:#b9d0c7}.status-pill strong{display:block;font-size:11px}.mini-meter{width:43px;height:5px;border-radius:9px;background:#633f3c;overflow:hidden;margin-left:auto}.mini-meter i{display:block;width:100%;height:100%;background:linear-gradient(90deg,#e36e54,#f5b46c)}
 .bottom-nav{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(330px,calc(100% - 38px));display:flex;padding:6px;border:1px solid #f1d39b88;border-radius:18px;background:linear-gradient(120deg,#173f4fef,#1b5260f2);box-shadow:0 7px 20px #032b3b77}.nav-button{flex:1;color:#d7d9c2;background:transparent;border-radius:12px;padding:5px 0 3px}.nav-icon{display:block;font-size:20px;color:#f5ca7b}.nav-button small{display:block;font-size:9px;font-weight:800;margin-top:3px}.nav-button.active{background:linear-gradient(145deg,#9a603b,#70452f)}.parchment{background:linear-gradient(145deg,#fff6df,#ecd4a6);border:2px solid #b9854d;border-radius:19px;box-shadow:0 7px 0 #573b2c,0 13px 28px #042c3d66,inset 0 0 0 2px #fff9e9;padding:13px;color:var(--ink)}#combat-panel{position:absolute;bottom:78px;left:8px;right:8px}.panel-kicker{display:flex;align-items:center;gap:6px;font-size:8px;font-weight:900;color:#a46c3f;margin-bottom:8px}.kicker-dot{width:6px;height:6px;border-radius:50%;background:#d66e51}.kicker-line{height:1px;flex:1;background:#d8bd91}.combat-heading{display:flex;align-items:center;justify-content:space-between}.combat-heading strong{font-family:'Rye',Georgia,serif;font-size:16px;color:#69462e}.combat-heading small{font-size:9px;color:#a17e5b}#enemy-hp{font-weight:900;color:#a34d40;font-size:12px}.enemy-bar{height:8px;background:#d8b99a;border-radius:8px;overflow:hidden;margin:7px 0 9px}#enemy-bar-fill{height:100%;width:100%;background:linear-gradient(90deg,#b64e42,#ec8963)}.weapon-row{display:flex;justify-content:space-between;font-size:9px;font-weight:900;color:#98734e;margin-bottom:7px}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:4px 0 11px}.card{min-width:0;min-height:90px;padding:8px 5px;border-radius:12px;border:1.5px solid #c59b63;background:linear-gradient(155deg,#fffdf2,#f0d9ad);color:#62472f;box-shadow:0 3px #b38b5d;text-align:center}.card.selected{transform:translateY(-5px);border-color:#d89b36}.card-art{width:37px;height:37px;margin:0 auto 5px;display:grid;place-items:center;border-radius:50%;background:#e8cc91;border:2px solid #c49a60}.card-art svg{width:25px;height:25px;stroke:#70472f;stroke-width:1.8;fill:none}.card strong{display:block;font-size:9px}.card small{display:block;font-size:8px;color:#927451}.card-type{position:absolute;top:7px;right:8px;font-size:6px;color:#a47b4f;font-weight:900}.combat-actions{display:flex;gap:8px}.wood-button,.quiet-button{border-radius:11px;padding:9px 13px;font-size:11px;font-weight:900}.wood-button{flex:1;color:#fff6df;background:linear-gradient(#bd8050,#925a38);box-shadow:0 3px #68432e}.quiet-button{background:#e3cfaa;color:#765638;border:1px solid #c7a87a}#toast{position:absolute;top:119px;left:50%;transform:translateX(-50%);max-width:calc(100% - 30px);background:#fff2d9f2;border:1px solid #c89b65;border-radius:12px;padding:9px 14px;font-size:11px;font-weight:900;color:#69482f;opacity:0;transition:opacity .2s;white-space:nowrap}#toast.show{opacity:1}#drawer{position:absolute;left:8px;right:8px;bottom:78px;max-height:48%;overflow:auto}.drawer-title{font-family:'Rye',Georgia,serif;font-size:16px;color:#69462e}.shop-item,.crew-item{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #d7b98b;padding:10px 0;font-size:11px}.shop-item button{background:linear-gradient(#a66b42,#7f4d32);color:white;padding:8px 12px;border-radius:9px;font-weight:900}.drawer-note{font-size:10px;color:#94724f}.map-hint{position:absolute;bottom:76px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;color:#e8e3c9;text-shadow:0 2px 4px #063b4c;white-space:nowrap;pointer-events:none}.hint-compass{color:#f5c779}@media(min-width:700px){#game-shell{height:min(100dvh,1000px)}}@media(max-height:680px){.bottom-nav{bottom:7px}#combat-panel,#drawer{bottom:68px}.card{min-height:76px}.map-hint{bottom:67px}}
@@ -31,3 +31,67 @@ body{position:fixed;inset:0}
 #toast{top:120px;background:#fff4dc;border:1px solid #c18b53;color:#68482f}
 @media(max-height:700px){.hand-panel{bottom:calc(env(safe-area-inset-bottom) + 125px)}.bottom-nav{bottom:calc(env(safe-area-inset-bottom) + 60px)}.card{min-height:70px}.card-art{width:27px;height:27px}}
 @media(orientation:landscape) and (max-height:520px){#game-shell{height:100dvh}.hand-panel{bottom:calc(env(safe-area-inset-bottom) + 100px)}}
+
+/* ===== Cozy Nintendo pass : bois clair sculpté, parchemin, liserés dorés ===== */
+:root{--wood:#d9a566;--wood-dark:#a8693c;--wood-edge:#7d4c2d;--parch:#fff6e0;--parch2:#f3dfb4;--gold2:#f2c35b;--ink:#6a4630}
+body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
+#game-shell{background:#4fb9c6}
+/* Accueil : plus de voile sombre, un ciel lagon chaud */
+.home-screen{background:linear-gradient(180deg,#ffffff22 0%,#ffffff00 38%,#0f6f7ccc 100%)}
+.home-vignette{background:radial-gradient(ellipse at 50% 42%,transparent 35%,#0a5a6a44 100%)}
+.home-title h1{color:#fff7dc;text-shadow:0 3px #c98a4b,0 6px #8a5632,0 12px 22px #0a4a5a99;-webkit-text-stroke:1px #7d4c2d}
+.home-title h1 span{color:#ffd56b}
+.title-kicker{color:#fff3c8;text-shadow:0 2px 6px #0a4a5a}
+.home-title p{color:#fff;text-shadow:0 2px 8px #0a4a5a}
+.start-button{background:linear-gradient(180deg,#ffe29a,#e0a24f);border:2px solid #fff1c4;color:#6a4020;box-shadow:0 5px 0 #8a5632,0 12px 22px #0a4a5a66,inset 0 2px #fffbe8}
+.continue-button{background:#fff6e0cc;border:2px solid #d9a566;color:#7d4c2d}
+.home-top,.home-footer{color:#fff;text-shadow:0 1px 4px #0a4a5a}
+/* Cadres en bois clair avec veinures + liseré doré intérieur */
+.topbar,.status-pill,.bottom-nav,.hand-panel{
+  background:
+    repeating-linear-gradient(92deg,#ffffff10 0 2px,transparent 2px 9px),
+    linear-gradient(180deg,#e8b878,#c98c52);
+  border:2px solid var(--wood-edge);color:var(--ink);
+  box-shadow:0 5px 0 #6b3f25,0 10px 18px #0a4a5a44,inset 0 2px #fff3cf,inset 0 0 0 3px #f2c35b55}
+.topbar{border-radius:20px}
+.brand strong{color:#fff8e2;text-shadow:0 2px #7d4c2d}.brand strong span{color:#ffe18a}
+.brand small{color:#fff0cc}.eyebrow{color:#fff3c8}
+.brand-mark{background:linear-gradient(145deg,#fff0bf,#f0b95a);box-shadow:inset 0 2px #fff,0 3px #8a5632}
+.gold-pill{background:linear-gradient(180deg,#fff3c4,#f2c35b);border:2px solid #b97d3d;color:#6a4020;box-shadow:0 3px #8a5632,inset 0 2px #fffbe8}
+.status-pill{border-radius:16px;box-shadow:0 4px 0 #6b3f25,inset 0 2px #fff3cf}
+.status-pill small{color:#fff0cc}.status-pill strong{color:#fff;text-shadow:0 1px #7d4c2d}.status-icon{color:#ffe18a}
+.mini-meter{background:#6b3f2566;border:1px solid #7d4c2d}
+.mini-meter i{background:linear-gradient(90deg,#f0675c,#ffb26b)}
+.bottom-nav{border-radius:22px}
+.nav-button{color:#fff4d6;border-radius:16px;font-weight:600;transition:transform .12s}
+.nav-icon{color:#ffe9a8;text-shadow:0 2px #7d4c2d}
+.nav-button:active{transform:scale(.94)}
+.nav-button.active{background:linear-gradient(180deg,#fff6e0,#f3dfb4);color:#6a4630;box-shadow:inset 0 -3px #d9b97f,0 2px #8a5632}
+.nav-button.active .nav-icon{color:#d0803f;text-shadow:none}
+/* Parchemin (tiroirs, combat) */
+.parchment{background:
+  radial-gradient(circle at 20% 15%,#ffffff88,transparent 55%),
+  linear-gradient(160deg,var(--parch),var(--parch2));
+  border:3px solid var(--wood-edge);border-radius:24px;
+  box-shadow:0 6px 0 #6b3f25,0 14px 26px #0a4a5a55,inset 0 0 0 3px #f2c35b99,inset 0 0 26px #d9b97f66}
+.drawer-title,.combat-heading strong{color:#7a4a2a}
+.wood-button{background:linear-gradient(180deg,#e8b878,#c98c52);border:2px solid #7d4c2d;color:#fff8e2;text-shadow:0 1px #7d4c2d;box-shadow:0 4px 0 #6b3f25,inset 0 2px #fff3cf}
+.wood-button:active,.quiet-button:active,.shop-item button:active{transform:translateY(3px);box-shadow:0 1px 0 #6b3f25}
+.quiet-button{background:#fff6e0;border:2px solid #d9a566;color:#7d4c2d}
+.shop-item button{background:linear-gradient(180deg,#e8b878,#c98c52);border:2px solid #7d4c2d;box-shadow:0 3px 0 #6b3f25}
+/* Main de 4 cartes : sages et alignées, seule la carte choisie se lève */
+.hand-panel{border-radius:22px;padding:9px 8px 11px}
+.hand-heading{color:#fff8e2;text-shadow:0 1px #7d4c2d}.hand-heading small{color:#ffeebf}
+.card{border:2px solid #c9964f;border-radius:13px;background:
+  linear-gradient(180deg,#fffdf3 0%,#fff6e0 55%,#f3dfb4 100%);
+  box-shadow:0 4px 0 #a8743f,0 6px 8px #5a381f33,inset 0 0 0 2px #ffffffaa;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,#e8795f,#f2c35b)}
+.card[data-card] .card-type{position:static;display:block;margin:2px 0 3px;font-size:5.5px;letter-spacing:.8px;color:#b27a3e}
+.card-art{background:radial-gradient(circle at 35% 30%,#fff6d6,#f0d18c);border:2px solid #d3a45f;box-shadow:inset 0 -2px #e2bd7a}
+.card-art svg{stroke:#7a4a2a}
+.card strong{color:#6a4630;font-weight:600}
+.card small{color:#9a7a55}
+.card.selected{transform:translateY(-11px) scale(1.04);border-color:#ffd25a;
+  box-shadow:0 8px 0 #a8743f,0 14px 18px #5a381f55,0 0 0 3px #fff1a8,0 0 18px 4px #ffe58a}
+.map-hint{color:#fff;text-shadow:0 2px 6px #0a5a6a,0 0 3px #0a5a6a;font-weight:600}
+#toast{background:linear-gradient(180deg,#fffaf0,#f3dfb4);border:2px solid #7d4c2d;box-shadow:0 4px 0 #6b3f25;color:#6a4630;font-weight:600}
