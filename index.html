@@ -3,35 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#69cbd0" />
-  <title>Pirate Hex — Les mers oubliées</title>
+  <meta name="theme-color" content="#0d6172" />
+  <meta name="description" content="Deck2Fortune — prends la mer, explore les îles et bâtis ta légende de pirate." />
+  <title>Deck2Fortune — Les mers oubliées</title>
 </head>
 <body>
   <main id="game-shell">
     <div id="game"></div>
     <div id="hud">
-      <header class="topbar wood-panel">
-        <div><span class="eyebrow">JOUR 03 · ARCHIPEL DES BRUMES</span><strong>Les mers oubliées</strong></div>
-        <div class="gold-pill">✦ <span id="gold">120</span></div>
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark"><span>✦</span><i></i></div>
+          <div><span class="eyebrow">JOUR 03 · ARCHIPEL DES BRUMES</span><strong>DECK<span>2</span>FORTUNE</strong><small>Les mers oubliées</small></div>
+        </div>
+        <div class="gold-pill"><span class="coin">✦</span><span id="gold">120</span><small>OR</small></div>
       </header>
       <section class="status-row">
-        <div class="status-pill">♥ <span id="hp">24 / 24</span></div>
-        <div class="status-pill">⚓ <span id="ship">La Mouette</span></div>
+        <div class="status-pill health"><span class="status-icon">♥</span><div><small>COQUE</small><strong id="hp">24 / 24</strong></div><div class="mini-meter"><i id="health-fill"></i></div></div>
+        <div class="status-pill ship-status"><span class="status-icon">⚓</span><div><small>NAVIRE</small><strong id="ship">La Mouette</strong></div></div>
       </section>
       <div id="toast" role="status"></div>
       <section id="combat-panel" class="parchment hidden">
-        <div class="combat-heading"><div><span class="eyebrow">RENCONTRE EN MER</span><strong id="enemy-name">Corsaire</strong></div><span id="enemy-hp">18 ♥</span></div>
+        <div class="panel-kicker"><span class="kicker-dot"></span> RENCONTRE EN MER <span class="kicker-line"></span><span class="enemy-level">NIV. 02</span></div>
+        <div class="combat-heading"><div><strong id="enemy-name">Corsaire des Brumes</strong><small>Navire hostile repéré</small></div><span id="enemy-hp">18 ♥</span></div>
         <div class="enemy-bar"><div id="enemy-bar-fill"></div></div>
         <div class="weapon-row"><span id="melee-label">Coutelas · prêt</span><span id="ranged-label">Mousquet · prêt</span></div>
         <div class="cards" id="cards"></div>
-        <div class="combat-actions"><button id="end-turn" class="wood-button">Fin du tour</button><button id="flee" class="quiet-button">Fuir</button></div>
+        <div class="combat-actions"><button id="end-turn" class="wood-button"><span>Fin du tour</span><b>↗</b></button><button id="flee" class="quiet-button">Fuir</button></div>
       </section>
-      <nav class="bottom-nav wood-panel">
-        <button data-tab="map" class="nav-button active">⌖<small>Carte</small></button>
-        <button data-tab="crew" class="nav-button">♟<small>Équipage</small></button>
-        <button data-tab="shop" class="nav-button">✦<small>Boutique</small></button>
+      <nav class="bottom-nav">
+        <button data-tab="map" class="nav-button active"><span class="nav-icon">⌖</span><small>Carte</small></button>
+        <button data-tab="crew" class="nav-button"><span class="nav-icon">♟</span><small>Équipage</small></button>
+        <button data-tab="shop" class="nav-button"><span class="nav-icon">✧</span><small>Boutique</small></button>
       </nav>
       <section id="drawer" class="parchment hidden"></section>
+      <div class="map-hint"><span class="hint-compass">✥</span> Touche une case pour explorer</div>
     </div>
   </main>
   <script type="module" src="/src/main.js"></script>
