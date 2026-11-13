@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap');
+:root {
+  font-family: 'Nunito', system-ui, sans-serif;
+  color: #59442f;
+  background: #69cbd0;
+  --lagoon: #69cbd0; --island: #83c98a; --sand: #f4d58b;
+  --wood: #a96f46; --wood-dark: #70462f; --paper: #fff2d3;
+}
+* { box-sizing: border-box; }
+html, body { margin:0; width:100%; height:100%; overflow:hidden; overscroll-behavior:none; }
+body { background:linear-gradient(#75d5d4,#45aebd); }
+button { font:inherit; border:0; cursor:pointer; touch-action:manipulation; }
+#game-shell { position:relative; width:100%; height:100dvh; max-width:560px; margin:auto; overflow:hidden; background:#69cbd0; }
+#game { position:absolute; inset:0; }
+#game canvas { display:block; width:100%; height:100%; }
+#hud { position:absolute; inset:0; pointer-events:none; padding: max(12px, env(safe-area-inset-top)) 12px max(10px, env(safe-area-inset-bottom)); }
+#hud > * { pointer-events:auto; }
+.wood-panel { background:linear-gradient(180deg,#dca875,#b77b4c); border:3px solid #875536; border-radius:17px; box-shadow:0 4px 0 #74472f, inset 0 2px 0 #f5d0a0; }
+.topbar { display:flex; align-items:center; justify-content:space-between; padding:9px 13px; color:#fff7df; text-shadow:0 1px 1px #70462f; }
+.topbar strong { display:block; font-size:17px; line-height:1.1; }
+.eyebrow { display:block; font-size:9px; font-weight:900; letter-spacing:1.1px; opacity:.8; }
+.gold-pill,.status-pill { border-radius:20px; padding:6px 10px; background:#fff0c8; color:#8a5a30; font-weight:900; box-shadow:inset 0 1px #fff; }
+.status-row { display:flex; gap:7px; margin-top:9px; }
+.status-pill { font-size:12px; }
+.bottom-nav { position:absolute; bottom:max(12px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:min(310px,calc(100% - 40px)); display:flex; justify-content:space-around; padding:5px; }
+.nav-button { flex:1; color:#fff2d3; background:transparent; font-size:19px; font-weight:900; border-radius:12px; padding:4px 0 2px; text-shadow:0 1px #70462f; }
+.nav-button small { display:block; font-size:10px; }
+.nav-button.active { background:#8c5a39; box-shadow:inset 0 2px 3px #68432f; }
+.parchment { background:linear-gradient(145deg,#fff5dc,#f2dcae); border:3px solid #bd8b55; border-radius:22px; box-shadow:0 6px 0 #805335, inset 0 0 0 2px #fff9e9; padding:12px; }
+#combat-panel { position:absolute; bottom:83px; left:10px; right:10px; }
+.hidden { display:none !important; }
+.combat-heading { display:flex; align-items:center; justify-content:space-between; }
+.combat-heading strong { font-size:17px; }
+#enemy-hp { font-weight:900; color:#a04d40; }
+.enemy-bar { height:8px; background:#dfb99a; border-radius:8px; overflow:hidden; margin:6px 0 8px; }
+#enemy-bar-fill { height:100%; width:100%; background:#d76b58; transition:width .2s; }
+.weapon-row { display:flex; justify-content:space-between; font-size:10px; font-weight:900; color:#8b6748; margin-bottom:8px; }
+.cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; align-items:end; padding:5px 0 10px; }
+.card { min-width:0; min-height:104px; padding:8px 5px; border-radius:12px; border:2px solid #c89b65; background:linear-gradient(160deg,#fffdf2,#f1d7a8); color:#62472f; box-shadow:0 3px 0 #bd986c; text-align:center; transition:transform .16s,box-shadow .16s; }
+.card.selected { transform:translateY(-10px); box-shadow:0 9px 13px #73523355; border-color:#e0a83e; }
+.card .card-icon { font-size:24px; display:block; }
+.card strong { display:block; font-size:10px; line-height:1.1; margin:4px 0; }
+.card small { display:block; font-size:9px; line-height:1.15; }
+.combat-actions { display:flex; gap:8px; }
+.wood-button,.quiet-button { border-radius:12px; padding:9px 13px; font-weight:900; }
+.wood-button { flex:1; color:#fff6df; background:linear-gradient(#c98c59,#a76840); box-shadow:0 3px #75472f; }
+.quiet-button { background:#e8d3a9; color:#765638; }
+#toast { position:absolute; top:110px; left:50%; transform:translateX(-50%); background:#fff2d3ee; border:2px solid #bd8b55; border-radius:14px; padding:8px 13px; font-size:12px; font-weight:900; opacity:0; transition:opacity .2s; white-space:nowrap; }
+#toast.show { opacity:1; }
+#drawer { position:absolute; left:10px; right:10px; bottom:82px; max-height:48%; overflow:auto; }
+.drawer-title { font-weight:900; font-size:17px; margin-bottom:7px; }
+.shop-item,.crew-item { display:flex; align-items:center; justify-content:space-between; gap:8px; border-top:1px solid #d7b98b; padding:9px 0; font-size:12px; }
+.shop-item button { background:#8e603e; color:white; padding:7px 10px; border-radius:9px; font-weight:900; }
+.drawer-note { font-size:11px; line-height:1.4; }
+@media (min-width:560px) { #game-shell { border-left:1px solid #ffffff55; border-right:1px solid #ffffff55; } }
+
+@media (orientation: landscape) {
+  #game-shell::after {
+    content: "Tourne ton téléphone en mode portrait pour prendre la mer.";
+    position: absolute; inset: 0; z-index: 20; display: grid; place-items: center;
+    padding: 34px; text-align: center; font-weight: 900; color: #59442f;
+    background: #fff2d3; font-size: 20px;
+  }
+}
