@@ -108,3 +108,23 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 .identity-save:active{transform:translateY(2px);box-shadow:0 1px 0 #6b3f25}
 .identity-save span{color:#ffe18a;font-size:13px}
 .identity-hint{font-size:8px;text-align:center;color:#a18460}
+
+
+/* Tempêtes : pluie, éclairs et naufrage */
+#game.storm-active::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(115deg,#173e5a22,#263b5d55 48%,#173e5a33);animation:storm-atmosphere 2.8s ease-in-out infinite alternate}
+@keyframes storm-atmosphere{from{opacity:.35}to{opacity:.85}}
+.storm-flash{position:absolute;inset:0;z-index:4;pointer-events:none;background:#eaf8ff;opacity:0}
+.storm-flash.flash{animation:lightning-flash .48s ease-out}
+@keyframes lightning-flash{0%{opacity:0}12%{opacity:.72}22%{opacity:.08}38%{opacity:.42}100%{opacity:0}}
+.shipwreck-overlay{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;background:radial-gradient(ellipse at 50% 55%,#0b5667eF,#062a42f7 78%);color:#fff1d5;text-align:center;opacity:0;pointer-events:none;transition:opacity .8s}
+.shipwreck-overlay.visible{opacity:1;pointer-events:auto;animation:sea-rise 1.1s ease-out both}
+.wreck-splash{font-size:64px;color:#9ce4e8;text-shadow:0 0 25px #a8f4ff;animation:float-wreck 1.4s ease-in-out infinite}
+.shipwreck-overlay strong{font-family:'Rye',Georgia,serif;font-size:clamp(21px,6vw,32px);color:#ffe0a0;text-shadow:0 3px #75482e}
+.shipwreck-overlay span{font-size:12px;color:#d8e9df}
+.shipwreck-overlay button{margin-top:14px;padding:13px 20px;border:2px solid #f7dca2;border-radius:13px;background:linear-gradient(#e8b878,#bd7947);color:#fff8e2;font-weight:900;box-shadow:0 5px #71452e}
+@keyframes float-wreck{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-12px) rotate(4deg)}}
+@keyframes sea-rise{from{clip-path:inset(100% 0 0)}to{clip-path:inset(0)}}
+
+.storm-warning{position:absolute;top:119px;left:50%;z-index:6;transform:translate(-50%,-8px);padding:8px 12px;border:1px solid #b9d9e8;border-radius:11px;background:linear-gradient(180deg,#365c78ed,#17384feF);color:#fff2c7;font-size:8px;font-weight:900;letter-spacing:.6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;box-shadow:0 4px 12px #082d4388}
+.storm-warning.visible{opacity:1;transform:translate(-50%,0);animation:warning-shake .5s ease-in-out infinite alternate}
+@keyframes warning-shake{from{filter:brightness(1)}to{filter:brightness(1.25)}}

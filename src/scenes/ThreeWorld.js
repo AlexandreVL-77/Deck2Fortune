@@ -14,6 +14,7 @@ export class ThreeWorld {
     this.ray=new THREE.Raycaster(); this.pointer=new THREE.Vector2();
     this.drag=null; this.target=new THREE.Vector3(0,0,0);
     this.crests=[]; this.foams=[]; this.smokes=[]; this.cloudGroups=[]; this.heading=0;
+    this.stormDamageAccumulator=0; this.lastFrameTime=0; this.sinkingStartedAt=null; this.lastLightning=0;
     this.toonGradient=this.makeToonGradient();
     this.scene=new THREE.Scene();
     this.scene.background=new THREE.Color('#4fb9c6');
@@ -29,7 +30,7 @@ export class ThreeWorld {
     this.renderer.toneMappingExposure=1;
     this.renderer.domElement.style.touchAction='none';
     root.appendChild(this.renderer.domElement);
-    this.addLights(); this.createOcean(); this.createMap(); this.createShip();
+    this.addLights(); this.createOcean(); this.createMap(); this.createShip(); this.createStormEffects();
     this.createHighlights(); this.updateHighlights(); this.resize();
     window.addEventListener('resize',()=>this.resize());
     const canvas=this.renderer.domElement;
@@ -230,6 +231,19 @@ export class ThreeWorld {
     this.ship.position.y=SHIP_Y; this.ship.rotation.y=this.heading;
     this.shipTarget=this.ship.position.clone(); this.scene.add(this.ship);
   }
+  createStormEffects(){
+    const positions=new Float32Array(180*6);
+    this.rainGeometry=new THREE.BufferGeometry();
+    this.rainGeometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
+    this.rain=new THREE.LineSegments(this.rainGeometry,new THREE.LineBasicMaterial({color:'#e4f7ff',transparent:true,opacity:.62}));
+    this.rain.visible=false; this.scene.add(this.rain);
+    this.stormFlash=document.createElement('div'); this.stormFlash.className='storm-flash'; this.root.appendChild(this.stormFlash);
+    this.sunkOverlay=document.createElement('div'); this.sunkOverlay.className='shipwreck-overlay';
+    this.sunkOverlay.innerHTML='<div class="wreck-splash">〰</div><strong>TON NAVIRE A COULÉ</strong><span>La mer a englouti ton aventure…</span><button type="button">RETOUR À LA MER</button>';
+    this.root.appendChild(this.sunkOverlay);
+    this.sunkOverlay.querySelector('button').addEventListener('click',()=>window.location.reload());
+    this.rainSeeds=Array.from({length:180},()=>({x:(Math.random()-.5)*15,z:(Math.random()-.5)*15,y:Math.random()*9,speed:5+Math.random()*5}));
+  }
   createHighlights(){
     this.highlightGroup=new THREE.Group(); this.scene.add(this.highlightGroup);
     this.hlRingGeo=this.flatHex(new THREE.RingGeometry(HEX_SIZE*.80,HEX_SIZE*.94,6,1));
@@ -275,18 +289,24 @@ export class ThreeWorld {
     const hit=this.ray.intersectObjects(this.tiles,false)[0];if(!hit)return;
     const tile=hit.object.userData.tile;
     if(hexDistance(tile,this.state.player)>1)return;
-    if(tile.kind==='sea'){
+    if(tile.kind==='sea'||tile.kind==='storm'){
+      if(this.state.sunk)return;
       const from=this.shipTarget.clone();
       this.state.player={q:tile.q,r:tile.r};
       this.shipTarget.copy(this.tilePosition(tile.q,tile.r));
       const d=this.shipTarget.clone().sub(from);
       if(d.lengthSq()>.01)this.heading=Math.atan2(d.x,d.z);
       this.updateHighlights();
-      window.dispatchEvent(new CustomEvent('pirate-toast',{detail:'Navigation réussie !'}));
+      if(tile.kind==='storm'){
+        this.state.enterStorm();
+        window.dispatchEvent(new CustomEvent('pirate-toast',{detail:'TEMPÊTE ! La coque subit des dégâts tant que tu restes dans l’orage !'}));
+      }else{
+        this.state.leaveStorm();
+        window.dispatchEvent(new CustomEvent('pirate-toast',{detail:'Navigation réussie !'}));
+      }
     }else{
-      const message=tile.kind==='island'?'Île découverte : +5 or !':tile.kind==='storm'?'Nuage d’orage : la coque tremble !':'Volcan découvert : +12 or !';
+      const message=tile.kind==='island'?'Île découverte : +5 or !':'Volcan découvert : +12 or !';
       if(tile.kind==='island')this.state.gold+=5;
-      if(tile.kind==='storm')this.state.damagePlayer(2);
       if(tile.kind==='volcano')this.state.gold+=12;
       window.dispatchEvent(new CustomEvent('pirate-toast',{detail:message}));
     }
@@ -298,6 +318,33 @@ export class ThreeWorld {
     const aspect=w/h,halfH=this.viewHeight/2,halfW=halfH*aspect;
     this.camera.left=-halfW;this.camera.right=halfW;this.camera.top=halfH;this.camera.bottom=-halfH;
     this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);this.updateCamera();
+  }
+  animateStorm(t,dt){
+    const active=this.state.inStorm&&!this.state.sunk;
+    this.rain.visible=active; this.root.classList.toggle('storm-active',active);
+    if(active){
+      const pos=this.ship.position,arr=this.rain.geometry.attributes.position.array;
+      for(let i=0;i<this.rainSeeds.length;i++){
+        const seed=this.rainSeeds[i],j=i*6; seed.y-=seed.speed*dt;
+        if(seed.y<-.3){seed.y=6+Math.random()*3;seed.x=(Math.random()-.5)*15;seed.z=(Math.random()-.5)*15;}
+        arr[j]=pos.x+seed.x;arr[j+1]=seed.y;arr[j+2]=pos.z+seed.z;
+        arr[j+3]=pos.x+seed.x-.12;arr[j+4]=seed.y-.42;arr[j+5]=pos.z+seed.z+.08;
+      }
+      this.rain.geometry.attributes.position.needsUpdate=true;
+      this.stormDamageAccumulator+=dt;
+      if(this.stormDamageAccumulator>=.25){const elapsed=this.stormDamageAccumulator;this.stormDamageAccumulator=0;this.state.damageHull(this.state.stormDamageRate*elapsed);}
+      if(t-this.lastLightning>4.5){this.lastLightning=t;this.stormFlash.classList.remove('flash');void this.stormFlash.offsetWidth;this.stormFlash.classList.add('flash');}
+      this.ship.rotation.x=Math.sin(t*6.5)*.045; this.ship.rotation.z=Math.sin(t*8)*.025;
+    }else{this.stormDamageAccumulator=0;this.ship.rotation.x+=(Math.sin(t*1.1)*.025-this.ship.rotation.x)*.04;}
+  }
+  animateSinking(t){
+    if(!this.state.sunk)return;
+    if(this.sinkingStartedAt===null)this.sinkingStartedAt=t;
+    const p=Math.min(1,(t-this.sinkingStartedAt)/3.4);
+    this.ship.position.y=SHIP_Y-p*2.3; this.ship.rotation.z+=(-.8-this.ship.rotation.z)*.025;
+    this.ship.rotation.x+=(.55-this.ship.rotation.x)*.025; this.ship.rotation.y+=.012;
+    this.ship.scale.setScalar(Math.max(.35,1-p*.65));
+    if(p>=1)this.sunkOverlay.classList.add('visible');
   }
   animateWorld(t){
     const a=this.ocean.geometry.attributes.position,b=this.oceanBase;
@@ -319,12 +366,13 @@ export class ThreeWorld {
   }
   loop(){
     this.frame=requestAnimationFrame(this.loop);const t=performance.now()*.001;
+    const dt=this.lastFrameTime?Math.min(.05,t-this.lastFrameTime):0;this.lastFrameTime=t;
     const sp=this.ship.position;
     sp.x+=(this.shipTarget.x-sp.x)*.075; sp.z+=(this.shipTarget.z-sp.z)*.075;
-    sp.y=SHIP_Y+Math.sin(t*1.7)*.03;
+    if(!this.state.sunk)sp.y=SHIP_Y+Math.sin(t*1.7)*.03;
     let dh=this.heading-this.ship.rotation.y; dh=Math.atan2(Math.sin(dh),Math.cos(dh)); this.ship.rotation.y+=dh*.12;
     this.ship.rotation.z=Math.sin(t*.8)*.03; this.ship.rotation.x=Math.sin(t*1.1)*.025;
-    this.animateWorld(t);
+    this.animateWorld(t);this.animateStorm(t,dt);this.animateSinking(t);
     if(this.home){this.target.x=Math.sin(t*.1)*.25;this.updateCamera();}
     this.renderer.render(this.scene,this.camera);
   }
