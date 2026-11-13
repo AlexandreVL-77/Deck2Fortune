@@ -113,6 +113,7 @@ export class ThreeWorld {
     const qCenter=(Math.sqrt(3)/3*this.target.x-this.target.z/3)/HEX_SIZE;
     const rCenter=(2/3*this.target.z)/HEX_SIZE;
     const cq=Math.floor(qCenter/CHUNK_SIZE),cr=Math.floor(rCenter/CHUNK_SIZE);
+    const centerKey=cq+','+cr;if(!force&&this.chunkCenter===centerKey)return;this.chunkCenter=centerKey;
     const wanted=new Set();
     for(let x=-CHUNK_RADIUS;x<=CHUNK_RADIUS;x++)for(let z=-CHUNK_RADIUS;z<=CHUNK_RADIUS;z++){
       const key=(cq+x)+','+(cr+z);wanted.add(key);
@@ -288,7 +289,9 @@ export class ThreeWorld {
     if(age>1.7){this.scene.remove(this.boosterModel);this.boosterModel=null;}
   }
   resetWorld(){
-    this.target.set(0,0,0);this.shipTarget.copy(this.tilePosition(0,0));this.ship.position.copy(this.shipTarget);this.ship.position.y=SHIP_Y;this.ship.rotation.set(0,0,0);this.ship.scale.setScalar(1);this.heading=0;this.sinkingStartedAt=null;this.sunkOverlay.classList.remove('visible');this.state.camera={x:0,z:0};this.updateChunks();this.updateHighlights();this.updateCamera();
+    for(const group of this.chunks.values())this.scene.remove(group);
+    this.chunks.clear();this.tiles=[];this.tileByKey.clear();this.foams=[];this.smokes=[];this.cloudGroups=[];this.chunkCenter=null;
+    this.target.set(0,0,0);this.shipTarget.copy(this.tilePosition(0,0));this.ship.position.copy(this.shipTarget);this.ship.position.y=SHIP_Y;this.ship.rotation.set(0,0,0);this.ship.scale.setScalar(1);this.heading=0;this.sinkingStartedAt=null;this.sunkOverlay.classList.remove('visible');this.state.camera={x:0,z:0};this.updateChunks(true);this.updateHighlights();this.updateCamera();
   }
   createHighlights(){
     this.highlightGroup=new THREE.Group(); this.scene.add(this.highlightGroup);
