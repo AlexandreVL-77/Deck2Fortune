@@ -60,7 +60,7 @@ export class ThreeWorld {
   }
   tilePosition(q,r){
     const p=axialToPixel(q,r,HEX_SIZE);
-    return new THREE.Vector3(p.x*.88,0,p.y*.88);
+    return new THREE.Vector3(p.x,0,p.y);
   }
   makeHexOutline(){
     const points=[];
@@ -166,7 +166,7 @@ export class ThreeWorld {
     const p=this.state.player;
     for(const [dq,dr] of DIRECTIONS){
       const q=p.q+dq,r=p.r+dr,entry=this.tileByKey.get(this.key(q,r));
-      if(!entry||entry.data.kind!=='sea')continue;
+      if(!entry)continue;
       const glow=new THREE.Mesh(this.highlightTemplate.geometry,this.highlightTemplate.material);
       glow.position.copy(this.tilePosition(q,r)); glow.position.y=-.31;
       glow.rotation.y=Math.PI/6; this.highlightGroup.add(glow);
