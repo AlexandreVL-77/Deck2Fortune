@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { makeIslandMap, axialToPixel, hexDistance, DIRECTIONS } from '../systems/HexGrid.js';
+import { makeTile, axialToPixel, hexDistance, DIRECTIONS } from '../systems/HexGrid.js';
 
-const MAP_RADIUS = 7;
+const CHUNK_SIZE=8;
+const CHUNK_RADIUS=1;
 const HEX_SIZE = 1.12;
 const VIEW_HEIGHT = 13.8;
 const OCEAN_Y = -.42;
@@ -12,7 +13,7 @@ export class ThreeWorld {
     this.root=root; this.state=state; this.home=true;
     this.tiles=[]; this.tileByKey=new Map(); this.highlightMeshes=[];
     this.ray=new THREE.Raycaster(); this.pointer=new THREE.Vector2();
-    this.drag=null; this.target=new THREE.Vector3(0,0,0);
+    this.drag=null; this.target=new THREE.Vector3(state.camera?.x||0,0,state.camera?.z||0); this.chunks=new Map();
     this.crests=[]; this.foams=[]; this.smokes=[]; this.cloudGroups=[]; this.heading=0;
     this.stormDamageAccumulator=0; this.lastFrameTime=0; this.sinkingStartedAt=null; this.lastLightning=0;
     this.toonGradient=this.makeToonGradient();
@@ -95,33 +96,46 @@ export class ThreeWorld {
   key(q,r){return q+','+r;}
   flatHex(geo){geo.rotateX(-Math.PI/2);geo.rotateY(Math.PI/6);return geo;}
   createMap(){
-    // Grille pointy-top : sommet du cylindre vers +Z (pas de rotation), aligné avec les liserés.
     const baseGeo=new THREE.CylinderGeometry(HEX_SIZE*.98,HEX_SIZE*.98,.20,6,1);
-    // Cases d'eau translucides (lagon plus clair que l'océan autour) + liseré blanc fin visible
     const waterMat=new THREE.MeshStandardMaterial({color:'#8fe3da',roughness:.4,transparent:true,opacity:.4,depthWrite:false});
     const ringGeo=this.flatHex(new THREE.RingGeometry(HEX_SIZE*.94,HEX_SIZE*.985,6,1));
     const ringMat=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.34,depthWrite:false});
-    const leafGeo=new THREE.SphereGeometry(.28,6,4); leafGeo.scale(1,.2,.42);
-    this.islandGeo={
-      sand:new THREE.CylinderGeometry(.72,.84,.26,10), grass:new THREE.CylinderGeometry(.50,.64,.14,9),
-      hill:new THREE.SphereGeometry(.40,8,5), rock:new THREE.DodecahedronGeometry(.09,0), leaf:leafGeo
-    };
-    this.foamGeo=new THREE.RingGeometry(.80,.93,28); this.foamGeo.rotateX(-Math.PI/2);
+    const leafGeo=new THREE.SphereGeometry(.28,6,4);leafGeo.scale(1,.2,.42);
+    this.baseGeo=baseGeo;this.waterMat=waterMat;this.ringGeo=ringGeo;this.ringMat=ringMat;
+    this.islandGeo={sand:new THREE.CylinderGeometry(.72,.84,.26,10),grass:new THREE.CylinderGeometry(.50,.64,.14,9),hill:new THREE.SphereGeometry(.40,8,5),rock:new THREE.DodecahedronGeometry(.09,0),leaf:leafGeo};
+    this.foamGeo=new THREE.RingGeometry(.80,.93,28);this.foamGeo.rotateX(-Math.PI/2);
     this.foamMat=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.6,depthWrite:false});
-    this.cloudShadowGeo=new THREE.CircleGeometry(.72,28); this.cloudShadowGeo.rotateX(-Math.PI/2);
+    this.cloudShadowGeo=new THREE.CircleGeometry(.72,28);this.cloudShadowGeo.rotateX(-Math.PI/2);
     this.cloudShadowMat=new THREE.MeshBasicMaterial({map:this.softShadowTexture(),transparent:true,depthWrite:false});
-    for(const data of makeIslandMap(MAP_RADIUS)){
-      const pos=this.tilePosition(data.q,data.r), group=new THREE.Group();
-      group.position.copy(pos);
-      const base=new THREE.Mesh(baseGeo,waterMat);
-      base.position.y=-.29; base.receiveShadow=true;
-      base.userData.tile=data; group.add(base); this.tiles.push(base);
-      this.tileByKey.set(this.key(data.q,data.r),{data,group,base});
-      const ring=new THREE.Mesh(ringGeo,ringMat); ring.position.y=-.175; group.add(ring);
-      if(data.kind==='island') this.addIsland(group,data);
-      if(data.kind==='volcano') this.addVolcano(group,data);
-      if(data.kind==='storm') this.addCloud(group,data);
-      this.scene.add(group);
+    this.updateChunks(true);
+  }
+  updateChunks(force=false){
+    const qCenter=(Math.sqrt(3)/3*this.target.x-this.target.z/3)/HEX_SIZE;
+    const rCenter=(2/3*this.target.z)/HEX_SIZE;
+    const cq=Math.floor(qCenter/CHUNK_SIZE),cr=Math.floor(rCenter/CHUNK_SIZE);
+    const wanted=new Set();
+    for(let x=-CHUNK_RADIUS;x<=CHUNK_RADIUS;x++)for(let z=-CHUNK_RADIUS;z<=CHUNK_RADIUS;z++){
+      const key=(cq+x)+','+(cr+z);wanted.add(key);
+      if(this.chunks.has(key))continue;
+      const group=new THREE.Group(),[chunkQ,chunkR]=key.split(',').map(Number);
+      for(let q=chunkQ*CHUNK_SIZE;q<(chunkQ+1)*CHUNK_SIZE;q++)for(let r=chunkR*CHUNK_SIZE;r<(chunkR+1)*CHUNK_SIZE;r++){
+        const data=makeTile(this.state.seed,q,r),pos=this.tilePosition(q,r),tileGroup=new THREE.Group();tileGroup.position.copy(pos);
+        const base=new THREE.Mesh(this.baseGeo,this.waterMat);base.position.y=-.29;base.receiveShadow=true;base.userData.tile=data;tileGroup.add(base);
+        this.tiles.push(base);this.tileByKey.set(this.key(q,r),{data,group:tileGroup,base});
+        const ring=new THREE.Mesh(this.ringGeo,this.ringMat);ring.position.y=-.175;tileGroup.add(ring);
+        if(data.kind==='island')this.addIsland(tileGroup,data);
+        if(data.kind==='volcano')this.addVolcano(tileGroup,data);
+        if(data.kind==='storm')this.addCloud(tileGroup,data);
+        group.add(tileGroup);
+      }
+      group.userData.chunkKey=key;this.chunks.set(key,group);this.scene.add(group);
+    }
+    for(const [key,group] of this.chunks){
+      if(wanted.has(key))continue;
+      this.scene.remove(group);this.chunks.delete(key);
+      for(const base of this.tiles){const tile=base.userData.tile;if(Math.floor(tile.q/CHUNK_SIZE)+','+Math.floor(tile.r/CHUNK_SIZE)===key)this.tileByKey.delete(this.key(tile.q,tile.r));}
+      this.tiles=this.tiles.filter(base=>{const tile=base.userData.tile;return Math.floor(tile.q/CHUNK_SIZE)+','+Math.floor(tile.r/CHUNK_SIZE)!==key;});
+      group.traverse(obj=>{if(obj.isMesh){obj.geometry.dispose?.();}});
     }
   }
   addFoam(group,tile){
@@ -264,8 +278,10 @@ export class ThreeWorld {
     }
   }
   setHome(value){
-    this.home=value; this.target.set(0,0,0);
-    this.viewHeight=value?16:VIEW_HEIGHT; this.resize();
+    this.home=value;
+    this.viewHeight=value?16:VIEW_HEIGHT;
+    if(!value){this.target.set(this.state.camera.x||0,0,this.state.camera.z||0);this.updateChunks();}
+    this.resize();
   }
   pointerDown(e){this.drag={x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false};this.renderer.domElement.setPointerCapture?.(e.pointerId);}
   pointerMove(e){
@@ -274,7 +290,7 @@ export class ThreeWorld {
     if(Math.abs(e.clientX-this.drag.x)+Math.abs(e.clientY-this.drag.y)>7)this.drag.moved=true;
     if(this.drag.moved){
       const scale=this.viewHeight/Math.max(1,this.renderer.domElement.clientHeight);
-      this.target.x-=dx*scale*.72; this.target.z+=dy*scale*.72; this.updateCamera();
+      this.target.x-=dx*scale*.72; this.target.z+=dy*scale*.72; this.state.camera={x:this.target.x,z:this.target.z}; this.state.saveProgress(); this.updateChunks(); this.updateHighlights(); this.updateCamera();
     }
     this.drag.lastX=e.clientX;this.drag.lastY=e.clientY;
   }
@@ -294,6 +310,7 @@ export class ThreeWorld {
       const from=this.shipTarget.clone();
       this.state.player={q:tile.q,r:tile.r};
       this.shipTarget.copy(this.tilePosition(tile.q,tile.r));
+      this.state.camera={x:this.target.x,z:this.target.z};
       const d=this.shipTarget.clone().sub(from);
       if(d.lengthSq()>.01)this.heading=Math.atan2(d.x,d.z);
       this.updateHighlights();
@@ -306,8 +323,8 @@ export class ThreeWorld {
       }
     }else{
       const message=tile.kind==='island'?'Île découverte : +5 or !':'Volcan découvert : +12 or !';
-      if(tile.kind==='island')this.state.gold+=5;
-      if(tile.kind==='volcano')this.state.gold+=12;
+      const rewardKey=this.key(tile.q,tile.r);
+      if(!this.state.visited.has(rewardKey)){if(tile.kind==='island')this.state.gold+=5;if(tile.kind==='volcano')this.state.gold+=12;this.state.visited.add(rewardKey);}
       window.dispatchEvent(new CustomEvent('pirate-toast',{detail:message}));
     }
     this.state.emit();
@@ -367,13 +384,14 @@ export class ThreeWorld {
   loop(){
     this.frame=requestAnimationFrame(this.loop);const t=performance.now()*.001;
     const dt=this.lastFrameTime?Math.min(.05,t-this.lastFrameTime):0;this.lastFrameTime=t;
+    this.updateChunks(); this.ocean.position.x=this.target.x; this.ocean.position.z=this.target.z;
     const sp=this.ship.position;
     sp.x+=(this.shipTarget.x-sp.x)*.075; sp.z+=(this.shipTarget.z-sp.z)*.075;
     if(!this.state.sunk)sp.y=SHIP_Y+Math.sin(t*1.7)*.03;
     let dh=this.heading-this.ship.rotation.y; dh=Math.atan2(Math.sin(dh),Math.cos(dh)); this.ship.rotation.y+=dh*.12;
     this.ship.rotation.z=Math.sin(t*.8)*.03; this.ship.rotation.x=Math.sin(t*1.1)*.025;
     this.animateWorld(t);this.animateStorm(t,dt);this.animateSinking(t);
-    if(this.home){this.target.x=Math.sin(t*.1)*.25;this.updateCamera();}
+    if(this.home){this.target.x=this.state.camera.x||0;this.target.z=this.state.camera.z||0;this.updateCamera();}
     this.renderer.render(this.scene,this.camera);
   }
 }
