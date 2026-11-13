@@ -29,6 +29,8 @@ export function renderDrawer(state){
     $('buy-booster').onclick=()=>{const result=new ShopSystem(state).buyBooster();toast(result.message);renderCards(state);renderDrawer(state);};
   } else if(drawer.dataset.tab==='crew'){
     drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">♟</span> Ton équipage</div><div class="crew-item"><div style="display:flex;align-items:center;gap:9px"><span class="crew-avatar">♜</span><span><b>Milo la Brise</b><br><small>Capitaine · courageux et curieux</small></span></div><b>ACTIF</b></div><div class="crew-item"><span>⚔ ${state.melee.name}<br><small>Arme de corps-à-corps</small></span><b>${state.melee.damage} ATQ</b></div><div class="crew-item"><span>➶ ${state.ranged.name}<br><small>Arme à distance</small></span><b>${state.ranged.damage} ATQ</b></div>`;
+  } else if(drawer.dataset.tab==='arsenal'){
+    drawer.innerHTML=`<div class="drawer-title">⚔ Arsenal du capitaine</div><div class="crew-item"><span><b>${state.melee.name}</b><br><small>Arme de mêlée · coups rapprochés</small></span><b>${state.melee.damage} ATQ</b></div><div class="crew-item"><span><b>${state.ranged.name}</b><br><small>Arme à distance · tir précis</small></span><b>${state.ranged.damage} ATQ</b></div><p class="drawer-note">Améliore ton équipement au fil de tes explorations.</p>`;
   } else drawer.innerHTML='';
   drawer.classList.toggle('hidden',!drawer.dataset.tab||drawer.dataset.tab==='map');
 }
