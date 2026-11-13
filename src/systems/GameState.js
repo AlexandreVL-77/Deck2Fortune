@@ -3,6 +3,9 @@ import { WEAPONS } from '../data/weapons.js';
 
 const IDENTITY_KEY = 'deck2fortune.identity';
 const GOLD_KEY = 'deck2fortune.gold';
+const WORLD_KEY = 'deck2fortune.world';
+function loadWorld(){try{return JSON.parse(localStorage.getItem(WORLD_KEY)||'null');}catch{return null;}}
+function makeSeed(){return Math.floor(Math.random()*0x7fffffff)||1;}
 const DEFAULT_IDENTITY = { shipName: 'La Mouette', captainName: 'Milo la Brise' };
 
 function loadIdentity() {
@@ -29,13 +32,13 @@ function loadGold() {
 export class GameState {
   constructor() {
     const identity = loadIdentity();
-    this._gold=loadGold(); this.hp=24; this.maxHp=24;
+    const saved=loadWorld(); this._gold=loadGold(); this.hp=saved?.hp??24; this.maxHp=24;
     this.shipName=identity.shipName; this.captainName=identity.captainName;
-    this.player={q:0,r:0}; this.enemy={q:2,r:-1,hp:18,maxHp:18,name:'Corsaire des Brumes'};
+    this.seed=saved?.seed||makeSeed(); this.player=saved?.player||{q:0,r:0}; this.camera=saved?.camera||{x:0,z:0}; this.visited=new Set(saved?.visited||[]); this.inStorm=!!saved?.inStorm; this.sunk=!!saved?.sunk; this.enemy={q:2,r:-1,hp:18,maxHp:18,name:'Corsaire des Brumes'};
     this.hand=createHand(); this.selectedCard=0; this.inCombat=false; this.turn=1;
     this.melee={...WEAPONS.cutlass}; this.ranged={...WEAPONS.musket};
     this.ownedBoosters=0; this.cosmetics={ship:'seagull',captain:'milo',weapon:'brass'};
-    this.inStorm=false; this.sunk=false; this.stormDamageRate=3;
+    this.stormDamageRate=1.6;
     this.listeners=new Set();
   }
   get gold(){return this._gold;}
@@ -44,7 +47,9 @@ export class GameState {
     try { localStorage.setItem(GOLD_KEY,String(this._gold)); } catch {}
   }
   subscribe(fn){this.listeners.add(fn);return()=>this.listeners.delete(fn);}
-  emit(){this.listeners.forEach(fn=>fn(this));}
+  emit(){this.saveProgress();this.listeners.forEach(fn=>fn(this));}
+  saveProgress(){try{localStorage.setItem(WORLD_KEY,JSON.stringify({seed:this.seed,player:this.player,camera:this.camera,hp:this.hp,visited:[...this.visited],inStorm:this.inStorm,sunk:this.sunk}));}catch{}}
+  newWorld(){this.seed=makeSeed();this.player={q:0,r:0};this.camera={x:0,z:0};this.hp=this.maxHp;this.visited=new Set();this.inStorm=false;this.sunk=false;this.inCombat=false;this.enemy.hp=this.enemy.maxHp;this.saveProgress();}
   saveIdentity(shipName,captainName){
     const ship=String(shipName||'').trim().slice(0,24);
     const captain=String(captainName||'').trim().slice(0,24);

@@ -128,3 +128,25 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 .storm-warning{position:absolute;top:119px;left:50%;z-index:6;transform:translate(-50%,-8px);padding:8px 12px;border:1px solid #b9d9e8;border-radius:11px;background:linear-gradient(180deg,#365c78ed,#17384feF);color:#fff2c7;font-size:8px;font-weight:900;letter-spacing:.6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;box-shadow:0 4px 12px #082d4388}
 .storm-warning.visible{opacity:1;transform:translate(-50%,0);animation:warning-shake .5s ease-in-out infinite alternate}
 @keyframes warning-shake{from{filter:brightness(1)}to{filter:brightness(1.25)}}
+
+
+/* Carte procédurale : interface allégée, données secondaires sur l'accueil */
+#hud .topbar,#hud .status-row{display:none}
+.home-voyage-stats{position:absolute;left:50%;bottom:clamp(155px,22%,210px);transform:translateX(-50%);width:min(340px,calc(100% - 38px));display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:13px;border:2px solid #f0c875;border-radius:18px;background:linear-gradient(145deg,#173b54eF,#102c43eF);box-shadow:0 8px 24px #062b3c77,inset 0 0 0 1px #fff2b344;color:#fff1d1}
+.home-voyage-stats div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.home-voyage-stats small{font-size:8px;letter-spacing:1.2px;color:#f3c978;font-weight:900}
+.home-voyage-stats strong{font-size:12px;color:#fff8e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-actions{z-index:3}
+.home-actions button{min-height:48px}
+#continue-game[hidden]{display:none}
+.booster-reveal{position:absolute;inset:0;z-index:25;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:12px;padding:30px 22px calc(env(safe-area-inset-bottom) + 42px);background:radial-gradient(ellipse at 50% 43%,#173a63a8,#071b35ee 78%);opacity:0;pointer-events:none;transition:opacity .35s}
+.booster-reveal.charging,.booster-reveal.visible{opacity:1;pointer-events:auto}
+.booster-reveal.charging .booster-title{animation:booster-glitch .16s steps(2) infinite}
+.booster-kicker{font-size:9px;font-weight:900;letter-spacing:2.8px;color:#73f7ed;text-shadow:0 0 14px #43dbe6}
+.booster-title{font-family:'Fredoka',system-ui,sans-serif;font-size:clamp(23px,7vw,34px);font-weight:900;letter-spacing:2px;color:#fff;text-align:center;text-shadow:0 0 18px #39dbe8,0 3px #10213d}
+.booster-reward{min-height:26px;font-size:15px;font-weight:800;color:#ffe59a;text-align:center;text-shadow:0 2px 8px #000}
+.booster-reveal button{min-width:190px;padding:14px 22px;border:1px solid #a5fff5;border-radius:13px;background:linear-gradient(135deg,#6cf5e8,#4b8cff 55%,#8b62ef);color:#081b35;font-size:11px;font-weight:1000;letter-spacing:1.2px;box-shadow:0 0 22px #42dce899,0 5px 0 #274a82;opacity:0;transform:translateY(12px);transition:opacity .3s,transform .3s}
+.booster-reveal.visible button{opacity:1;transform:translateY(0)}
+@keyframes booster-glitch{0%{transform:translateX(-2px);filter:hue-rotate(0)}100%{transform:translateX(2px);filter:hue-rotate(30deg)}}
+@media(max-height:740px){.home-voyage-stats{bottom:clamp(135px,20%,180px);padding:10px}.home-voyage-stats strong{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.booster-reveal *{animation:none!important;transition:none!important}}
