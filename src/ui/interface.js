@@ -28,7 +28,7 @@ export function renderCards(state){
 export function renderDrawer(state){
   const drawer=$('drawer');if(drawer.dataset.tab==='shop'){
     drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">✧</span> La cale aux trésors</div><p class="drawer-note">Les capitaines y échangent des boosters scellés. Chaque paquet cache une surprise.</p><div class="shop-item"><span><b>Booster du large</b><br><small>Carte, équipement ou butin</small></span><button id="buy-booster">45 ✦</button></div><p class="drawer-note">Boosters ouverts : ${state.ownedBoosters}</p>`;
-    $('buy-booster').onclick=()=>{const result=new ShopSystem(state).buyBooster();toast(result.message);renderCards(state);renderDrawer(state);};
+    $('buy-booster').onclick=()=>{const result=new ShopSystem(state).buyBooster();toast(result.message);if(result.ok)game.showBoosterReveal(result.reward);renderCards(state);renderDrawer(state);};
   } else if(drawer.dataset.tab==='crew'){
     drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">♟</span> Ton équipage</div>
       <div class="crew-item"><div style="display:flex;align-items:center;gap:9px"><span class="crew-avatar">♜</span><span><b id="crew-captain-name"></b><br><small>Capitaine · courageux et curieux</small></span></div><b>ACTIF</b></div>
