@@ -14,7 +14,9 @@ const art={
 function cardArt(card){return art[card.id]||art.cutlass;}
 export function renderCards(state){
   $('cards').innerHTML=state.hand.map((c,i)=>`<button class="card ${i===state.selectedCard?'selected':''}" data-card="${i}" aria-label="${c.name}"><span class="card-type">${c.type==='attack'?'ATTAQUE':c.type==='move'?'MOUVEMENT':'SOUTIEN'}</span><span class="card-art">${cardArt(c)}</span><strong>${c.name}</strong><small>${c.type==='attack'?`${c.power} dégâts · portée ${c.range}`:c.description}</small></button>`).join('');
-  $('hp').textContent=`${state.hp} / ${state.maxHp}`;$('gold').textContent=state.gold;$('ship').textContent=state.shipName;
+  $('hp').textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;
+  const stormWarning=$('storm-warning');if(stormWarning)stormWarning.classList.toggle('visible',state.inStorm&&!state.sunk);
+  $('hud').classList.toggle('ship-sunk',!!state.sunk);$('gold').textContent=state.gold;$('ship').textContent=state.shipName;
   const fill=$('health-fill');if(fill)fill.style.width=`${state.hp/state.maxHp*100}%`;
   $('enemy-name').textContent=state.enemy.name;$('enemy-hp').textContent=`${state.enemy.hp} ♥`;
   $('enemy-bar-fill').style.width=`${state.enemy.hp/state.enemy.maxHp*100}%`;
