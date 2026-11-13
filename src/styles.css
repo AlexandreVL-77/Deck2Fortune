@@ -150,3 +150,35 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 @keyframes booster-glitch{0%{transform:translateX(-2px);filter:hue-rotate(0)}100%{transform:translateX(2px);filter:hue-rotate(30deg)}}
 @media(max-height:740px){.home-voyage-stats{bottom:clamp(135px,20%,180px);padding:10px}.home-voyage-stats strong{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.booster-reveal *{animation:none!important;transition:none!important}}
+
+
+/* Ressources visibles pendant toute l'exploration */
+#hud .topbar,#hud .status-row{display:flex}
+#hud .topbar{gap:8px;min-height:61px}
+#hud .status-row{margin-top:8px}
+.quit-adventure{flex:0 0 38px;width:38px;height:38px;display:grid;place-items:center;border:2px solid #7d4c2d;border-radius:12px;background:linear-gradient(180deg,#fff3cf,#e3b36b);color:#75492c;font-size:23px;font-weight:900;box-shadow:0 3px 0 #6b3f25,inset 0 1px #fff}
+.quit-adventure:active{transform:translateY(2px);box-shadow:0 1px 0 #6b3f25}
+.home-shop-panel{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);width:min(350px,calc(100% - 34px));padding:16px;border:3px solid #7d4c2d;border-radius:22px;background:radial-gradient(circle at 15% 10%,#fff9e8,transparent 58%),linear-gradient(145deg,#fff3d5,#e7c58f);box-shadow:0 8px 0 #6b3f25,0 18px 45px #001b2bbd,inset 0 0 0 3px #f2c35b99;color:#6a4630}
+.home-shop-panel[hidden]{display:none}
+.home-shop-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.home-shop-heading div{display:grid;gap:4px}
+.home-shop-heading small{font-size:8px;letter-spacing:1.6px;font-weight:900;color:#b27a3e}
+.home-shop-heading strong{font-family:'Rye',Georgia,serif;font-size:17px}
+.home-shop-heading button{width:30px;height:30px;border:1px solid #b9854d;border-radius:9px;background:#f7e4bd;color:#75492c;font-weight:900}
+.home-shop-panel>p{font-size:11px;color:#96704a}
+.home-shop-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid #d7b98b;border-bottom:1px solid #d7b98b}
+.home-shop-item span{display:grid;gap:4px}
+.home-shop-item b{font-size:12px}
+.home-shop-item small,.home-shop-owned{font-size:9px;color:#987653}
+.home-shop-item button{padding:10px 13px;border:2px solid #7d4c2d;border-radius:10px;background:linear-gradient(180deg,#e8b878,#c98c52);color:#fff8e2;font-size:11px;font-weight:900;white-space:nowrap;box-shadow:0 3px 0 #6b3f25}
+.home-shop-item button:active{transform:translateY(2px);box-shadow:0 1px 0 #6b3f25}
+.home-shop-owned{display:block;margin-top:10px}
+.home-actions{gap:8px}
+.home-actions .continue-button{min-height:42px}
+@media(max-height:700px){.home-shop-panel{top:47%;padding:13px}#hud .topbar{min-height:54px}.brand-mark{width:34px;height:34px}.status-pill{min-height:39px}}
+
+
+.home-shop-trigger{margin-left:auto;padding:7px 10px;border:1px solid #f3d89d;border-radius:10px;background:linear-gradient(180deg,#fff0bf,#e6b66a);color:#704627;font-size:8px;font-weight:900;letter-spacing:.7px;white-space:nowrap;box-shadow:0 2px 0 #8a5632}
+.home-shop-trigger:active{transform:translateY(2px)}
+.home-version{margin-left:0}
+@media(max-width:360px){.home-top{gap:6px}.home-top>span:nth-child(2){font-size:7px;letter-spacing:1px}.home-shop-trigger{padding:6px 7px;font-size:7px}}
