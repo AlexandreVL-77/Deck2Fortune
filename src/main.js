@@ -1,26 +1,12 @@
-import Phaser from 'phaser';
 import './styles.css';
-import { GameScene } from './scenes/GameScene.js';
 import { GameState } from './systems/GameState.js';
 import { renderCards, renderDrawer, bindUI } from './ui/interface.js';
-
-const state = new GameState();
-const config = {
-  type: Phaser.AUTO,
-  parent: 'game',
-  backgroundColor: '#69cbd0',
-  scale: {
-    mode: Phaser.Scale.RESIZE,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 390,
-    height: 844
-  },
-  scene: [new GameScene(state)],
-  render: { antialias: true, pixelArt: false, roundPixels: true }
-};
-const game = new Phaser.Game(config);
-window.pirateHex = { game, state };
-
-bindUI(state, game);
-renderCards(state);
-renderDrawer(state);
+import { ThreeWorld } from './scenes/ThreeWorld.js';
+const state=new GameState();
+const world=new ThreeWorld(document.getElementById('game'),state);
+const home=document.getElementById('home-screen'),hud=document.getElementById('hud');
+function enterGame(){home.classList.add('home-hidden');hud.classList.remove('hidden');world.setHome(false);renderCards(state);renderDrawer(state);}
+document.getElementById('start-game').addEventListener('click',enterGame);
+document.getElementById('continue-game').addEventListener('click',enterGame);
+bindUI(state,world);renderCards(state);renderDrawer(state);
+window.deck2fortune={world,state};
