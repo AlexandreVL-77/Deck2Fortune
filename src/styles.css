@@ -176,3 +176,9 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 .home-actions{gap:8px}
 .home-actions .continue-button{min-height:42px}
 @media(max-height:700px){.home-shop-panel{top:47%;padding:13px}#hud .topbar{min-height:54px}.brand-mark{width:34px;height:34px}.status-pill{min-height:39px}}
+
+
+.home-shop-trigger{margin-left:auto;padding:7px 10px;border:1px solid #f3d89d;border-radius:10px;background:linear-gradient(180deg,#fff0bf,#e6b66a);color:#704627;font-size:8px;font-weight:900;letter-spacing:.7px;white-space:nowrap;box-shadow:0 2px 0 #8a5632}
+.home-shop-trigger:active{transform:translateY(2px)}
+.home-version{margin-left:0}
+@media(max-width:360px){.home-top{gap:6px}.home-top>span:nth-child(2){font-size:7px;letter-spacing:1px}.home-shop-trigger{padding:6px 7px;font-size:7px}}
