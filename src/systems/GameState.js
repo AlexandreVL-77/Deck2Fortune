@@ -19,7 +19,9 @@ function loadIdentity() {
 
 function loadGold() {
   try {
-    const value = Number(localStorage.getItem(GOLD_KEY));
+    const stored = localStorage.getItem(GOLD_KEY);
+    if (stored === null) return 120;
+    const value = Number(stored);
     return Number.isFinite(value) && value >= 0 ? Math.floor(value) : 120;
   } catch { return 120; }
 }
