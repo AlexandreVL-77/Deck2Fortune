@@ -124,3 +124,7 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 .shipwreck-overlay button{margin-top:14px;padding:13px 20px;border:2px solid #f7dca2;border-radius:13px;background:linear-gradient(#e8b878,#bd7947);color:#fff8e2;font-weight:900;box-shadow:0 5px #71452e}
 @keyframes float-wreck{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-12px) rotate(4deg)}}
 @keyframes sea-rise{from{clip-path:inset(100% 0 0)}to{clip-path:inset(0)}}
+
+.storm-warning{position:absolute;top:119px;left:50%;z-index:6;transform:translate(-50%,-8px);padding:8px 12px;border:1px solid #b9d9e8;border-radius:11px;background:linear-gradient(180deg,#365c78ed,#17384feF);color:#fff2c7;font-size:8px;font-weight:900;letter-spacing:.6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;box-shadow:0 4px 12px #082d4388}
+.storm-warning.visible{opacity:1;transform:translate(-50%,0);animation:warning-shake .5s ease-in-out infinite alternate}
+@keyframes warning-shake{from{filter:brightness(1)}to{filter:brightness(1.25)}}
