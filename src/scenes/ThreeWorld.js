@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { makeTile, axialToPixel, hexDistance, DIRECTIONS } from '../systems/HexGrid.js';
 
-const CHUNK_SIZE=8;
+const CHUNK_SIZE=6;
 const CHUNK_RADIUS=1;
 const HEX_SIZE = 1.12;
 const VIEW_HEIGHT = 13.8;
@@ -23,7 +23,7 @@ export class ThreeWorld {
     this.cameraOffset=new THREE.Vector3(9,17,9);
     this.viewHeight=VIEW_HEIGHT;
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.25));
     this.renderer.shadowMap.enabled=true;
     this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -31,7 +31,7 @@ export class ThreeWorld {
     this.renderer.toneMappingExposure=1;
     this.renderer.domElement.style.touchAction='none';
     root.appendChild(this.renderer.domElement);
-    this.addLights(); this.createOcean(); this.createMap(); this.createShip(); this.createStormEffects();
+    this.addLights(); this.createOcean(); this.createMap(); this.createShip(); this.createStormEffects(); this.createBoosterEffects();
     this.createHighlights(); this.updateHighlights(); this.resize();
     window.addEventListener('resize',()=>this.resize());
     const canvas=this.renderer.domElement;
@@ -68,7 +68,7 @@ export class ThreeWorld {
     this.scene.add(new THREE.HemisphereLight(0xeaffff,0x7aa88f,1.6));
     const sun=new THREE.DirectionalLight(0xfff0d2,2.0);
     sun.position.set(-8,18,11); sun.castShadow=true;
-    sun.shadow.mapSize.set(1024,1024);
+    sun.shadow.mapSize.set(512,512);
     sun.shadow.camera.left=-22; sun.shadow.camera.right=22;
     sun.shadow.camera.top=22; sun.shadow.camera.bottom=-22;
     sun.shadow.bias=-.00025; sun.shadow.normalBias=.02; this.scene.add(sun);
@@ -135,7 +135,7 @@ export class ThreeWorld {
       this.scene.remove(group);this.chunks.delete(key);
       for(const base of this.tiles){const tile=base.userData.tile;if(Math.floor(tile.q/CHUNK_SIZE)+','+Math.floor(tile.r/CHUNK_SIZE)===key)this.tileByKey.delete(this.key(tile.q,tile.r));}
       this.tiles=this.tiles.filter(base=>{const tile=base.userData.tile;return Math.floor(tile.q/CHUNK_SIZE)+','+Math.floor(tile.r/CHUNK_SIZE)!==key;});
-      group.traverse(obj=>{if(obj.isMesh){obj.geometry.dispose?.();}});
+      const removed=new Set();group.traverse(obj=>removed.add(obj));this.foams=this.foams.filter(obj=>!removed.has(obj));this.smokes=this.smokes.filter(obj=>!removed.has(obj));this.cloudGroups=this.cloudGroups.filter(obj=>!removed.has(obj));
     }
   }
   addFoam(group,tile){
@@ -257,6 +257,38 @@ export class ThreeWorld {
     this.root.appendChild(this.sunkOverlay);
     this.sunkOverlay.querySelector('button').addEventListener('click',()=>window.location.reload());
     this.rainSeeds=Array.from({length:180},()=>({x:(Math.random()-.5)*15,z:(Math.random()-.5)*15,y:Math.random()*9,speed:5+Math.random()*5}));
+  }
+  createBoosterEffects(){
+    this.boosterOverlay=document.createElement('div');this.boosterOverlay.className='booster-reveal';
+    this.boosterOverlay.innerHTML='<div class="booster-kicker">OBJET MYSTÈRE DÉTECTÉ</div><strong class="booster-title">CAPSULE DU LARGE</strong><div class="booster-reward"></div><button type="button">RÉCUPÉRER</button>';
+    this.root.appendChild(this.boosterOverlay);
+    this.boosterOverlay.querySelector('button').addEventListener('click',()=>{this.boosterOverlay.classList.remove('visible');if(this.boosterModel){this.scene.remove(this.boosterModel);this.boosterModel=null;}});
+    this.boosterModel=null;this.boosterStartedAt=0;
+  }
+  showBoosterReveal(label){
+    if(this.boosterModel)this.scene.remove(this.boosterModel);
+    const group=new THREE.Group(),shell=new THREE.Mesh(new THREE.OctahedronGeometry(.62,1),new THREE.MeshStandardMaterial({color:'#192d4c',metalness:.85,roughness:.2,emissive:'#245d9b',emissiveIntensity:1.5}));
+    group.add(shell);
+    const ringMat=new THREE.MeshStandardMaterial({color:'#69f5ed',metalness:.8,roughness:.16,emissive:'#19b9d2',emissiveIntensity:2});
+    for(let i=0;i<3;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(.72+i*.09,.035,8,48),ringMat);ring.rotation.set(i*.8,i*1.1,0);group.add(ring);}
+    const core=new THREE.Mesh(new THREE.IcosahedronGeometry(.2,1),new THREE.MeshBasicMaterial({color:'#fff2a5'}));group.add(core);
+    group.position.set(this.target.x,1.7,this.target.z);group.scale.setScalar(.01);this.scene.add(group);
+    this.boosterModel=group;this.boosterStartedAt=performance.now()*.001;
+    this.boosterOverlay.querySelector('.booster-reward').textContent=label;
+    this.boosterOverlay.classList.remove('visible');
+    this.boosterOverlay.classList.add('charging');
+  }
+  animateBooster(t){
+    if(!this.boosterModel)return;
+    const age=t-this.boosterStartedAt;
+    this.boosterModel.rotation.y+=.025;this.boosterModel.rotation.x=Math.sin(t*2)*.08;
+    const scale=age<.65?Math.max(.01,age/.65):age<1.35?1+Math.sin(age*19)*.08:Math.max(.01,1-(age-1.35)*2.2);
+    this.boosterModel.scale.setScalar(scale);
+    if(age>1.35&&!this.boosterOverlay.classList.contains('visible')){this.boosterOverlay.classList.remove('charging');this.boosterOverlay.classList.add('visible');}
+    if(age>1.7){this.scene.remove(this.boosterModel);this.boosterModel=null;}
+  }
+  resetWorld(){
+    this.target.set(0,0,0);this.shipTarget.copy(this.tilePosition(0,0));this.ship.position.copy(this.shipTarget);this.ship.position.y=SHIP_Y;this.ship.rotation.set(0,0,0);this.ship.scale.setScalar(1);this.heading=0;this.sinkingStartedAt=null;this.sunkOverlay.classList.remove('visible');this.state.camera={x:0,z:0};this.updateChunks();this.updateHighlights();this.updateCamera();
   }
   createHighlights(){
     this.highlightGroup=new THREE.Group(); this.scene.add(this.highlightGroup);
@@ -390,7 +422,7 @@ export class ThreeWorld {
     if(!this.state.sunk)sp.y=SHIP_Y+Math.sin(t*1.7)*.03;
     let dh=this.heading-this.ship.rotation.y; dh=Math.atan2(Math.sin(dh),Math.cos(dh)); this.ship.rotation.y+=dh*.12;
     this.ship.rotation.z=Math.sin(t*.8)*.03; this.ship.rotation.x=Math.sin(t*1.1)*.025;
-    this.animateWorld(t);this.animateStorm(t,dt);this.animateSinking(t);
+    this.animateWorld(t);this.animateStorm(t,dt);this.animateSinking(t);this.animateBooster(t);
     if(this.home){this.target.x=this.state.camera.x||0;this.target.z=this.state.camera.z||0;this.updateCamera();}
     this.renderer.render(this.scene,this.camera);
   }
