@@ -65,7 +65,10 @@ export function bindUI(state,game){
     const btn=e.target.closest('[data-card]');if(!btn)return;
     const index=Number(btn.dataset.card);
     if(state.selectedCard!==index){state.selectedCard=index;renderCards(state);return;}
-    const result=combat.playCard(index);toast(result.message);
+    const playedCard=state.hand[index];
+    const result=combat.playCard(index);
+    if(result.ok&&playedCard?.type==='move')game.syncShipToPlayer();
+    toast(result.message);
   });
   $('end-turn').onclick=()=>{combat.endTurn();toast(state.hp===0?'Ton navire est à la dérive…':'Au tour des corsaires !');};
   $('flee').onclick=()=>{state.endCombat();toast('Tu as pris le large.');};
