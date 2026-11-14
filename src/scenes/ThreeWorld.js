@@ -288,6 +288,13 @@ export class ThreeWorld {
     if(age>1.35&&!this.boosterOverlay.classList.contains('visible')){this.boosterOverlay.classList.remove('charging');this.boosterOverlay.classList.add('visible');}
     if(age>1.7){this.scene.remove(this.boosterModel);this.boosterModel=null;}
   }
+  syncShipToPlayer(){
+    const destination=this.tilePosition(this.state.player.q,this.state.player.r);
+    const direction=destination.clone().sub(this.shipTarget);
+    if(direction.lengthSq()>.001)this.heading=Math.atan2(direction.x,direction.z);
+    this.shipTarget.copy(destination);
+    this.updateHighlights();
+  }
   resetWorld(){
     for(const group of this.chunks.values())this.scene.remove(group);
     this.chunks.clear();this.tiles=[];this.tileByKey.clear();this.foams=[];this.smokes=[];this.cloudGroups=[];this.chunkCenter=null;
