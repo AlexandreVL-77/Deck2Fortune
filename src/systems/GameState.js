@@ -70,7 +70,7 @@ export class GameState {
       z: finiteNumber(saved?.camera?.z, 0)
     };
     const visited = Array.isArray(saved?.visited) ? saved.visited : [];
-    this.visited = new Set(visited.filter(key => typeof key === 'string' && /^-?\\d+,-?\\d+$/.test(key)).slice(0, 100000));
+    this.visited = new Set(visited.filter(key => typeof key === 'string' && /^-?\d+,-?\d+$/.test(key)).slice(0, 100000));
     this.sunk = !!saved?.sunk || this.hp <= 0;
     this.inStorm = !!saved?.inStorm && !this.sunk;
     this.enemy = { q: 2, r: -1, hp: 18, maxHp: 18, name: 'Corsaire des Brumes' };
