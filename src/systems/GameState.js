@@ -4,10 +4,23 @@ import { WEAPONS } from '../data/weapons.js';
 const IDENTITY_KEY = 'deck2fortune.identity';
 const GOLD_KEY = 'deck2fortune.gold';
 const WORLD_KEY = 'deck2fortune.world';
-function loadWorld(){try{return JSON.parse(localStorage.getItem(WORLD_KEY)||'null');}catch{return null;}}
-function makeSeed(){return Math.floor(Math.random()*0x7fffffff)||1;}
 const DEFAULT_IDENTITY = { shipName: 'La Mouette', captainName: 'Milo la Brise' };
 
+function finiteNumber(value, fallback, min = -1_000_000, max = 1_000_000) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= min && number <= max ? number : fallback;
+}
+function safeInteger(value, fallback, min = -1_000_000, max = 1_000_000) {
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number >= min && number <= max ? number : fallback;
+}
+function loadWorld() {
+  try {
+    const value = JSON.parse(localStorage.getItem(WORLD_KEY) || 'null');
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+  } catch { return null; }
+}
+function makeSeed() { return Math.floor(Math.random() * 0x7fffffff) || 1; }
 function loadIdentity() {
   try {
     const saved = JSON.parse(localStorage.getItem(IDENTITY_KEY) || 'null');
@@ -15,61 +28,128 @@ function loadIdentity() {
       shipName: typeof saved?.shipName === 'string' && saved.shipName.trim() ? saved.shipName.trim().slice(0, 24) : DEFAULT_IDENTITY.shipName,
       captainName: typeof saved?.captainName === 'string' && saved.captainName.trim() ? saved.captainName.trim().slice(0, 24) : DEFAULT_IDENTITY.captainName
     };
-  } catch {
-    return { ...DEFAULT_IDENTITY };
-  }
+  } catch { return { ...DEFAULT_IDENTITY }; }
 }
-
 function loadGold() {
   try {
     const stored = localStorage.getItem(GOLD_KEY);
     if (stored === null) return 120;
-    const value = Number(stored);
-    return Number.isFinite(value) && value >= 0 ? Math.floor(value) : 120;
+    return Math.floor(finiteNumber(stored, 120, 0, Number.MAX_SAFE_INTEGER));
   } catch { return 120; }
+}
+function restoreWeapon(saved, fallback) {
+  if (!saved || typeof saved !== 'object') return { ...fallback };
+  const maxCooldown = safeInteger(saved.maxCooldown, fallback.maxCooldown, 0, 99);
+  return {
+    ...fallback,
+    name: typeof saved.name === 'string' && saved.name.trim() ? saved.name.trim().slice(0, 32) : fallback.name,
+    damage: finiteNumber(saved.damage, fallback.damage, 0, 999),
+    range: safeInteger(saved.range, fallback.range ?? 1, 1, 20),
+    luck: finiteNumber(saved.luck, fallback.luck, 0, 100),
+    maxCooldown,
+    cooldown: safeInteger(saved.cooldown, 0, 0, maxCooldown)
+  };
 }
 
 export class GameState {
   constructor() {
     const identity = loadIdentity();
-    const saved=loadWorld(); this._gold=loadGold(); this.hp=saved?.hp??24; this.maxHp=24;
-    this.shipName=identity.shipName; this.captainName=identity.captainName;
-    this.seed=saved?.seed||makeSeed(); this.player=saved?.player||{q:0,r:0}; this.camera=saved?.camera||{x:0,z:0}; this.visited=new Set(saved?.visited||[]); this.inStorm=!!saved?.inStorm; this.sunk=!!saved?.sunk; this.enemy={q:2,r:-1,hp:18,maxHp:18,name:'Corsaire des Brumes'};
-    this.hand=createHand(); this.selectedCard=0; this.inCombat=false; this.turn=1;
-    this.melee={...WEAPONS.cutlass}; this.ranged={...WEAPONS.musket};
-    this.ownedBoosters=0; this.cosmetics={ship:'seagull',captain:'milo',weapon:'brass'};
-    this.stormDamageRate=1.6;
-    this.listeners=new Set();
+    const saved = loadWorld();
+    this.maxHp = 24;
+    this._gold = loadGold();
+    this.hp = finiteNumber(saved?.hp, this.maxHp, 0, this.maxHp);
+    this.shipName = identity.shipName;
+    this.captainName = identity.captainName;
+    this.seed = safeInteger(saved?.seed, makeSeed(), 1, 0x7fffffff);
+    this.player = {
+      q: safeInteger(saved?.player?.q, 0),
+      r: safeInteger(saved?.player?.r, 0)
+    };
+    this.camera = {
+      x: finiteNumber(saved?.camera?.x, 0),
+      z: finiteNumber(saved?.camera?.z, 0)
+    };
+    const visited = Array.isArray(saved?.visited) ? saved.visited : [];
+    this.visited = new Set(visited.filter(key => typeof key === 'string' && /^-?\\d+,-?\\d+$/.test(key)).slice(0, 100000));
+    this.sunk = !!saved?.sunk || this.hp <= 0;
+    this.inStorm = !!saved?.inStorm && !this.sunk;
+    this.enemy = { q: 2, r: -1, hp: 18, maxHp: 18, name: 'Corsaire des Brumes' };
+    this.hand = createHand();
+    this.selectedCard = 0;
+    this.inCombat = false;
+    this.turn = 1;
+    this.melee = restoreWeapon(saved?.melee, WEAPONS.cutlass);
+    this.ranged = restoreWeapon(saved?.ranged, WEAPONS.musket);
+    this.ownedBoosters = safeInteger(saved?.ownedBoosters, 0, 0, Number.MAX_SAFE_INTEGER);
+    this.cosmetics = { ship: 'seagull', captain: 'milo', weapon: 'brass' };
+    this.stormDamageRate = 1.6;
+    this.listeners = new Set();
   }
-  get gold(){return this._gold;}
-  set gold(value){
-    this._gold=Math.max(0,Math.floor(Number(value)||0));
-    try { localStorage.setItem(GOLD_KEY,String(this._gold)); } catch {}
+  get gold() { return this._gold; }
+  set gold(value) {
+    this._gold = Math.floor(finiteNumber(value, 0, 0, Number.MAX_SAFE_INTEGER));
+    try { localStorage.setItem(GOLD_KEY, String(this._gold)); } catch {}
   }
-  subscribe(fn){this.listeners.add(fn);return()=>this.listeners.delete(fn);}
-  emit(){this.saveProgress();this.listeners.forEach(fn=>fn(this));}
-  saveProgress(){try{localStorage.setItem(WORLD_KEY,JSON.stringify({seed:this.seed,player:this.player,camera:this.camera,hp:this.hp,visited:[...this.visited],inStorm:this.inStorm,sunk:this.sunk}));}catch{}}
-  newWorld(){this.seed=makeSeed();this.player={q:0,r:0};this.camera={x:0,z:0};this.hp=this.maxHp;this.visited=new Set();this.inStorm=false;this.sunk=false;this.inCombat=false;this.enemy.hp=this.enemy.maxHp;this.saveProgress();}
-  saveIdentity(shipName,captainName){
-    const ship=String(shipName||'').trim().slice(0,24);
-    const captain=String(captainName||'').trim().slice(0,24);
-    if(!ship||!captain)return false;
-    this.shipName=ship; this.captainName=captain;
-    try { localStorage.setItem(IDENTITY_KEY,JSON.stringify({shipName:ship,captainName:captain})); } catch {}
+  subscribe(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
+  emit() {
+    this.saveProgress();
+    this.listeners.forEach(fn => fn(this));
+  }
+  saveProgress() {
+    try {
+      localStorage.setItem(WORLD_KEY, JSON.stringify({
+        seed: this.seed, player: this.player, camera: this.camera, hp: this.hp,
+        visited: [...this.visited], inStorm: this.inStorm, sunk: this.sunk,
+        ownedBoosters: this.ownedBoosters, melee: this.melee, ranged: this.ranged
+      }));
+    } catch {}
+  }
+  newWorld() {
+    this.seed = makeSeed();
+    this.player = { q: 0, r: 0 };
+    this.camera = { x: 0, z: 0 };
+    this.hp = this.maxHp;
+    this.visited = new Set();
+    this.inStorm = false;
+    this.sunk = false;
+    this.inCombat = false;
+    this.enemy.hp = this.enemy.maxHp;
+    this.saveProgress();
+  }
+  saveIdentity(shipName, captainName) {
+    const ship = String(shipName || '').trim().slice(0, 24);
+    const captain = String(captainName || '').trim().slice(0, 24);
+    if (!ship || !captain) return false;
+    this.shipName = ship;
+    this.captainName = captain;
+    try { localStorage.setItem(IDENTITY_KEY, JSON.stringify({ shipName: ship, captainName: captain })); } catch {}
     this.emit();
     return true;
   }
-  enterStorm(){if(this.sunk)return;this.inStorm=true;this.emit();}
-  leaveStorm(){if(!this.inStorm)return;this.inStorm=false;this.emit();}
-  damageHull(amount){
-    if(this.sunk||amount<=0)return;
-    this.hp=Math.max(0,this.hp-amount);
-    if(this.hp===0){this.sunk=true;this.inStorm=false;}
+  enterStorm() { if (this.sunk) return; this.inStorm = true; this.emit(); }
+  leaveStorm() { if (!this.inStorm) return; this.inStorm = false; this.emit(); }
+  damageHull(amount) {
+    const damage = finiteNumber(amount, 0, 0, 999);
+    if (this.sunk || damage <= 0) return;
+    this.hp = Math.max(0, this.hp - damage);
+    if (this.hp === 0) { this.sunk = true; this.inStorm = false; }
     this.emit();
   }
-  startCombat(){if(this.sunk)return;this.inCombat=true;this.emit();}
-  endCombat(){this.inCombat=false;this.enemy.hp=18;this.emit();}
-  spendGold(amount){if(this.gold<amount)return false;this.gold-=amount;this.emit();return true;}
-  damageEnemy(amount){if(this.sunk)return;this.enemy.hp=Math.max(0,this.enemy.hp-amount);if(this.enemy.hp===0){this.gold+=35;this.inCombat=false;}this.emit();}
-  damagePlayer(amount){this.damageHull(amount);}
+  startCombat() { if (this.sunk) return; this.inCombat = true; this.emit(); }
+  endCombat() { this.inCombat = false; this.enemy.hp = this.enemy.maxHp; this.emit(); }
+  spendGold(amount) {
+    const cost = finiteNumber(amount, -1, 0, Number.MAX_SAFE_INTEGER);
+    if (cost < 0 || this.gold < cost) return false;
+    this.gold -= cost;
+    this.emit();
+    return true;
+  }
+  damageEnemy(amount) {
+    const damage = finiteNumber(amount, 0, 0, 999);
+    if (this.sunk || damage <= 0) return;
+    this.enemy.hp = Math.max(0, this.enemy.hp - damage);
+    if (this.enemy.hp === 0) { this.gold += 35; this.inCombat = false; }
+    this.emit();
+  }
+  damagePlayer(amount) { this.damageHull(amount); }
 }
