@@ -109,6 +109,24 @@ export class ThreeWorld {
     this.cloudShadowMat=new THREE.MeshBasicMaterial({map:this.softShadowTexture(),transparent:true,depthWrite:false});
     this.updateChunks(true);
   }
+  disposeChunk(group){
+    const sharedGeometries=new Set([
+      this.baseGeo,this.ringGeo,this.foamGeo,this.cloudShadowGeo,
+      ...Object.values(this.islandGeo||{})
+    ]);
+    const sharedMaterials=new Set([
+      this.waterMat,this.ringMat,this.foamMat,this.cloudShadowMat,
+      ...(this.matCache?.values()||[])
+    ]);
+    const geometries=new Set(),materials=new Set();
+    group.traverse(object=>{
+      if(object.geometry&&!sharedGeometries.has(object.geometry))geometries.add(object.geometry);
+      const list=Array.isArray(object.material)?object.material:[object.material];
+      for(const material of list)if(material&&!sharedMaterials.has(material))materials.add(material);
+    });
+    geometries.forEach(geometry=>geometry.dispose());
+    materials.forEach(material=>material.dispose());
+  }
   updateChunks(force=false){
     const qCenter=(Math.sqrt(3)/3*this.target.x-this.target.z/3)/HEX_SIZE;
     const rCenter=(2/3*this.target.z)/HEX_SIZE;
@@ -133,7 +151,7 @@ export class ThreeWorld {
     }
     for(const [key,group] of this.chunks){
       if(wanted.has(key))continue;
-      this.scene.remove(group);this.chunks.delete(key);
+      this.scene.remove(group);this.disposeChunk(group);this.chunks.delete(key);
       for(const base of this.tiles){const tile=base.userData.tile;if(Math.floor(tile.q/CHUNK_SIZE)+','+Math.floor(tile.r/CHUNK_SIZE)===key)this.tileByKey.delete(this.key(tile.q,tile.r));}
       this.tiles=this.tiles.filter(base=>{const tile=base.userData.tile;return Math.floor(tile.q/CHUNK_SIZE)+','+Math.floor(tile.r/CHUNK_SIZE)!==key;});
       const removed=new Set();group.traverse(obj=>removed.add(obj));this.foams=this.foams.filter(obj=>!removed.has(obj));this.smokes=this.smokes.filter(obj=>!removed.has(obj));this.cloudGroups=this.cloudGroups.filter(obj=>!removed.has(obj));
@@ -288,8 +306,15 @@ export class ThreeWorld {
     if(age>1.35&&!this.boosterOverlay.classList.contains('visible')){this.boosterOverlay.classList.remove('charging');this.boosterOverlay.classList.add('visible');}
     if(age>1.7){this.scene.remove(this.boosterModel);this.boosterModel=null;}
   }
+  syncShipToPlayer(){
+    const destination=this.tilePosition(this.state.player.q,this.state.player.r);
+    const direction=destination.clone().sub(this.shipTarget);
+    if(direction.lengthSq()>.001)this.heading=Math.atan2(direction.x,direction.z);
+    this.shipTarget.copy(destination);
+    this.updateHighlights();
+  }
   resetWorld(){
-    for(const group of this.chunks.values())this.scene.remove(group);
+    for(const group of this.chunks.values()){this.scene.remove(group);this.disposeChunk(group);}
     this.chunks.clear();this.tiles=[];this.tileByKey.clear();this.foams=[];this.smokes=[];this.cloudGroups=[];this.chunkCenter=null;
     this.target.set(0,0,0);this.shipTarget.copy(this.tilePosition(0,0));this.ship.position.copy(this.shipTarget);this.ship.position.y=SHIP_Y;this.ship.rotation.set(0,0,0);this.ship.scale.setScalar(1);this.heading=0;this.sinkingStartedAt=null;this.sunkOverlay.classList.remove('visible');this.state.camera={x:0,z:0};this.updateChunks(true);this.updateHighlights();this.updateCamera();
   }
