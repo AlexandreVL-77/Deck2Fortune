@@ -209,10 +209,11 @@ export class ThreeWorld {
     // Nuage flottant + ombre ronde et douce sur l'eau
     const shadow=new THREE.Mesh(this.cloudShadowGeo,this.cloudShadowMat);
     shadow.position.set(.14,-.175,-.1); shadow.scale.set(1.1,1,.82); group.add(shadow);
-    const cloud=new THREE.Group(); cloud.position.y=.62; cloud.userData.phase=tile.q*.9+tile.r*1.7; group.add(cloud);
-    for(const [x,y,z,s] of [[-.30,0,.02,.30],[0,.12,0,.40],[.32,0,-.02,.30],[.08,-.02,.22,.26],[-.12,0,-.20,.24]]){
-      const puff=new THREE.Mesh(new THREE.SphereGeometry(s,12,9),this.material(y>.05?'#ffffff':'#dbe3ef'));
-      puff.scale.y=.75; puff.position.set(x,y,z); cloud.add(puff);
+    const cloud=new THREE.Group(); cloud.position.y=1.28; cloud.scale.setScalar(1.45); cloud.userData.phase=tile.q*.9+tile.r*1.7; group.add(cloud);
+    // Nuages denses et opaques : ils masquent les cases situees dessous.
+    for(const [x,y,z,s] of [[-.42,0,.02,.42],[0,.12,0,.52],[.42,0,-.02,.42],[.12,-.04,.38,.36],[-.18,-.02,-.34,.36],[.48,.08,.30,.30],[-.48,.08,-.28,.30]]){
+      const puff=new THREE.Mesh(new THREE.SphereGeometry(s,14,10),this.material(y>.05?'#ffffff':'#e5edf2'));
+      puff.scale.y=.82; puff.position.set(x,y,z); cloud.add(puff);
     }
     const bolt=new THREE.Shape();
     bolt.moveTo(0,0); bolt.lineTo(-.08,-.2); bolt.lineTo(-.02,-.2); bolt.lineTo(-.1,-.42); bolt.lineTo(.06,-.16); bolt.lineTo(0,-.16); bolt.closePath();
