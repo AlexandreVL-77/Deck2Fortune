@@ -1,0 +1,43 @@
+/* Booster opening: original pirate TCG-style pack and sequential card reveal */
+.booster-reveal{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:22px 16px calc(env(safe-area-inset-bottom) + 22px);background:radial-gradient(ellipse at 50% 38%,#275c78f5 0%,#102d4bf7 58%,#071b31fa 100%);color:#fff4d8;opacity:0;pointer-events:none;transition:opacity .28s ease;overflow-y:auto}
+.booster-reveal.visible{opacity:1;pointer-events:auto}
+.booster-stage{width:min(100%,390px);display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.booster-kicker{font-size:9px;font-weight:1000;letter-spacing:2.5px;color:#f4d28b;text-transform:uppercase}
+.booster-title{font-family:'Rye',Georgia,serif;font-size:clamp(23px,7vw,31px);line-height:1.1;color:#fff2c7;text-shadow:0 3px #71472d,0 0 22px #f1bd5a66}
+.booster-pack{position:relative;width: min(65vw,220px);height:min(90vw,300px);min-height:235px;border:3px solid #f4d18a;border-radius:17px;overflow:hidden;background:radial-gradient(circle at 50% 24%,#ffe4a4 0 3%,transparent 4%),radial-gradient(ellipse at 50% 38%,#4c9da0 0,#22556e 45%,#102e4a 78%);box-shadow:0 0 0 4px #7b4b2d,0 14px 30px #0008,inset 0 0 24px #ffe5a455;transform:rotate(-3deg);animation:pack-float 2.5s ease-in-out infinite}
+.booster-pack:before,.booster-pack:after{content:"";position:absolute;left:-20%;width:140%;height:9px;background:repeating-linear-gradient(90deg,#f9d98d 0 7px,#b77943 7px 10px);opacity:.9}
+.booster-pack:before{top:13px}.booster-pack:after{bottom:13px}
+.booster-pack-brand{position:absolute;inset:25% 8% auto;padding:14px 6px;border-top:2px solid #f8d88d;border-bottom:2px solid #f8d88d;background:linear-gradient(110deg,#133d59dd,#1a6470dd);font-family:'Rye',Georgia,serif;font-size:clamp(19px,6vw,26px);line-height:1.1;color:#fff0c5;text-shadow:0 3px #6b432c}
+.booster-pack-brand span{color:#f6c75f}
+.booster-pack-emblem{position:absolute;top:9%;left:50%;transform:translateX(-50%);font-size:44px;color:#ffe39b;text-shadow:0 0 18px #fff1a8}
+.booster-pack-caption{position:absolute;bottom:27px;left:0;right:0;font-size:8px;font-weight:900;letter-spacing:2px;color:#f8e4b3}
+.booster-pack.opening{animation:pack-tear .65s ease-in forwards}
+.booster-action{min-width:210px;padding:14px 22px;border:2px solid #f8df9f;border-radius:13px;background:linear-gradient(180deg,#ffe9a9,#dca04e);color:#613d25;font-size:11px;font-weight:1000;letter-spacing:1.1px;box-shadow:0 5px 0 #794b2e,0 10px 18px #0005;cursor:pointer}
+.booster-action:active{transform:translateY(3px);box-shadow:0 2px 0 #794b2e}
+.booster-card-wrap{perspective:1000px;width:min(72vw,250px);height:min(105vw,340px);min-height:275px}
+.booster-card{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 14px 16px #0008)}
+.booster-card.is-revealed{transform:rotateY(180deg)}
+.booster-card-back,.booster-card-front{position:absolute;inset:0;backface-visibility:hidden;border-radius:17px;border:4px solid #f4d18a;overflow:hidden}
+.booster-card-back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:repeating-linear-gradient(45deg,#17435e 0 9px,#205a70 9px 18px);box-shadow:inset 0 0 0 4px #9d6a3e,inset 0 0 32px #071c33}
+.booster-card-back b{display:grid;place-items:center;width:105px;height:105px;border:3px double #f7d88d;border-radius:50%;font-size:58px;color:#ffe39b;text-shadow:0 0 18px #ffe39b}
+.booster-card-back strong{font-family:'Rye',Georgia,serif;font-size:23px;color:#fff0c5;text-shadow:0 3px #6b432c}
+.booster-card-back small{font-size:8px;letter-spacing:2px;color:#f6d99b}
+.booster-card-front{transform:rotateY(180deg);display:flex;flex-direction:column;padding:10px;background:linear-gradient(145deg,#fff9e8,#e8c991);color:#68452c;box-shadow:inset 0 0 0 3px #fff8e4}
+.booster-card-front.rarity-rare{background:radial-gradient(circle at 50% 40%,#fff9d7,#f2d58e 55%,#d99d54);border-color:#ffe18a;box-shadow:inset 0 0 0 3px #fff6c8,0 0 26px #f5ce65aa}
+.booster-card-top{display:flex;justify-content:space-between;align-items:center;padding:2px 3px 8px;border-bottom:1px solid #c59a60;font-size:8px;font-weight:1000;letter-spacing:1px}
+.booster-card-stars{color:#d18b2d;font-size:15px;letter-spacing:2px}
+.booster-card-art{flex:1;min-height:120px;display:grid;place-items:center;margin:9px 0;border:2px solid #d2a45f;border-radius:10px;background:radial-gradient(circle at 50% 42%,#fff9d8,#d8b878 80%);font-size:clamp(58px,17vw,78px);text-shadow:0 5px 0 #a77b4833}
+.rarity-rare .booster-card-art{background:radial-gradient(circle at 50% 35%,#fffde8,#f1c45f 65%,#c98d4a);box-shadow:inset 0 0 24px #fff4a8}
+.booster-card-front h3{margin:2px 0 5px;font-family:'Rye',Georgia,serif;font-size:clamp(16px,4.8vw,20px);color:#70482b}
+.booster-card-type{align-self:flex-start;padding:4px 7px;border-radius:6px;background:#8d5b37;color:#fff2cf;font-size:7px;font-weight:1000;letter-spacing:1px}
+.booster-card-front p{margin:10px 2px 6px;min-height:35px;font-size:10px;line-height:1.35;color:#896746}
+.booster-card-footer{margin-top:auto;padding-top:7px;border-top:1px solid #c59a60;font-size:7px;font-weight:900;letter-spacing:1.5px;color:#a47749}
+.booster-progress{display:flex;gap:7px;align-items:center;justify-content:center}
+.booster-progress i{width:7px;height:7px;border-radius:50%;background:#668397;box-shadow:0 0 0 1px #f4d18a}
+.booster-progress i.done{background:#ffe09a;box-shadow:0 0 8px #ffe09a}
+.booster-subtitle{font-size:10px;color:#f4dfb5}
+.booster-reveal .booster-action{opacity:1;transform:none}
+@keyframes pack-float{0%,100%{translate:0 0;rotate:-3deg}50%{translate:0 -8px;rotate:2deg}}
+@keyframes pack-tear{0%{transform:rotate(-3deg) scale(1);filter:brightness(1)}35%{transform:rotate(5deg) scale(1.06);filter:brightness(1.8)}100%{transform:rotate(12deg) scale(.2);opacity:0;filter:brightness(2)}}
+@media(max-height:650px){.booster-stage{gap:9px}.booster-card-wrap{height:min(76vh,285px);min-height:220px}.booster-card-art{min-height:75px}.booster-card-front p{margin:5px 2px;min-height:25px}.booster-pack{height:min(68vh,245px);min-height:200px}}
+@media(prefers-reduced-motion:reduce){.booster-pack,.booster-pack.opening,.booster-card{animation:none!important;transition:none!important}}
