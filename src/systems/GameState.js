@@ -74,6 +74,7 @@ export class GameState {
     this.sunk = !!saved?.sunk || this.hp <= 0;
     this.inStorm = !!saved?.inStorm && !this.sunk;
     this.enemy = { q: 2, r: -1, hp: 18, maxHp: 18, name: 'Corsaire des Brumes' };
+    this.cardCollection = Object.fromEntries(CARD_LIBRARY.map(card => [card.id, safeInteger(saved?.cardCollection?.[card.id], 0, 0, Number.MAX_SAFE_INTEGER)]));
     if (Object.values(this.cardCollection).every(count => count === 0)) CARD_LIBRARY.forEach(card => { this.cardCollection[card.id] = 1; });
     try {
       const savedDeck = JSON.parse(localStorage.getItem('deck2fortune.deck') || 'null');
@@ -93,7 +94,6 @@ export class GameState {
     this.melee = restoreWeapon(saved?.melee, WEAPONS.cutlass);
     this.ranged = restoreWeapon(saved?.ranged, WEAPONS.musket);
     this.ownedBoosters = safeInteger(saved?.ownedBoosters, 0, 0, Number.MAX_SAFE_INTEGER);
-    this.cardCollection = Object.fromEntries(CARD_LIBRARY.map(card => [card.id, safeInteger(saved?.cardCollection?.[card.id], 0, 0, Number.MAX_SAFE_INTEGER)]));
     this.cosmetics = { ship: 'seagull', captain: 'milo', weapon: 'brass' };
     this.stormDamageRate = 1.6;
     this.listeners = new Set();
