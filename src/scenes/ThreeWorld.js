@@ -105,7 +105,7 @@ export class ThreeWorld {
     const ringMat=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.34,depthWrite:false});
     const leafGeo=new THREE.SphereGeometry(.28,6,4);leafGeo.scale(1,.2,.42);
     this.baseGeo=baseGeo;this.waterMat=waterMat;this.ringGeo=ringGeo;this.ringMat=ringMat;
-    this.islandGeo={sand:new THREE.CylinderGeometry(.72,.84,.26,10),grass:new THREE.CylinderGeometry(.50,.64,.14,9),hill:new THREE.SphereGeometry(.40,8,5),rock:new THREE.DodecahedronGeometry(.09,0),leaf:leafGeo};
+    this.islandGeo={sand:new THREE.CylinderGeometry(.72,.84,.26,10),grass:new THREE.CylinderGeometry(.50,.64,.14,9),hill:new THREE.SphereGeometry(.40,8,5),rock:new THREE.DodecahedronGeometry(.09,0),leaf:leafGeo,archipelagoBridge:new THREE.BoxGeometry(.46,.12,1.65)};
     this.foamGeo=new THREE.RingGeometry(.80,.93,28);this.foamGeo.rotateX(-Math.PI/2);
     this.foamMat=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.6,depthWrite:false});
     this.cloudShadowGeo=new THREE.CircleGeometry(.72,28);this.cloudShadowGeo.rotateX(-Math.PI/2);
@@ -146,6 +146,7 @@ export class ThreeWorld {
         this.tiles.push(base);this.tileByKey.set(this.key(q,r),{data,group:tileGroup,base});
         const ring=new THREE.Mesh(this.ringGeo,this.ringMat);ring.position.y=-.175;tileGroup.add(ring);
         if(data.kind==='island')this.addIsland(tileGroup,data);
+        if(data.kind==='archipelago')this.addArchipelago(tileGroup,data);
         if(data.kind==='volcano')this.addVolcano(tileGroup,data);
         if(data.kind==='storm')this.addCloud(tileGroup,data);
         group.add(tileGroup);
@@ -180,6 +181,41 @@ export class ThreeWorld {
     mesh(g.rock,this.material('#bfb090',true),-.45,.07,.46).scale.setScalar(.8);
     this.addPalm(isle,-.18,-.02,.9,.22);
     this.addPalm(isle,.28,.22,.62,.15);
+  }
+  addArchipelago(group,tile){
+    // Archipelago tiles use a richer model and sand causeways that physically connect neighboring land.
+    const g=this.islandGeo,isle=new THREE.Group();
+    isle.rotation.y=(((tile.q*5+tile.r*3)%6)+6)%6*Math.PI/3; group.add(isle);
+    this.addFoam(group,tile);
+    const mesh=(geo,mat,x,y,z,sy=1)=>{
+      const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.scale.y=sy;
+      m.castShadow=true;m.receiveShadow=true;isle.add(m);return m;
+    };
+    mesh(g.sand,this.material('#efd39a',true),0,-.08,0);
+    mesh(g.grass,this.material('#79bd70',true),-.02,.10,.02);
+    mesh(g.hill,this.material('#5da961',true),-.12,.14,-.04,.62);
+    mesh(g.rock,this.material('#b9aa91',true),.48,.07,-.38);
+    mesh(g.rock,this.material('#d0bd98',true),-.43,.07,.42).scale.setScalar(.85);
+    this.addPalm(isle,-.18,-.02,.95,.22);
+    this.addPalm(isle,.28,.22,.65,.15);
+
+    // Only the first three axial directions are drawn to avoid duplicate bridges.
+    const bridgeDirections=[[1,0],[1,-1],[0,-1]];
+    for(const [dq,dr] of bridgeDirections){
+      const neighbor=makeTile(this.state.seed,tile.q+dq,tile.r+dr);
+      if(neighbor.kind!=='archipelago')continue;
+      const a=axialToPixel(dq,dr,HEX_SIZE);
+      const angle=Math.atan2(a.x,a.y);
+      const bridge=new THREE.Mesh(g.archipelagoBridge,this.material('#e8c98f',true));
+      bridge.position.set(a.x*.5,-.005,a.y*.5);
+      bridge.rotation.y=angle;
+      bridge.castShadow=true;bridge.receiveShadow=true;
+      group.add(bridge);
+      const trim=new THREE.Mesh(new THREE.BoxGeometry(.52,.035,1.55),this.material('#83b96c',true));
+      trim.position.set(a.x*.5,.07,a.y*.5);
+      trim.rotation.y=angle;
+      trim.castShadow=true;group.add(trim);
+    }
   }
   addPalm(parent,x,z,s,baseY){
     const p=new THREE.Group(); p.position.set(x,baseY,z); parent.add(p);
