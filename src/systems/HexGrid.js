@@ -28,7 +28,8 @@ function findArchipelagoOrigin(seed,q,r,near){
 
 export function makeTile(seed,q,r){
   if(q===0&&r===0)return{q,r,kind:'sea'};
-  const n=hash(seed,q,r),near=hexDistance({q,r},{q:0,r:0});\n  const islandRoll=hash(seed^0x1b873593,q,r),volcanoRoll=hash(seed^0x6d2b79f5,q,r);let kind='sea';
+  const n=hash(seed,q,r),near=hexDistance({q,r},{q:0,r:0});
+  const islandRoll=hash(seed^0x1b873593,q,r),volcanoRoll=hash(seed^0x6d2b79f5,q,r);let kind='sea';
   // Rare cloud banks remain independent from island generation.
   const cloudShape=[[0,0],[1,0],[-1,0],[0,1],[0,-1]];
   const coveredByCloud=cloudShape.some(([dq,dr])=>{
@@ -38,8 +39,8 @@ export function makeTile(seed,q,r){
   const archipelagoOrigin=findArchipelagoOrigin(seed,q,r,near);
   if(coveredByCloud)kind='storm';
   else if(archipelagoOrigin)kind='archipelago';
-  else if(n>.9997&&near>5)kind='volcano';
-  else if(n>.98&&near>3)kind='island';
+  else if(volcanoRoll>.995&&near>5)kind='volcano';
+  else if(islandRoll>.97&&near>3)kind='island';
   return{q,r,kind,archipelagoOrigin};
 }
 export function makeIslandMap(radius=7,seed=1){const tiles=[];for(let q=-radius;q<=radius;q++)for(let r=-radius;r<=radius;r++)if(hexDistance({q,r},{q:0,r:0})<=radius)tiles.push(makeTile(seed,q,r));return tiles;}
