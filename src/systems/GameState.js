@@ -1,4 +1,4 @@
-import { createHand, CARD_LIBRARY, DEFAULT_DECK } from '../data/cards.js';
+import { createHand, CARD_LIBRARY, DEFAULT_DECK, DECK_MIN_SIZE, DECK_MAX_SIZE, shuffle } from '../data/cards.js';
 import { WEAPONS } from '../data/weapons.js';
 
 const IDENTITY_KEY = 'deck2fortune.identity';
@@ -74,11 +74,16 @@ export class GameState {
     this.sunk = !!saved?.sunk || this.hp <= 0;
     this.inStorm = !!saved?.inStorm && !this.sunk;
     this.enemy = { q: 2, r: -1, hp: 18, maxHp: 18, name: 'Corsaire des Brumes' };
+    if (Object.values(this.cardCollection).every(count => count === 0)) CARD_LIBRARY.forEach(card => { this.cardCollection[card.id] = 1; });
     try {
       const savedDeck = JSON.parse(localStorage.getItem('deck2fortune.deck') || 'null');
-      this.deck = Array.isArray(savedDeck) ? [...new Set(savedDeck.filter(id => CARD_LIBRARY.some(card => card.id === id)))].slice(0, 8) : [...DEFAULT_DECK];
+      this.deck = Array.isArray(savedDeck) ? savedDeck.filter(id => CARD_LIBRARY.some(card => card.id === id)).slice(0, DECK_MAX_SIZE) : [...DEFAULT_DECK];
     } catch { this.deck = [...DEFAULT_DECK]; }
-    if (this.deck.length < 4) this.deck = [...DEFAULT_DECK];
+    if (this.deck.length < DECK_MIN_SIZE || this.deck.some(id => this.deck.filter(x => x === id).length > (this.cardCollection[id] || 0))) {
+      this.deck = DEFAULT_DECK.filter(id => (this.cardCollection[id] || 0) > 0).slice(0, DECK_MAX_SIZE);
+    }
+    this.drawPile = [];
+    this.discardPile = [];
     this.hand = createHand(this.deck);
     this.luckBoostTurns = 0;
     this.negativeEffects = [];
@@ -94,14 +99,36 @@ export class GameState {
     this.listeners = new Set();
   }
   setDeck(ids) {
-    const valid = [...new Set(ids.filter(id => CARD_LIBRARY.some(card => card.id === id)))].slice(0, 8);
-    if (valid.length < 4) return false;
-    this.deck = valid;
+    if (!Array.isArray(ids) || ids.length < DECK_MIN_SIZE || ids.length > DECK_MAX_SIZE) return false;
+    const counts = {};
+    for (const id of ids) {
+      if (!CARD_LIBRARY.some(card => card.id === id)) return false;
+      counts[id] = (counts[id] || 0) + 1;
+      if (counts[id] > (this.cardCollection[id] || 0)) return false;
+    }
+    this.deck = [...ids];
     try { localStorage.setItem('deck2fortune.deck', JSON.stringify(this.deck)); } catch {}
-    this.hand = createHand(this.deck);
-    this.selectedCard = 0;
-    this.emit();
-    return true;
+    this.drawPile = []; this.discardPile = [];
+    this.hand = createHand(this.deck); this.selectedCard = 0;
+    this.emit(); return true;
+  }
+  drawFromDeck(count = 1) {
+    const drawn = [];
+    for (let i = 0; i < count; i++) {
+      if (!this.drawPile.length && this.discardPile.length) {
+        this.drawPile = shuffle(this.discardPile); this.discardPile = [];
+      }
+      if (!this.drawPile.length) break;
+      const card = CARD_LIBRARY.find(item => item.id === this.drawPile.pop());
+      if (card) drawn.push({...card});
+    }
+    return drawn;
+  }
+  discardCard(index) {
+    const [card] = this.hand.splice(index, 1);
+    if (card) this.discardPile.push(card.id);
+    this.hand.push(...this.drawFromDeck(1));
+    this.selectedCard = Math.min(this.selectedCard, Math.max(0, this.hand.length - 1));
   }
   get gold() { return this._gold; }
   set gold(value) {
@@ -132,6 +159,7 @@ export class GameState {
     this.sunk = false;
     this.inCombat = false;
     this.enemy.hp = this.enemy.maxHp;
+    this.drawPile = []; this.discardPile = [];
     this.hand = createHand(this.deck);
     this.selectedCard = 0;
     this.saveProgress();
@@ -155,8 +183,8 @@ export class GameState {
     if (this.hp === 0) { this.sunk = true; this.inStorm = false; }
     this.emit();
   }
-  startCombat() { if (this.sunk) return; this.inCombat = true; this.emit(); }
-  endCombat() { this.inCombat = false; this.enemy.hp = this.enemy.maxHp; this.emit(); }
+  startCombat() { if (this.sunk) return; this.inCombat = true; this.drawPile = shuffle(this.deck); this.discardPile = []; this.hand = this.drawFromDeck(4); this.selectedCard = 0; this.turn = 1; this.luckBoostTurns = 0; this.emit(); }
+  endCombat() { this.inCombat = false; this.enemy.hp = this.enemy.maxHp; this.drawPile = []; this.discardPile = []; this.luckBoostTurns = 0; this.emit(); }
   spendGold(amount) {
     const cost = finiteNumber(amount, -1, 0, Number.MAX_SAFE_INTEGER);
     if (cost < 0 || this.gold < cost) return false;
