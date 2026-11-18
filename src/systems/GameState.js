@@ -1,4 +1,4 @@
-import { createHand } from '../data/cards.js';
+import { createHand, CARD_LIBRARY } from '../data/cards.js';
 import { WEAPONS } from '../data/weapons.js';
 
 const IDENTITY_KEY = 'deck2fortune.identity';
@@ -81,6 +81,7 @@ export class GameState {
     this.melee = restoreWeapon(saved?.melee, WEAPONS.cutlass);
     this.ranged = restoreWeapon(saved?.ranged, WEAPONS.musket);
     this.ownedBoosters = safeInteger(saved?.ownedBoosters, 0, 0, Number.MAX_SAFE_INTEGER);
+    this.cardCollection = Object.fromEntries(CARD_LIBRARY.map(card => [card.id, safeInteger(saved?.cardCollection?.[card.id], 0, 0, Number.MAX_SAFE_INTEGER)]));
     this.cosmetics = { ship: 'seagull', captain: 'milo', weapon: 'brass' };
     this.stormDamageRate = 1.6;
     this.listeners = new Set();
@@ -100,7 +101,7 @@ export class GameState {
       localStorage.setItem(WORLD_KEY, JSON.stringify({
         seed: this.seed, player: this.player, camera: this.camera, hp: this.hp,
         visited: [...this.visited], inStorm: this.inStorm, sunk: this.sunk,
-        ownedBoosters: this.ownedBoosters, melee: this.melee, ranged: this.ranged
+        ownedBoosters: this.ownedBoosters, cardCollection: this.cardCollection, melee: this.melee, ranged: this.ranged
       }));
     } catch {}
   }
