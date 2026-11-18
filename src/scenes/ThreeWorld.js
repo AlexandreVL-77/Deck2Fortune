@@ -308,7 +308,7 @@ export class ThreeWorld {
   showBoosterReveal(cards){
     const packCards=Array.isArray(cards)?cards:[];
     if(!packCards.length)return;
-    const typeLabels={attack:'ATTAQUE',move:'NAVIGATION',heal:'SOUTIEN'};
+    const typeLabels={attack:'ATTAQUE',move:'NAVIGATION',heal:'SOUTIEN',blessing:'BÉNÉDICTION'};
     this.boosterOverlay.innerHTML=`
       <div class="booster-stage">
         <div class="booster-kicker">ÉDITION · LES MERS OUBLIÉES</div>
@@ -331,19 +331,19 @@ export class ThreeWorld {
     },{once:true});
     const showCard=(index,revealed)=>{
       const card=packCards[index];
-      const stars=card.rarity==='rare'?'★★':'★';
-      const rarity=card.rarity==='rare'?'RARE':'COMMUNE';
-      const stat=card.type==='attack'?`${card.power} DÉGÂTS · PORTÉE ${card.range}`:card.type==='move'?`DÉPLACEMENT · ${card.distance} CASE${card.distance>1?'S':''}`:`RÉCUPÉRATION · ${card.power} PV`;
+      const stars=card.rarity==='epic'?'★★★':card.rarity==='rare'?'★★':'★';
+      const rarity=card.rarity==='epic'?'ÉPIQUE':card.rarity==='rare'?'RARE':'COMMUNE';
+      const stat=card.type==='attack'?`${card.power} DÉGÂTS · PORTÉE ${card.range}`:card.type==='move'?`DÉPLACEMENT · ${card.distance} CASE${card.distance>1?'S':''}`:card.type==='blessing'?'CHANCE ×2 · 2 TOURS':`RÉPARATION · +${card.power} COQUE`;
       this.boosterOverlay.innerHTML=`
         <div class="booster-stage">
           <div class="booster-kicker">OUVERTURE DU BOOSTER</div>
           <strong class="booster-title">TA COLLECTION</strong>
           <div class="booster-card-wrap">
-            <div class="booster-card ${revealed?'is-revealed':''} ${card.rarity==='rare'?'rarity-rare':''}">
+            <div class="booster-card ${revealed?'is-revealed':''} ${card.rarity==='epic'?'rarity-epic':card.rarity==='rare'?'rarity-rare':''}">
               <div class="booster-card-back"><strong>DECK<span style="color:#f6c75f">2</span>FORTUNE</strong><b>✦</b><small>LES MERS OUBLIÉES</small></div>
               <div class="booster-card-front ${card.rarity==='rare'?'rarity-rare':''}">
                 <div class="booster-card-top"><span>${rarity}</span><span class="booster-card-stars">${stars}</span></div>
-                <div class="booster-card-art">${card.icon}</div>
+                <div class="booster-card-art">${card.image?`<img class="booster-card-art-image" src="${card.image}" alt="${card.name}">`:card.icon}</div>
                 <h3>${card.name}</h3>
                 <span class="booster-card-type">${typeLabels[card.type]||'CARTE'}</span>
                 <p>${card.description}</p>
