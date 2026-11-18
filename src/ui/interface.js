@@ -29,7 +29,7 @@ export function renderCards(state){
 export function renderDrawer(state){
   const drawer=$('drawer');if(drawer.dataset.tab==='shop'){
     drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">✧</span> La cale aux trésors</div><p class="drawer-note">Dépense ton or pour entretenir ton navire et renforcer ton équipement.</p>
-      <div class="shop-item"><span><b>Booster du large</b><br><small>Carte, équipement ou butin surprise</small></span><button id="buy-booster">45 ✦</button></div>
+      <div class="shop-item"><span><b>Booster du large</b><br><small>5 cartes à collectionner · 1 rare garantie</small></span><button id="buy-booster">45 ✦</button></div>
       <div class="shop-item"><span><b>Réparation de coque</b><br><small>Restaure jusqu’à 8 points de coque</small></span><button id="buy-repair">30 ✦</button></div>
       <div class="shop-item"><span><b>Renforcer l’arme de mêlée</b><br><small>${state.melee.name} · +2 dégâts (max. 20)</small></span><button id="upgrade-melee">80 ✦</button></div>
       <div class="shop-item"><span><b>Renforcer l’arme à distance</b><br><small>${state.ranged.name} · +2 dégâts (max. 20)</small></span><button id="upgrade-ranged">80 ✦</button></div>
