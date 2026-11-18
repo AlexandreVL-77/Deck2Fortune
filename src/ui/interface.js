@@ -27,8 +27,17 @@ export function renderCards(state){
 }
 export function renderDrawer(state){
   const drawer=$('drawer');if(drawer.dataset.tab==='shop'){
-    drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">✧</span> La cale aux trésors</div><p class="drawer-note">Les capitaines y échangent des boosters scellés. Chaque paquet cache une surprise.</p><div class="shop-item"><span><b>Booster du large</b><br><small>Carte, équipement ou butin</small></span><button id="buy-booster">45 ✦</button></div><p class="drawer-note">Boosters ouverts : ${state.ownedBoosters}</p>`;
-    $('buy-booster').onclick=()=>{const result=new ShopSystem(state).buyBooster();toast(result.message);if(result.ok)game.showBoosterReveal(result.reward);renderCards(state);renderDrawer(state);};
+    drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">✧</span> La cale aux trésors</div><p class="drawer-note">Dépense ton or pour entretenir ton navire et renforcer ton équipement.</p>
+      <div class="shop-item"><span><b>Booster du large</b><br><small>Carte, équipement ou butin surprise</small></span><button id="buy-booster">45 ✦</button></div>
+      <div class="shop-item"><span><b>Réparation de coque</b><br><small>Restaure jusqu’à 8 points de coque</small></span><button id="buy-repair">30 ✦</button></div>
+      <div class="shop-item"><span><b>Renforcer l’arme de mêlée</b><br><small>${state.melee.name} · +2 dégâts (max. 20)</small></span><button id="upgrade-melee">80 ✦</button></div>
+      <div class="shop-item"><span><b>Renforcer l’arme à distance</b><br><small>${state.ranged.name} · +2 dégâts (max. 20)</small></span><button id="upgrade-ranged">80 ✦</button></div>
+      <p class="drawer-note">Boosters ouverts : ${state.ownedBoosters} · Solde : ${state.gold} pièces</p>`;
+    const buy=(action,reveal=false)=>{const result=action();toast(result.message);if(result.ok&&reveal)game.showBoosterReveal(result.reward);renderCards(state);renderDrawer(state);};
+    $('buy-booster').onclick=()=>buy(()=>new ShopSystem(state).buyBooster(),true);
+    $('buy-repair').onclick=()=>buy(()=>new ShopSystem(state).buyRepair());
+    $('upgrade-melee').onclick=()=>buy(()=>new ShopSystem(state).upgradeWeapon('melee'));
+    $('upgrade-ranged').onclick=()=>buy(()=>new ShopSystem(state).upgradeWeapon('ranged'));
   } else if(drawer.dataset.tab==='crew'){
     drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">♟</span> Ton équipage</div>
       <div class="crew-item"><div style="display:flex;align-items:center;gap:9px"><span class="crew-avatar">♜</span><span><b id="crew-captain-name"></b><br><small>Capitaine · courageux et curieux</small></span></div><b>ACTIF</b></div>
