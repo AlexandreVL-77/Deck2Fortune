@@ -209,9 +209,18 @@ export class ThreeWorld {
     // Nuage flottant + ombre ronde et douce sur l'eau
     const shadow=new THREE.Mesh(this.cloudShadowGeo,this.cloudShadowMat);
     shadow.position.set(.14,-.175,-.1); shadow.scale.set(1.1,1,.82); group.add(shadow);
-    const cloud=new THREE.Group(); cloud.position.y=1.28; cloud.scale.setScalar(1.45); cloud.userData.phase=tile.q*.9+tile.r*1.7; group.add(cloud);
-    // Nuages denses et opaques : ils masquent les cases situees dessous.
-    for(const [x,y,z,s] of [[-.42,0,.02,.42],[0,.12,0,.52],[.42,0,-.02,.42],[.12,-.04,.38,.36],[-.18,-.02,-.34,.36],[.48,.08,.30,.30],[-.48,.08,-.28,.30]]){
+    const cloud=new THREE.Group(); cloud.position.y=1.28; cloud.scale.setScalar(1.7); cloud.userData.phase=tile.q*.9+tile.r*1.7; group.add(cloud);
+    // Une masse nuageuse continue sous les bourrelets : elle bouche les trous
+    // et deborde sur les cases voisines pour cacher entierement le terrain.
+    const canopy=new THREE.Mesh(
+      new THREE.SphereGeometry(1,18,12),
+      this.material('#e5edf2')
+    );
+    canopy.scale.set(1.25,.24,1.25);
+    canopy.position.set(0,-.12,0);
+    cloud.add(canopy);
+    // Bourrelets volontairement rapproches et chevauches pour former un seul banc.
+    for(const [x,y,z,s] of [[-.48,0,.02,.48],[0,.12,0,.56],[.48,0,-.02,.48],[.12,-.04,.40,.43],[-.20,-.02,-.38,.42],[.52,.08,.34,.38],[-.52,.08,-.30,.38],[0,.02,.62,.38],[0,.02,-.62,.38]]){
       const puff=new THREE.Mesh(new THREE.SphereGeometry(s,14,10),this.material(y>.05?'#ffffff':'#e5edf2'));
       puff.scale.y=.82; puff.position.set(x,y,z); cloud.add(puff);
     }
