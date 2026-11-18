@@ -192,7 +192,7 @@ export class ThreeWorld {
       const ka=vertexKey(a),kb=vertexKey(b),key=ka<kb?ka+'|'+kb:kb+'|'+ka;
       if(edgeMap.has(key))edgeMap.delete(key);else edgeMap.set(key,{a,b});
     };
-    const radius=HEX_SIZE*.98;
+    const radius=HEX_SIZE;
     for(const [q,r] of cells){
       const cx=HEX_SIZE*Math.sqrt(3)*(q+r/2),cz=HEX_SIZE*1.5*r;
       const vertices=[];
@@ -240,9 +240,18 @@ export class ThreeWorld {
     const grassGeo=extrude(roundedShape(.91),.13,.075,.055);
     const grass=new THREE.Mesh(grassGeo,this.material('#79bd70',true));
     grass.position.y=.22;grass.castShadow=true;grass.receiveShadow=true;land.add(grass);
+    // Les décors forment un groupe compact, repositionné différemment sur chaque île.
+    // La réduction garantit une marge avec la côte, même sur les formes de 5 cases.
+    const decor=new THREE.Group();
+    const randomA=Math.abs(Math.sin(tile.q*127.1+tile.r*311.7)*43758.5453)%1;
+    const randomB=Math.abs(Math.sin(tile.q*269.5+tile.r*183.3+17)*24634.6345)%1;
+    decor.scale.setScalar(.66+randomA*.07);
+    decor.rotation.y=randomB*Math.PI*2;
+    decor.position.set((randomA-.5)*.22,0,(randomB-.5)*.22);
+    land.add(decor);
     const prop=(geo,mat,x,y,z,sx=1,sy=1,sz=1)=>{
       const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.scale.set(sx,sy,sz);
-      m.castShadow=true;m.receiveShadow=true;land.add(m);return m;
+      m.castShadow=true;m.receiveShadow=true;decor.add(m);return m;
     };
     const wood=this.material('#93603d',true),darkWood=this.material('#68442f',true);
     const roof=this.material('#b85e43',true),cream=this.material('#f5dfb2',true);
@@ -281,9 +290,9 @@ export class ThreeWorld {
     prop(new THREE.SphereGeometry(.09,7,5),this.material('#ffd16a'),1.55,.78,.55);
     prop(new THREE.ConeGeometry(.18,.28,6),this.material('#e98a45'),-.05,.40,1.42);
     prop(new THREE.ConeGeometry(.10,.20,6),this.material('#ffe08a'),-.05,.52,1.42);
-    this.addPalm(land,-1.55,-.15,.92,.30);
-    this.addPalm(land,1.48,1.25,.78,.30);
-    this.addPalm(land,.45,-1.82,.72,.30);
+    this.addPalm(decor,-1.55,-.15,.92,.30);
+    this.addPalm(decor,1.48,1.25,.78,.30);
+    this.addPalm(decor,.45,-1.82,.72,.30);
     // Petite jetée intégrée à la côte du groupe de cases.
     prop(new THREE.BoxGeometry(.34,.10,.58),wood,0,.02,1.88);
     for(const x of [-.17,.17])for(const z of [1.66,2.10])prop(new THREE.CylinderGeometry(.045,.055,.42,6),darkWood,x,.17,z);
