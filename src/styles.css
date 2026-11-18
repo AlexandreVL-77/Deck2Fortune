@@ -196,3 +196,26 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 @media(max-width:380px){.bottom-nav{gap:2px}.nav-button{padding-left:5px;padding-right:5px}.nav-button small{font-size:7px}}
 
 .card-emoji-art{display:block;font-size:21px;line-height:27px;filter:drop-shadow(0 2px 1px #b98a4b)}
+
+/* Deck builder: card previews, rarity and copy controls */
+.deck-count{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.deck-count-meter{height:5px;flex:1 0 100%;background:#d8bd91;border-radius:9px;overflow:hidden}
+.deck-count-meter i{display:block;height:100%;background:linear-gradient(90deg,#5c9c79,#d5a34e);border-radius:9px}
+.deck-card-list{display:grid;gap:7px;max-height:260px;overflow:auto;padding:2px 2px 5px}
+.deck-card-row{display:flex;align-items:center;gap:8px;min-height:82px;padding:6px;border:1.5px solid #d5b17e;border-radius:12px;background:#fff9eb;color:#6a4630;box-shadow:0 2px 0 #c8a16b}
+.deck-card-row.in-deck{border-color:#b77b3f;background:linear-gradient(100deg,#fff0c9,#f7e2b5)}
+.deck-card-row.not-owned{opacity:.55}
+.deck-card-art{width:48px;height:67px;object-fit:cover;border-radius:5px;border:1px solid #b98a4b;box-shadow:0 2px 4px #563b2b44}
+.deck-card-emoji{display:grid;place-items:center;width:48px;height:67px;border-radius:5px;background:#f0d8a7;font-size:24px}
+.deck-card-info{display:grid;gap:3px;min-width:0;flex:1}
+.deck-card-info b{font-size:10px}.deck-card-info small{font-size:8px;line-height:1.2;color:#987653}
+.deck-rarity{font-size:7px;font-weight:900;letter-spacing:.5px;color:#987653}
+.deck-rarity.rare{color:#387b9d}.deck-rarity.epic{color:#8756a6}
+.deck-card-controls{display:flex;align-items:center;gap:4px}
+.deck-card-controls button{width:25px;height:27px;border-radius:7px;background:linear-gradient(#e8b878,#c98c52);color:#fff8e2;font-weight:900;box-shadow:0 2px #8a5632}
+.deck-card-controls button:disabled{opacity:.3;box-shadow:none}
+.deck-card-controls b{min-width:12px;text-align:center;font-size:10px}
+.card-art-image{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.card:has(.card-art-image) .card-art{overflow:hidden;border-radius:7px}
+.card:has(.card-art-image) .card-art-image{border-radius:5px}
+.identity-save:disabled{opacity:.45;box-shadow:none}
