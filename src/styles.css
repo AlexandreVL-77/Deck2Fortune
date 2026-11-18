@@ -194,3 +194,5 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 .deck-choice-state{font-size:16px;font-weight:900;color:#a66b3c}
 .deck-choice.included .deck-choice-state{color:#39836b}
 @media(max-width:380px){.bottom-nav{gap:2px}.nav-button{padding-left:5px;padding-right:5px}.nav-button small{font-size:7px}}
+
+.card-emoji-art{display:block;font-size:21px;line-height:27px;filter:drop-shadow(0 2px 1px #b98a4b)}
