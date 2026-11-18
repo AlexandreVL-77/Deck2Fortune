@@ -462,6 +462,10 @@ export class ThreeWorld {
         this.state.leaveStorm();
         window.dispatchEvent(new CustomEvent('pirate-toast',{detail:'Navigation réussie !'}));
       }
+      if(!this.state.inCombat&&hexDistance(this.state.player,this.state.enemy)<=1){
+        this.state.startCombat();
+        window.dispatchEvent(new CustomEvent('pirate-toast',{detail:'Un corsaire des brumes approche ! Prépare tes cartes !'}));
+      }
     }else{
       const message=tile.kind==='island'?'Île découverte : +5 or !':'Volcan découvert : +12 or !';
       const rewardKey=this.key(tile.q,tile.r);
