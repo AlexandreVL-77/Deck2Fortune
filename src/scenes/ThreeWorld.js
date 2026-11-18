@@ -213,16 +213,12 @@ export class ThreeWorld {
       if(chain.length>=4)chains.push(chain.slice(0,-1));
     }
     const outline=chains.sort((a,b)=>b.length-a.length)[0]||[[-1,-1],[1,-1],[1,1],[-1,1]];
+    // Silhouette en vrais segments : on conserve les facettes hexagonales low-poly.
     const roundedShape=(scale)=>{
       const points=outline.map(([x,z])=>[x*scale,z*scale]);
       const shape=new THREE.Shape();
-      const midpoint=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
-      const first=midpoint(points[points.length-1],points[0]);
-      shape.moveTo(first[0],first[1]);
-      for(let i=0;i<points.length;i++){
-        const current=points[i],next=points[(i+1)%points.length],mid=midpoint(current,next);
-        shape.quadraticCurveTo(current[0],current[1],mid[0],mid[1]);
-      }
+      shape.moveTo(points[0][0],points[0][1]);
+      for(let i=1;i<points.length;i++)shape.lineTo(points[i][0],points[i][1]);
       shape.closePath();
       return shape;
     };
@@ -253,7 +249,7 @@ export class ThreeWorld {
     for(let i=1;i<innerPoints.length;i++)innerPath.lineTo(innerPoints[i].x,innerPoints[i].y);
     innerPath.closePath();
     shoreline.holes.push(innerPath);
-    const foamGeo=new THREE.ShapeGeometry(shoreline,16);
+    const foamGeo=new THREE.ShapeGeometry(shoreline,1);
     foamGeo.rotateX(-Math.PI/2);
     const foam=new THREE.Mesh(foamGeo,this.foamMat);
     foam.position.y=-.165;
@@ -264,7 +260,7 @@ export class ThreeWorld {
     // Quelques bosses de terrain arrondies donnent du volume sans créer de murs.
     const hillMat=this.material('#68b96d');
     const hill=(x,z,sx,sy,sz)=>{
-      const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,16,10),hillMat);
+      const mesh=new THREE.Mesh(new THREE.DodecahedronGeometry(1,0),hillMat);
       mesh.position.set(x,.22,z);mesh.scale.set(sx,sy,sz);
       mesh.castShadow=true;mesh.receiveShadow=true;land.add(mesh);
     };
