@@ -1,5 +1,6 @@
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
+import { CARD_LIBRARY } from '../data/cards.js';
 const $=id=>document.getElementById(id);
 let toastTimer;
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);}
@@ -28,12 +29,12 @@ export function renderCards(state){
 export function renderDrawer(state){
   const drawer=$('drawer');if(drawer.dataset.tab==='shop'){
     drawer.innerHTML=`<div class="drawer-title"><span class="drawer-symbol">✧</span> La cale aux trésors</div><p class="drawer-note">Dépense ton or pour entretenir ton navire et renforcer ton équipement.</p>
-      <div class="shop-item"><span><b>Booster du large</b><br><small>Carte, équipement ou butin surprise</small></span><button id="buy-booster">45 ✦</button></div>
+      <div class="shop-item"><span><b>Booster du large</b><br><small>5 cartes à collectionner · 1 rare garantie</small></span><button id="buy-booster">45 ✦</button></div>
       <div class="shop-item"><span><b>Réparation de coque</b><br><small>Restaure jusqu’à 8 points de coque</small></span><button id="buy-repair">30 ✦</button></div>
       <div class="shop-item"><span><b>Renforcer l’arme de mêlée</b><br><small>${state.melee.name} · +2 dégâts (max. 20)</small></span><button id="upgrade-melee">80 ✦</button></div>
       <div class="shop-item"><span><b>Renforcer l’arme à distance</b><br><small>${state.ranged.name} · +2 dégâts (max. 20)</small></span><button id="upgrade-ranged">80 ✦</button></div>
       <p class="drawer-note">Boosters ouverts : ${state.ownedBoosters} · Solde : ${state.gold} pièces</p>`;
-    const buy=(action,reveal=false)=>{const result=action();toast(result.message);if(result.ok&&reveal)game.showBoosterReveal(result.reward);renderCards(state);renderDrawer(state);};
+    const buy=(action,reveal=false)=>{const result=action();toast(result.message);if(result.ok&&reveal)game.showBoosterReveal(result.cards);renderCards(state);renderDrawer(state);};
     $('buy-booster').onclick=()=>buy(()=>new ShopSystem(state).buyBooster(),true);
     $('buy-repair').onclick=()=>buy(()=>new ShopSystem(state).buyRepair());
     $('upgrade-melee').onclick=()=>buy(()=>new ShopSystem(state).upgradeWeapon('melee'));
@@ -63,7 +64,9 @@ export function renderDrawer(state){
       if(state.saveIdentity(ship,captain))toast('Ton identité de capitaine est enregistrée !');
     });
   } else if(drawer.dataset.tab==='arsenal'){
-    drawer.innerHTML=`<div class="drawer-title">⚔ Arsenal du capitaine</div><div class="crew-item"><span><b>${state.melee.name}</b><br><small>Arme de mêlée · coups rapprochés</small></span><b>${state.melee.damage} ATQ</b></div><div class="crew-item"><span><b>${state.ranged.name}</b><br><small>Arme à distance · tir précis</small></span><b>${state.ranged.damage} ATQ</b></div><p class="drawer-note">Améliore ton équipement au fil de tes explorations.</p>`;
+    const collection=CARD_LIBRARY.map(card=>`<div class="crew-item"><span>${card.icon} <b>${card.name}</b><br><small>${card.type==='attack'?'Attaque':card.type==='move'?'Navigation':'Soutien'}</small></span><b>×${state.cardCollection[card.id]||0}</b></div>`).join('');
+    const total=Object.values(state.cardCollection).reduce((sum,count)=>sum+count,0);
+    drawer.innerHTML=`<div class="drawer-title">⚔ Arsenal du capitaine</div><div class="crew-item"><span><b>${state.melee.name}</b><br><small>Arme de mêlée · coups rapprochés</small></span><b>${state.melee.damage} ATQ</b></div><div class="crew-item"><span><b>${state.ranged.name}</b><br><small>Arme à distance · tir précis</small></span><b>${state.ranged.damage} ATQ</b></div><p class="drawer-note">Améliore ton équipement au fil de tes explorations.</p><div class="drawer-title" style="margin-top:12px">Collection de cartes · ${total}</div>${collection}`;
   } else drawer.innerHTML='';
   drawer.classList.toggle('hidden',!drawer.dataset.tab||drawer.dataset.tab==='map');
 }

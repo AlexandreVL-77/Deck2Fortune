@@ -1,26 +1,27 @@
+import { CARD_LIBRARY } from '../data/cards.js';
+
 const BOOSTER_PRICE=45;
 const REPAIR_PRICE=30;
 const WEAPON_UPGRADE_PRICE=80;
 const MAX_WEAPON_DAMAGE=20;
-const LOOT=[
-  {type:'gold',amount:25,label:'25 pièces d’or'},
-  {type:'heal',amount:6,label:'Réparation de coque'},
-  {type:'weapon',id:'boardingAxe',label:'Hache d’abordage'},
-  {type:'weapon',id:'flintlock',label:'Pistolet à silex'}
-];
+const RARE_CARDS=new Set(['broadside','cutlass','pistol']);
+
+function drawCard(guaranteedRare=false){
+  const pool=guaranteedRare?CARD_LIBRARY.filter(card=>RARE_CARDS.has(card.id)):CARD_LIBRARY;
+  const card=pool[Math.floor(Math.random()*pool.length)];
+  return {...card,rarity:RARE_CARDS.has(card.id)?'rare':'common'};
+}
+
 export class ShopSystem {
   constructor(state){this.state=state;}
   buyBooster(){
     if(!this.state.spendGold(BOOSTER_PRICE))return {ok:false,message:'Pas assez de pièces !'};
-    const reward=LOOT[Math.floor(Math.random()*LOOT.length)];
-    if(reward.type==='gold')this.state.gold+=reward.amount;
-    if(reward.type==='heal')this.state.hp=Math.min(this.state.maxHp,this.state.hp+reward.amount);
-    if(reward.type==='weapon'){
-      const slot=reward.id==='boardingAxe'?'melee':'ranged';
-      this.state[slot]={...this.state[slot],...({boardingAxe:{name:'Hache d’abordage',damage:9,luck:78,maxCooldown:2,cooldown:0},flintlock:{name:'Pistolet à silex',damage:5,luck:85,maxCooldown:1,cooldown:0}}[reward.id])};
-    }
-    this.state.ownedBoosters++;this.state.emit();
-    return {ok:true,message:`Booster ouvert : ${reward.label} !`,reward:reward.label};
+    const cards=Array.from({length:4},()=>drawCard());
+    cards.push(drawCard(true));
+    cards.forEach(card=>{this.state.cardCollection[card.id]=(this.state.cardCollection[card.id]||0)+1;});
+    this.state.ownedBoosters++;
+    this.state.emit();
+    return {ok:true,message:'Booster ouvert : 5 cartes ajoutées à ta collection !',cards};
   }
   buyRepair(){
     if(this.state.hp>=this.state.maxHp)return {ok:false,message:'Ta coque est déjà en parfait état.'};

@@ -1,4 +1,5 @@
 import './styles.css';
+import './booster.css';
 import { GameState } from './systems/GameState.js';
 import { ShopSystem } from './systems/ShopSystem.js';
 import { renderCards, renderDrawer, bindUI } from './ui/interface.js';
@@ -32,7 +33,7 @@ function homePurchase(action,reveal=false){
   const result=action();
   updateHomeStats();
   document.getElementById('home-shop-feedback').textContent=result.message;
-  if(result.ok&&reveal){shopPanel.hidden=true;world.showBoosterReveal(result.reward);}
+  if(result.ok&&reveal){shopPanel.hidden=true;world.showBoosterReveal(result.cards);}
 }
 document.getElementById('home-buy-booster').addEventListener('click',()=>homePurchase(()=>new ShopSystem(state).buyBooster(),true));
 document.getElementById('home-buy-repair').addEventListener('click',()=>homePurchase(()=>new ShopSystem(state).buyRepair()));

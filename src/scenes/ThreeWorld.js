@@ -278,33 +278,70 @@ export class ThreeWorld {
     this.rainSeeds=Array.from({length:180},()=>({x:(Math.random()-.5)*15,z:(Math.random()-.5)*15,y:Math.random()*9,speed:5+Math.random()*5}));
   }
   createBoosterEffects(){
-    this.boosterOverlay=document.createElement('div');this.boosterOverlay.className='booster-reveal';
-    this.boosterOverlay.innerHTML='<div class="booster-kicker">OBJET MYSTÈRE DÉTECTÉ</div><strong class="booster-title">CAPSULE DU LARGE</strong><div class="booster-reward"></div><button type="button">RÉCUPÉRER</button>';
+    this.boosterOverlay=document.createElement('div');
+    this.boosterOverlay.className='booster-reveal';
     this.root.appendChild(this.boosterOverlay);
-    this.boosterOverlay.querySelector('button').addEventListener('click',()=>{this.boosterOverlay.classList.remove('visible');if(this.boosterModel){this.scene.remove(this.boosterModel);this.boosterModel=null;}});
-    this.boosterModel=null;this.boosterStartedAt=0;
+    this.boosterModel=null;
+    this.boosterStartedAt=0;
   }
-  showBoosterReveal(label){
-    if(this.boosterModel)this.scene.remove(this.boosterModel);
-    const group=new THREE.Group(),shell=new THREE.Mesh(new THREE.OctahedronGeometry(.62,1),new THREE.MeshStandardMaterial({color:'#192d4c',metalness:.85,roughness:.2,emissive:'#245d9b',emissiveIntensity:1.5}));
-    group.add(shell);
-    const ringMat=new THREE.MeshStandardMaterial({color:'#69f5ed',metalness:.8,roughness:.16,emissive:'#19b9d2',emissiveIntensity:2});
-    for(let i=0;i<3;i++){const ring=new THREE.Mesh(new THREE.TorusGeometry(.72+i*.09,.035,8,48),ringMat);ring.rotation.set(i*.8,i*1.1,0);group.add(ring);}
-    const core=new THREE.Mesh(new THREE.IcosahedronGeometry(.2,1),new THREE.MeshBasicMaterial({color:'#fff2a5'}));group.add(core);
-    group.position.set(this.target.x,1.7,this.target.z);group.scale.setScalar(.01);this.scene.add(group);
-    this.boosterModel=group;this.boosterStartedAt=performance.now()*.001;
-    this.boosterOverlay.querySelector('.booster-reward').textContent=label;
-    this.boosterOverlay.classList.remove('visible');
-    this.boosterOverlay.classList.add('charging');
-  }
-  animateBooster(t){
-    if(!this.boosterModel)return;
-    const age=t-this.boosterStartedAt;
-    this.boosterModel.rotation.y+=.025;this.boosterModel.rotation.x=Math.sin(t*2)*.08;
-    const scale=age<.65?Math.max(.01,age/.65):age<1.35?1+Math.sin(age*19)*.08:Math.max(.01,1-(age-1.35)*2.2);
-    this.boosterModel.scale.setScalar(scale);
-    if(age>1.35&&!this.boosterOverlay.classList.contains('visible')){this.boosterOverlay.classList.remove('charging');this.boosterOverlay.classList.add('visible');}
-    if(age>1.7){this.scene.remove(this.boosterModel);this.boosterModel=null;}
+  showBoosterReveal(cards){
+    const packCards=Array.isArray(cards)?cards:[];
+    if(!packCards.length)return;
+    const typeLabels={attack:'ATTAQUE',move:'NAVIGATION',heal:'SOUTIEN'};
+    this.boosterOverlay.innerHTML=`
+      <div class="booster-stage">
+        <div class="booster-kicker">ÉDITION · LES MERS OUBLIÉES</div>
+        <strong class="booster-title">NOUVEAU BOOSTER !</strong>
+        <div class="booster-pack" aria-label="Booster scellé">
+          <div class="booster-pack-emblem">✦</div>
+          <div class="booster-pack-brand">DECK<span>2</span><br>FORTUNE</div>
+          <div class="booster-pack-caption">5 CARTES À COLLECTIONNER</div>
+        </div>
+        <div class="booster-subtitle">Un paquet de 5 cartes t’attend…</div>
+        <button class="booster-action" type="button">OUVRIR LE BOOSTER</button>
+      </div>`;
+    this.boosterOverlay.classList.add('visible');
+    const openButton=this.boosterOverlay.querySelector('.booster-action');
+    openButton.addEventListener('click',()=>{
+      const pack=this.boosterOverlay.querySelector('.booster-pack');
+      pack?.classList.add('opening');
+      openButton.disabled=true;
+      window.setTimeout(()=>showCard(0,false),560);
+    },{once:true});
+    const showCard=(index,revealed)=>{
+      const card=packCards[index];
+      const stars=card.rarity==='rare'?'★★':'★';
+      const rarity=card.rarity==='rare'?'RARE':'COMMUNE';
+      const stat=card.type==='attack'?`${card.power} DÉGÂTS · PORTÉE ${card.range}`:card.type==='move'?`DÉPLACEMENT · ${card.distance} CASE${card.distance>1?'S':''}`:`RÉCUPÉRATION · ${card.power} PV`;
+      this.boosterOverlay.innerHTML=`
+        <div class="booster-stage">
+          <div class="booster-kicker">OUVERTURE DU BOOSTER</div>
+          <strong class="booster-title">TA COLLECTION</strong>
+          <div class="booster-card-wrap">
+            <div class="booster-card ${revealed?'is-revealed':''} ${card.rarity==='rare'?'rarity-rare':''}">
+              <div class="booster-card-back"><strong>DECK<span style="color:#f6c75f">2</span>FORTUNE</strong><b>✦</b><small>LES MERS OUBLIÉES</small></div>
+              <div class="booster-card-front ${card.rarity==='rare'?'rarity-rare':''}">
+                <div class="booster-card-top"><span>${rarity}</span><span class="booster-card-stars">${stars}</span></div>
+                <div class="booster-card-art">${card.icon}</div>
+                <h3>${card.name}</h3>
+                <span class="booster-card-type">${typeLabels[card.type]||'CARTE'}</span>
+                <p>${card.description}</p>
+                <div class="booster-card-footer">${stat}</div>
+                <div class="booster-card-footer">DECK2FORTUNE · COLLECTION</div>
+              </div>
+            </div>
+          </div>
+          <div class="booster-progress">${packCards.map((_,i)=>`<i class="${i<index||(i===index&&revealed)?'done':''}"></i>`).join('')}</div>
+          <div class="booster-subtitle">${revealed?`Carte ${index+1}/${packCards.length} ajoutée à ta collection`:`Carte ${index+1}/${packCards.length} · découvre-la !`}</div>
+          <button class="booster-action" type="button">${revealed?(index===packCards.length-1?'TERMINER':'CARTE SUIVANTE'):'RÉVÉLER LA CARTE'}</button>
+        </div>`;
+      const button=this.boosterOverlay.querySelector('.booster-action');
+      button.addEventListener('click',()=>{
+        if(!revealed){showCard(index,true);return;}
+        if(index<packCards.length-1){showCard(index+1,false);return;}
+        this.boosterOverlay.classList.remove('visible');
+      });
+    };
   }
   syncShipToPlayer(){
     const destination=this.tilePosition(this.state.player.q,this.state.player.r);
