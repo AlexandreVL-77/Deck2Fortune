@@ -35,7 +35,7 @@ export class CombatSystem {
       return { ok: true, message: 'Manœuvre effectuée.' };
     }
     if (card.type === 'blessing') {
-      s.luckBoostTurns = 3;
+      s.luckBoostTurns = 2;
       s.negativeEffects = [];
       this.replaceCard(index);
       s.emit();
