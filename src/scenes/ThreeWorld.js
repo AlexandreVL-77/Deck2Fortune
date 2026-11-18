@@ -487,7 +487,7 @@ export class ThreeWorld {
     if(!this.state.sunk)sp.y=SHIP_Y+Math.sin(t*1.7)*.03;
     let dh=this.heading-this.ship.rotation.y; dh=Math.atan2(Math.sin(dh),Math.cos(dh)); this.ship.rotation.y+=dh*.12;
     this.ship.rotation.z=Math.sin(t*.8)*.03; this.ship.rotation.x=Math.sin(t*1.1)*.025;
-    this.animateWorld(t);this.animateStorm(t,dt);this.animateSinking(t);this.animateBooster(t);
+    this.animateWorld(t);this.animateStorm(t,dt);this.animateSinking(t);
     if(this.home){this.target.x=this.state.camera.x||0;this.target.z=this.state.camera.z||0;this.updateCamera();}
     this.renderer.render(this.scene,this.camera);
   }
