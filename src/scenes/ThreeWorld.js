@@ -369,6 +369,8 @@ export class ThreeWorld {
     const direction=destination.clone().sub(this.shipTarget);
     if(direction.lengthSq()>.001)this.heading=Math.atan2(direction.x,direction.z);
     this.shipTarget.copy(destination);
+    // A ship movement recenters the camera; manual panning is temporary.
+    this.cameraPanOffset.set(0,0,0);
     this.updateHighlights();
   }
   resetWorld(){
@@ -447,6 +449,8 @@ export class ThreeWorld {
       const from=this.shipTarget.clone();
       this.state.player={q:tile.q,r:tile.r};
       this.shipTarget.copy(this.tilePosition(tile.q,tile.r));
+      // Smoothly return to the default ship-centered view after navigation.
+      this.cameraPanOffset.set(0,0,0);
       this.state.camera={x:this.target.x,z:this.target.z};
       const d=this.shipTarget.clone().sub(from);
       if(d.lengthSq()>.01)this.heading=Math.atan2(d.x,d.z);
