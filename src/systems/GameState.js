@@ -75,7 +75,7 @@ export class GameState {
     this.inStorm = !!saved?.inStorm && !this.sunk;
     this.enemy = { q: 2, r: -1, hp: 18, maxHp: 18, name: 'Corsaire des Brumes' };
     this.cardCollection = Object.fromEntries(CARD_LIBRARY.map(card => [card.id, safeInteger(saved?.cardCollection?.[card.id], 0, 0, Number.MAX_SAFE_INTEGER)]));
-    if (Object.values(this.cardCollection).every(count => count === 0)) CARD_LIBRARY.forEach(card => { this.cardCollection[card.id] = 1; });
+    CARD_LIBRARY.forEach(card => { if (this.cardCollection[card.id] === 0) this.cardCollection[card.id] = 1; });
     try {
       const savedDeck = JSON.parse(localStorage.getItem('deck2fortune.deck') || 'null');
       this.deck = Array.isArray(savedDeck) ? savedDeck.filter(id => CARD_LIBRARY.some(card => card.id === id)).slice(0, DECK_MAX_SIZE) : [...DEFAULT_DECK];
@@ -108,8 +108,10 @@ export class GameState {
     }
     this.deck = [...ids];
     try { localStorage.setItem('deck2fortune.deck', JSON.stringify(this.deck)); } catch {}
-    this.drawPile = []; this.discardPile = [];
-    this.hand = createHand(this.deck); this.selectedCard = 0;
+    if (!this.inCombat) {
+      this.drawPile = []; this.discardPile = [];
+      this.hand = createHand(this.deck); this.selectedCard = 0;
+    }
     this.emit(); return true;
   }
   drawFromDeck(count = 1) {
