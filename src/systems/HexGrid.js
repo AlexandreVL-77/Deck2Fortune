@@ -37,8 +37,8 @@ export function makeTile(seed,q,r){
   });
   if(coveredByCloud)kind='storm';
   else if(belongsToIslandCluster(seed,q,r,near))kind='archipelago';
-  else if(n>.98&&near>3)kind='island';
   else if(n>.9997&&near>5)kind='volcano';
+  else if(n>.98&&near>3)kind='island';
   return{q,r,kind};
 }
 export function makeIslandMap(radius=7,seed=1){const tiles=[];for(let q=-radius;q<=radius;q++)for(let r=-radius;r<=radius;r++)if(hexDistance({q,r},{q:0,r:0})<=radius)tiles.push(makeTile(seed,q,r));return tiles;}
