@@ -9,7 +9,7 @@ const RARE_CARDS=new Set(['broadside','cutlass','pistol']);
 function drawCard(guaranteedRare=false){
   const pool=guaranteedRare?CARD_LIBRARY.filter(card=>RARE_CARDS.has(card.id)):CARD_LIBRARY;
   const card=pool[Math.floor(Math.random()*pool.length)];
-  return {...card,rarity:RARE_CARDS.has(card.id)?'rare':'common'};
+  return {...card};
 }
 
 export class ShopSystem {
