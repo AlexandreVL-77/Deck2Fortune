@@ -13,7 +13,7 @@ export function makeTile(seed,q,r){
     return hexDistance({q:aq,r:ar},{q:0,r:0})>2&&hash(seed,aq,ar)>.997;
   });
   if(coveredByCloud)kind='storm';
-  else if(n>.955&&near>2)kind='volcano';else if(n>.79&&near>1)kind='island';
+  else if(n>.99&&near>3)kind='volcano';else if(n>.92&&near>2)kind='island';
   return{q,r,kind};
 }
 export function makeIslandMap(radius=7,seed=1){const tiles=[];for(let q=-radius;q<=radius;q++)for(let r=-radius;r<=radius;r++)if(hexDistance({q,r},{q:0,r:0})<=radius)tiles.push(makeTile(seed,q,r));return tiles;}
