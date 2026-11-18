@@ -13,11 +13,11 @@ const ISLAND_SHAPES=[
 function rotateAxial([q,r],turns){for(let i=0;i<turns;i++)[q,r]=[-r,q+r];return[q,r];}
 function findArchipelagoOrigin(seed,q,r,near){
   if(near<=3)return null;
-  // 0.5% chance per eligible cluster origin; each origin creates a connected 3–5 tile archipelago.
+  // 0.8% chance per eligible cluster origin; each origin creates one large hexagonal island.
   for(let oq=q-2;oq<=q+2;oq++)for(let or=r-2;or<=r+2;or++){
     if(hexDistance({q:oq,r:or},{q,r})>2||hexDistance({q:oq,r:or},{q:0,r:0})<=3)continue;
     const roll=hash(seed,oq,or);
-    if(roll<.995)continue;
+    if(roll<.992)continue;
     const shapeIndex=Math.floor(hash(seed^0x51ed270b,oq,or)*ISLAND_SHAPES.length);
     const turns=Math.floor(hash(seed^0x2c1b3c6d,oq,or)*6);
     const shape=ISLAND_SHAPES[shapeIndex].map(p=>rotateAxial(p,turns));
@@ -28,7 +28,7 @@ function findArchipelagoOrigin(seed,q,r,near){
 
 export function makeTile(seed,q,r){
   if(q===0&&r===0)return{q,r,kind:'sea'};
-  const n=hash(seed,q,r),near=hexDistance({q,r},{q:0,r:0});let kind='sea';
+  const n=hash(seed,q,r),near=hexDistance({q,r},{q:0,r:0});\n  const islandRoll=hash(seed^0x1b873593,q,r),volcanoRoll=hash(seed^0x6d2b79f5,q,r);let kind='sea';
   // Rare cloud banks remain independent from island generation.
   const cloudShape=[[0,0],[1,0],[-1,0],[0,1],[0,-1]];
   const coveredByCloud=cloudShape.some(([dq,dr])=>{
