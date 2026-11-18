@@ -1,4 +1,4 @@
-import { createHand, CARD_LIBRARY } from '../data/cards.js';
+import { createHand, CARD_LIBRARY, DEFAULT_DECK } from '../data/cards.js';
 import { WEAPONS } from '../data/weapons.js';
 
 const IDENTITY_KEY = 'deck2fortune.identity';
@@ -74,7 +74,14 @@ export class GameState {
     this.sunk = !!saved?.sunk || this.hp <= 0;
     this.inStorm = !!saved?.inStorm && !this.sunk;
     this.enemy = { q: 2, r: -1, hp: 18, maxHp: 18, name: 'Corsaire des Brumes' };
-    this.hand = createHand();
+    try {
+      const savedDeck = JSON.parse(localStorage.getItem('deck2fortune.deck') || 'null');
+      this.deck = Array.isArray(savedDeck) ? [...new Set(savedDeck.filter(id => CARD_LIBRARY.some(card => card.id === id)))].slice(0, 8) : [...DEFAULT_DECK];
+    } catch { this.deck = [...DEFAULT_DECK]; }
+    if (this.deck.length < 4) this.deck = [...DEFAULT_DECK];
+    this.hand = createHand(this.deck);
+    this.luckBoostTurns = 0;
+    this.negativeEffects = [];
     this.selectedCard = 0;
     this.inCombat = false;
     this.turn = 1;
@@ -85,6 +92,16 @@ export class GameState {
     this.cosmetics = { ship: 'seagull', captain: 'milo', weapon: 'brass' };
     this.stormDamageRate = 1.6;
     this.listeners = new Set();
+  }
+  setDeck(ids) {
+    const valid = [...new Set(ids.filter(id => CARD_LIBRARY.some(card => card.id === id)))].slice(0, 8);
+    if (valid.length < 4) return false;
+    this.deck = valid;
+    try { localStorage.setItem('deck2fortune.deck', JSON.stringify(this.deck)); } catch {}
+    this.hand = createHand(this.deck);
+    this.selectedCard = 0;
+    this.emit();
+    return true;
   }
   get gold() { return this._gold; }
   set gold(value) {
@@ -115,6 +132,8 @@ export class GameState {
     this.sunk = false;
     this.inCombat = false;
     this.enemy.hp = this.enemy.maxHp;
+    this.hand = createHand(this.deck);
+    this.selectedCard = 0;
     this.saveProgress();
   }
   saveIdentity(shipName, captainName) {
