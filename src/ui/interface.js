@@ -13,8 +13,9 @@ const art={
   pistol:'<svg viewBox="0 0 32 32"><path d="M5 10h21v6H15l-2 7H8l2-7H5z"/><path d="M20 16l3 4m-12-10v-3"/></svg>'
 };
 function cardArt(card){return art[card.id]||art.cutlass;}
+function cardTypeLabel(card){return card.type==='attack'?'ATTAQUE':card.type==='move'?'MOUVEMENT':card.type==='blessing'?'BÉNÉDICTION':'SOUTIEN';}
 export function renderCards(state){
-  $('cards').innerHTML=state.hand.map((c,i)=>`<button class="card ${i===state.selectedCard?'selected':''}" data-card="${i}" aria-label="${c.name}"><span class="card-type">${c.type==='attack'?'ATTAQUE':c.type==='move'?'MOUVEMENT':'SOUTIEN'}</span><span class="card-art">${cardArt(c)}</span><strong>${c.name}</strong><small>${c.type==='attack'?`${c.power} dégâts · portée ${c.range}`:c.description}</small></button>`).join('');
+  $('cards').innerHTML=state.hand.map((c,i)=>`<button class="card ${i===state.selectedCard?'selected':''}" data-card="${i}" aria-label="${c.name}"><span class="card-type">${cardTypeLabel(c)}</span><span class="card-art">${cardArt(c)}</span><strong>${c.name}</strong><small>${c.type==='attack'?`${c.power} dégâts · portée ${c.range}`:c.description}</small></button>`).join('');
   $('hp').textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;
   const stormWarning=$('storm-warning');if(stormWarning)stormWarning.classList.toggle('visible',state.inStorm&&!state.sunk);
   $('hud').classList.toggle('ship-sunk',!!state.sunk);$('gold').textContent=state.gold;$('ship').textContent=state.shipName;
@@ -63,8 +64,21 @@ export function renderDrawer(state){
       if(!ship||!captain){toast('Les deux noms sont nécessaires.');return;}
       if(state.saveIdentity(ship,captain))toast('Ton identité de capitaine est enregistrée !');
     });
+  } else if(drawer.dataset.tab==='deck'){
+    const selected=new Set(state.deck);
+    const deckCards=CARD_LIBRARY.map(card=>`<button class="deck-choice ${selected.has(card.id)?'included':''}" data-deck-card="${card.id}" aria-pressed="${selected.has(card.id)}"><span class="deck-choice-icon">${card.icon}</span><span class="deck-choice-copy"><b>${card.name}</b><small>${card.description}</small></span><span class="deck-choice-state">${selected.has(card.id)?'✓':'＋'}</span></button>`).join('');
+    drawer.innerHTML=`<div class="drawer-title">✦ Création de deck</div><p class="drawer-note">Compose ton paquet de 4 à 8 cartes. Les cartes choisies alimentent ta main pendant les combats.</p><div class="deck-count"><b id="deck-count">${state.deck.length} / 8</b><span>cartes sélectionnées · minimum 4</span></div><div class="deck-choices">${deckCards}</div><button id="save-deck" class="identity-save">SAUVEGARDER LE DECK <span>✦</span></button><small class="identity-hint">Ton deck est conservé sur cet appareil.</small>`;
+    let draft=new Set(state.deck);
+    drawer.querySelectorAll('[data-deck-card]').forEach(button=>button.onclick=()=>{
+      const id=button.dataset.deckCard;
+      if(draft.has(id)){if(draft.size<=4){toast('Un deck doit contenir au moins 4 cartes.');return;}draft.delete(id);}
+      else {if(draft.size>=8){toast('Ton deck est limité à 8 cartes.');return;}draft.add(id);}
+      button.classList.toggle('included',draft.has(id));button.setAttribute('aria-pressed',String(draft.has(id)));button.querySelector('.deck-choice-state').textContent=draft.has(id)?'✓':'＋';
+      $('deck-count').textContent=`${draft.size} / 8`;
+    });
+    $('save-deck').onclick=()=>{if(state.setDeck([...draft]))toast('Deck sauvegardé ! Ta prochaine main est prête.');};
   } else if(drawer.dataset.tab==='arsenal'){
-    const collection=CARD_LIBRARY.map(card=>`<div class="crew-item"><span>${card.icon} <b>${card.name}</b><br><small>${card.type==='attack'?'Attaque':card.type==='move'?'Navigation':'Soutien'}</small></span><b>×${state.cardCollection[card.id]||0}</b></div>`).join('');
+    const collection=CARD_LIBRARY.map(card=>`<div class="crew-item"><span>${card.icon} <b>${card.name}</b><br><small>${card.type==='attack'?'Attaque':card.type==='move'?'Navigation':card.type==='blessing'?'Bénédiction':'Soutien'}</small></span><b>×${state.cardCollection[card.id]||0}</b></div>`).join('');
     const total=Object.values(state.cardCollection).reduce((sum,count)=>sum+count,0);
     drawer.innerHTML=`<div class="drawer-title">⚔ Arsenal du capitaine</div><div class="crew-item"><span><b>${state.melee.name}</b><br><small>Arme de mêlée · coups rapprochés</small></span><b>${state.melee.damage} ATQ</b></div><div class="crew-item"><span><b>${state.ranged.name}</b><br><small>Arme à distance · tir précis</small></span><b>${state.ranged.damage} ATQ</b></div><p class="drawer-note">Améliore ton équipement au fil de tes explorations.</p><div class="drawer-title" style="margin-top:12px">Collection de cartes · ${total}</div>${collection}`;
   } else drawer.innerHTML='';
