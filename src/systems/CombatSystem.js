@@ -50,12 +50,7 @@ export class CombatSystem {
     return { ok: false, message: 'Action inconnue.' };
   }
   setCooldown(weapon) { weapon.cooldown = weapon.maxCooldown; }
-  replaceCard(index) {
-    const pool = (this.state.deck || []).map(id => CARD_LIBRARY.find(card => card.id === id)).filter(Boolean);
-    const source = pool.length ? pool : CARD_LIBRARY;
-    this.state.hand[index] = { ...source[Math.floor(Math.random() * source.length)] };
-    this.state.emit();
-  }
+  replaceCard(index) { this.state.discardCard(index); this.state.emit(); }
   enemyTurn() {
     const s = this.state;
     if (!s.inCombat || s.sunk) return;
