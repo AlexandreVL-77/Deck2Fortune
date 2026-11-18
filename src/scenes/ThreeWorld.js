@@ -13,7 +13,7 @@ export class ThreeWorld {
     this.root=root; this.state=state; this.home=true;
     this.tiles=[]; this.tileByKey=new Map(); this.highlightMeshes=[];
     this.ray=new THREE.Raycaster(); this.pointer=new THREE.Vector2();
-    this.drag=null; this.target=new THREE.Vector3(state.camera?.x||0,0,state.camera?.z||0); this.chunks=new Map();
+    this.drag=null; this.target=new THREE.Vector3(state.camera?.x||0,0,state.camera?.z||0); this.cameraPanOffset=new THREE.Vector3(); this.chunks=new Map();
     this.crests=[]; this.foams=[]; this.smokes=[]; this.cloudGroups=[]; this.heading=0;
     this.stormDamageAccumulator=0; this.lastFrameTime=0; this.sinkingStartedAt=null; this.lastLightning=0;
     this.toonGradient=this.makeToonGradient();
@@ -31,7 +31,10 @@ export class ThreeWorld {
     this.renderer.toneMappingExposure=1;
     this.renderer.domElement.style.touchAction='none';
     root.appendChild(this.renderer.domElement);
-    this.addLights(); this.createOcean(); this.createMap(); this.createShip(); this.createStormEffects(); this.createBoosterEffects();
+    this.addLights(); this.createOcean(); this.createMap(); this.createShip();
+    // Preserve the saved camera offset relative to the ship when resuming a game.
+    this.cameraPanOffset.set(this.target.x-this.shipTarget.x,0,this.target.z-this.shipTarget.z);
+    this.createStormEffects(); this.createBoosterEffects();
     this.createHighlights(); this.updateHighlights(); this.resize();
     window.addEventListener('resize',()=>this.resize());
     const canvas=this.renderer.domElement;
@@ -371,7 +374,7 @@ export class ThreeWorld {
   resetWorld(){
     for(const group of this.chunks.values()){this.scene.remove(group);this.disposeChunk(group);}
     this.chunks.clear();this.tiles=[];this.tileByKey.clear();this.foams=[];this.smokes=[];this.cloudGroups=[];this.chunkCenter=null;
-    this.target.set(0,0,0);this.shipTarget.copy(this.tilePosition(0,0));this.ship.position.copy(this.shipTarget);this.ship.position.y=SHIP_Y;this.ship.rotation.set(0,0,0);this.ship.scale.setScalar(1);this.heading=0;this.sinkingStartedAt=null;this.sunkOverlay.classList.remove('visible');this.state.camera={x:0,z:0};this.updateChunks(true);this.updateHighlights();this.updateCamera();
+    this.target.set(0,0,0);this.cameraPanOffset.set(0,0,0);this.shipTarget.copy(this.tilePosition(0,0));this.ship.position.copy(this.shipTarget);this.ship.position.y=SHIP_Y;this.ship.rotation.set(0,0,0);this.ship.scale.setScalar(1);this.heading=0;this.sinkingStartedAt=null;this.sunkOverlay.classList.remove('visible');this.state.camera={x:0,z:0};this.updateChunks(true);this.updateHighlights();this.updateCamera();
   }
   createHighlights(){
     this.highlightGroup=new THREE.Group(); this.scene.add(this.highlightGroup);
@@ -395,22 +398,41 @@ export class ThreeWorld {
   setHome(value){
     this.home=value;
     this.viewHeight=value?16:VIEW_HEIGHT;
-    if(!value){this.target.set(this.state.camera.x||0,0,this.state.camera.z||0);this.updateChunks();}
+    if(!value){this.target.copy(this.ship.position).add(this.cameraPanOffset);this.target.y=0;this.updateChunks();this.updateCamera();}
     this.resize();
   }
-  pointerDown(e){this.drag={x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false};this.renderer.domElement.setPointerCapture?.(e.pointerId);}
+  pointerDown(e){
+    if(e.button!==0||this.home)return;
+    e.preventDefault();
+    this.drag={pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false};
+    this.renderer.domElement.setPointerCapture?.(e.pointerId);
+  }
   pointerMove(e){
-    if(!this.drag||this.home)return;
+    if(!this.drag||this.home||e.pointerId!==this.drag.pointerId)return;
     const dx=e.clientX-this.drag.lastX,dy=e.clientY-this.drag.lastY;
-    if(Math.abs(e.clientX-this.drag.x)+Math.abs(e.clientY-this.drag.y)>7)this.drag.moved=true;
+    if(Math.hypot(e.clientX-this.drag.startX,e.clientY-this.drag.startY)>5)this.drag.moved=true;
     if(this.drag.moved){
       const scale=this.viewHeight/Math.max(1,this.renderer.domElement.clientHeight);
-      this.target.x-=dx*scale*.72; this.target.z+=dy*scale*.72; this.state.camera={x:this.target.x,z:this.target.z}; this.state.saveProgress(); this.updateChunks(); this.updateHighlights(); this.updateCamera();
+      // Move the camera opposite to the pointer in camera screen-space,
+      // so the ocean/map follows the drag naturally in every direction.
+      this.camera.updateMatrixWorld(true);
+      const right=new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld,0);
+      const up=new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld,1);
+      right.y=0;up.y=0;
+      if(right.lengthSq()>0)right.normalize();
+      if(up.lengthSq()>0)up.normalize();
+      this.cameraPanOffset.addScaledVector(right,-dx*scale);
+      this.cameraPanOffset.addScaledVector(up,dy*scale);
+      this.target.copy(this.ship.position).add(this.cameraPanOffset);this.target.y=0;
+      this.state.camera={x:this.target.x,z:this.target.z};
+      this.state.saveProgress();this.updateChunks();this.updateHighlights();this.updateCamera();
     }
     this.drag.lastX=e.clientX;this.drag.lastY=e.clientY;
   }
   pointerUp(e){
-    if(!this.drag)return;const moved=this.drag.moved;this.drag=null;
+    if(!this.drag||e.pointerId!==this.drag.pointerId)return;
+    const moved=this.drag.moved;this.drag=null;
+    if(this.renderer.domElement.hasPointerCapture?.(e.pointerId))this.renderer.domElement.releasePointerCapture(e.pointerId);
     if(!moved&&!this.home)this.tap(e);
   }
   tap(e){
@@ -499,14 +521,20 @@ export class ThreeWorld {
   loop(){
     this.frame=requestAnimationFrame(this.loop);const t=performance.now()*.001;
     const dt=this.lastFrameTime?Math.min(.05,t-this.lastFrameTime):0;this.lastFrameTime=t;
-    this.updateChunks(); this.ocean.position.x=this.target.x; this.ocean.position.z=this.target.z;
     const sp=this.ship.position;
     sp.x+=(this.shipTarget.x-sp.x)*.075; sp.z+=(this.shipTarget.z-sp.z)*.075;
+    if(!this.home){
+      const followTarget=new THREE.Vector3(sp.x+this.cameraPanOffset.x,0,sp.z+this.cameraPanOffset.z);
+      this.target.lerp(followTarget,.14);
+      this.state.camera={x:this.target.x,z:this.target.z};
+    }
+    this.updateChunks(); this.ocean.position.x=this.target.x; this.ocean.position.z=this.target.z;
     if(!this.state.sunk)sp.y=SHIP_Y+Math.sin(t*1.7)*.03;
     let dh=this.heading-this.ship.rotation.y; dh=Math.atan2(Math.sin(dh),Math.cos(dh)); this.ship.rotation.y+=dh*.12;
     this.ship.rotation.z=Math.sin(t*.8)*.03; this.ship.rotation.x=Math.sin(t*1.1)*.025;
     this.animateWorld(t);this.animateStorm(t,dt);this.animateSinking(t);
-    if(this.home){this.target.x=this.state.camera.x||0;this.target.z=this.state.camera.z||0;this.updateCamera();}
+    if(this.home){this.target.x=this.state.camera.x||0;this.target.z=this.state.camera.z||0;}
+    this.updateCamera();
     this.renderer.render(this.scene,this.camera);
   }
 }
