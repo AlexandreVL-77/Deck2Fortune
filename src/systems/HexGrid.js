@@ -13,11 +13,11 @@ const ISLAND_SHAPES=[
 function rotateAxial([q,r],turns){for(let i=0;i<turns;i++)[q,r]=[-r,q+r];return[q,r];}
 function belongsToIslandCluster(seed,q,r,near){
   if(near<=3)return false;
-  // Extremely rare cluster origins; each successful origin creates a connected 3–5 tile island.
+  // 2% chance per eligible cluster origin; each origin creates a connected 3–5 tile island.
   for(let oq=q-2;oq<=q+2;oq++)for(let or=r-2;or<=r+2;or++){
     if(hexDistance({q:oq,r:or},{q,r})>2||hexDistance({q:oq,r:or},{q:0,r:0})<=3)continue;
     const roll=hash(seed,oq,or);
-    if(roll<.99965)continue;
+    if(roll<.98)continue;
     const shapeIndex=Math.floor(hash(seed^0x51ed270b,oq,or)*ISLAND_SHAPES.length);
     const turns=Math.floor(hash(seed^0x2c1b3c6d,oq,or)*6);
     const shape=ISLAND_SHAPES[shapeIndex].map(p=>rotateAxial(p,turns));
