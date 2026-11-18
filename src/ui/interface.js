@@ -1,6 +1,6 @@
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
-import { CARD_LIBRARY } from '../data/cards.js';
+import { CARD_LIBRARY, DECK_MIN_SIZE, DECK_MAX_SIZE } from '../data/cards.js';
 const $=id=>document.getElementById(id);
 let toastTimer;
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);}
@@ -12,7 +12,7 @@ const art={
   repair:'<svg viewBox="0 0 32 32"><path d="M6 21l7-12 13 8-7 11z"/><path d="M15 14l7 5M16 5v6m-3-3h6"/></svg>',
   pistol:'<svg viewBox="0 0 32 32"><path d="M5 10h21v6H15l-2 7H8l2-7H5z"/><path d="M20 16l3 4m-12-10v-3"/></svg>'
 };
-function cardArt(card){if(art[card.id])return art[card.id];if(card.id==='sea-blessing')return '<span class="card-emoji-art">🌊</span>';if(card.id==='emergency-planks')return '<span class="card-emoji-art">🪵</span>';return art.cutlass;}
+function cardArt(card){if(card.image)return `<img class="card-art-image" src="${card.image}" alt="${card.name}" loading="lazy">`;if(art[card.id])return art[card.id];return art.cutlass;}
 function cardTypeLabel(card){return card.type==='attack'?'ATTAQUE':card.type==='move'?'MOUVEMENT':card.type==='blessing'?'BÉNÉDICTION':'SOUTIEN';}
 export function renderCards(state){
   $('cards').innerHTML=state.hand.map((c,i)=>`<button class="card ${i===state.selectedCard?'selected':''}" data-card="${i}" aria-label="${c.name}"><span class="card-type">${cardTypeLabel(c)}</span><span class="card-art">${cardArt(c)}</span><strong>${c.name}</strong><small>${c.type==='attack'?`${c.power} dégâts · portée ${c.range}`:c.description}</small></button>`).join('');
@@ -65,18 +65,21 @@ export function renderDrawer(state){
       if(state.saveIdentity(ship,captain))toast('Ton identité de capitaine est enregistrée !');
     });
   } else if(drawer.dataset.tab==='deck'){
-    const selected=new Set(state.deck);
-    const deckCards=CARD_LIBRARY.map(card=>`<button class="deck-choice ${selected.has(card.id)?'included':''}" data-deck-card="${card.id}" aria-pressed="${selected.has(card.id)}"><span class="deck-choice-icon">${card.icon}</span><span class="deck-choice-copy"><b>${card.name}</b><small>${card.description}</small></span><span class="deck-choice-state">${selected.has(card.id)?'✓':'＋'}</span></button>`).join('');
-    drawer.innerHTML=`<div class="drawer-title">✦ Création de deck</div><p class="drawer-note">Compose ton paquet de 4 à 8 cartes. Les cartes choisies alimentent ta main pendant les combats.</p><div class="deck-count"><b id="deck-count">${state.deck.length} / 8</b><span>cartes sélectionnées · minimum 4</span></div><div class="deck-choices">${deckCards}</div><button id="save-deck" class="identity-save">SAUVEGARDER LE DECK <span>✦</span></button><small class="identity-hint">Ton deck est conservé sur cet appareil.</small>`;
-    let draft=new Set(state.deck);
-    drawer.querySelectorAll('[data-deck-card]').forEach(button=>button.onclick=()=>{
-      const id=button.dataset.deckCard;
-      if(draft.has(id)){if(draft.size<=4){toast('Un deck doit contenir au moins 4 cartes.');return;}draft.delete(id);}
-      else {if(draft.size>=8){toast('Ton deck est limité à 8 cartes.');return;}draft.add(id);}
-      button.classList.toggle('included',draft.has(id));button.setAttribute('aria-pressed',String(draft.has(id)));button.querySelector('.deck-choice-state').textContent=draft.has(id)?'✓':'＋';
-      $('deck-count').textContent=`${draft.size} / 8`;
-    });
-    $('save-deck').onclick=()=>{if(state.setDeck([...draft]))toast('Deck sauvegardé ! Ta prochaine main est prête.');};
+    let draft=[...state.deck];
+    const renderDeck=()=>{
+      const counts=draft.reduce((map,id)=>{map[id]=(map[id]||0)+1;return map;},{});
+      const rows=CARD_LIBRARY.map(card=>{
+        const have=state.cardCollection[card.id]||0, inDeck=counts[card.id]||0;
+        const artMarkup=card.image?'<img class="deck-card-art" src="'+card.image+'" alt="'+card.name+'" loading="lazy">':'<span class="deck-card-emoji">'+card.icon+'</span>';
+        const rarity=card.rarity==='epic'?'ÉPIQUE':card.rarity==='rare'?'RARE':'COMMUNE';
+        return '<article class="deck-card-row '+(inDeck?'in-deck ':'')+(!have?'not-owned':'')+'">'+artMarkup+'<div class="deck-card-info"><b>'+card.name+'</b><small>'+card.description+'</small><span class="deck-rarity '+card.rarity+'">'+rarity+' · Possédées : '+have+'</span></div><div class="deck-card-controls"><button data-remove="'+card.id+'" '+(inDeck?'':'disabled')+' aria-label="Retirer '+card.name+'">−</button><b>'+inDeck+'</b><button data-add="'+card.id+'" '+(inDeck<have&&draft.length<DECK_MAX_SIZE?'':'disabled')+' aria-label="Ajouter '+card.name+'">＋</button></div></article>';
+      }).join('');
+      drawer.innerHTML='<div class="drawer-title">✦ Création de deck</div><p class="drawer-note">Construis ton paquet avec les cartes de ta collection. Les doublons sont autorisés si tu possèdes plusieurs exemplaires.</p><div class="deck-count"><b>'+draft.length+' / '+DECK_MAX_SIZE+'</b><span>cartes · minimum '+DECK_MIN_SIZE+'</span><i class="deck-count-meter"><i style="width:'+(draft.length/DECK_MAX_SIZE*100)+'%"></i></i></div><div class="deck-card-list">'+rows+'</div><button id="save-deck" class="identity-save" '+(draft.length<DECK_MIN_SIZE?'disabled':'')+'>SAUVEGARDER LE DECK <span>✦</span></button><small class="identity-hint">Deck sauvegardé sur cet appareil · utilisé en combat.</small>';
+      drawer.querySelectorAll('[data-add]').forEach(button=>button.onclick=()=>{draft.push(button.dataset.add);renderDeck();});
+      drawer.querySelectorAll('[data-remove]').forEach(button=>button.onclick=()=>{const index=draft.lastIndexOf(button.dataset.remove);if(index>=0)draft.splice(index,1);renderDeck();});
+      $('save-deck').onclick=()=>{if(state.setDeck(draft))toast('Deck sauvegardé ! Il sera utilisé au prochain combat.');else toast('Vérifie les cartes possédées et la taille du deck.');};
+    };
+    renderDeck();
   } else if(drawer.dataset.tab==='arsenal'){
     const collection=CARD_LIBRARY.map(card=>`<div class="crew-item"><span>${card.icon} <b>${card.name}</b><br><small>${card.type==='attack'?'Attaque':card.type==='move'?'Navigation':card.type==='blessing'?'Bénédiction':'Soutien'}</small></span><b>×${state.cardCollection[card.id]||0}</b></div>`).join('');
     const total=Object.values(state.cardCollection).reduce((sum,count)=>sum+count,0);
