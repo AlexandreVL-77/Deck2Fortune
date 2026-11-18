@@ -183,11 +183,10 @@ export class ThreeWorld {
     this.addPalm(isle,.28,.22,.62,.15);
   }
   addArchipelago(group,tile){
-    // One continuous, organic island silhouette spanning the whole cluster footprint.
-    // It is deliberately a single landmass: no bridges and no separate mini-islands.
+    // A single, clearly hexagonal landmass with a slightly irregular natural coastline.
     const makeCoastShape=(scale=1)=>{
       const s=new THREE.Shape();
-      const pts=[[-2.05,-.35],[-1.85,-1.12],[-1.12,-1.82],[-.25,-1.95],[.55,-1.72],[1.42,-1.55],[2.0,-.82],[2.12,.05],[1.72,.82],[1.12,1.62],[.22,1.92],[-.72,1.78],[-1.55,1.22],[-2.0,.52]];
+      const pts=[[-2.35,-1.30],[-.12,-2.52],[2.18,-1.24],[2.34,1.18],[.08,2.48],[-2.22,1.30]];
       s.moveTo(pts[0][0]*scale,pts[0][1]*scale);
       for(let i=0;i<pts.length;i++){
         const a=pts[i],b=pts[(i+1)%pts.length];
@@ -197,26 +196,76 @@ export class ThreeWorld {
       s.closePath();return s;
     };
     const land=new THREE.Group();group.add(land);
-    const sandGeo=new THREE.ExtrudeGeometry(makeCoastShape(1),{depth:.32,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.07,bevelThickness:.08,curveSegments:5});
+    const sandGeo=new THREE.ExtrudeGeometry(makeCoastShape(1),{depth:.34,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.07,bevelThickness:.08,curveSegments:3});
     sandGeo.rotateX(-Math.PI/2);
     const sand=new THREE.Mesh(sandGeo,this.material('#efd39a',true));
     sand.position.y=-.12;sand.castShadow=true;sand.receiveShadow=true;land.add(sand);
-    const grassGeo=new THREE.ExtrudeGeometry(makeCoastShape(.86),{depth:.12,bevelEnabled:true,bevelSegments:2,bevelSize:.06,bevelThickness:.05,curveSegments:5});
+    const grassGeo=new THREE.ExtrudeGeometry(makeCoastShape(.87),{depth:.13,bevelEnabled:true,bevelSegments:2,bevelSize:.06,bevelThickness:.05,curveSegments:3});
     grassGeo.rotateX(-Math.PI/2);
     const grass=new THREE.Mesh(grassGeo,this.material('#79bd70',true));
     grass.position.y=.22;grass.castShadow=true;grass.receiveShadow=true;land.add(grass);
-    const hill=new THREE.Mesh(new THREE.SphereGeometry(.9,10,7),this.material('#5da961',true));
-    hill.scale.set(1.15,.32,.78);hill.position.set(-.35,.37,-.05);hill.castShadow=true;land.add(hill);
+    const prop=(geo,mat,x,y,z,sx=1,sy=1,sz=1)=>{
+      const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.scale.set(sx,sy,sz);
+      m.castShadow=true;m.receiveShadow=true;land.add(m);return m;
+    };
+    const wood=this.material('#93603d',true),darkWood=this.material('#68442f',true);
+    const roof=this.material('#b85e43',true),cream=this.material('#f5dfb2',true);
+    const green=this.material('#4d9957',true),glass=this.material('#b9e8e4',true);
     const rockMat=this.material('#b9aa91',true);
-    for(const [x,z,s] of [[1.15,-.62,1],[-1.25,.72,.8],[.55,1.05,.65]]){
-      const rock=new THREE.Mesh(this.islandGeo.rock,rockMat);rock.position.set(x,.27,z);rock.scale.setScalar(s);rock.castShadow=true;land.add(rock);
+    // Low central hill and natural scenery.
+    prop(new THREE.SphereGeometry(.92,10,7),this.material('#5da961',true),-.35,.36,-.05,1.15,.34,.82);
+    for(const [x,z,s] of [[1.45,-.72,1],[-1.48,.88,.8],[.62,1.38,.65],[-.35,-1.48,.55]]){
+      prop(this.islandGeo.rock,rockMat,x,.27,z,s,s,s);
     }
-    this.addPalm(land,-.85,-.15,1.05,.30);
-    this.addPalm(land,.65,.35,.88,.30);
-    this.addPalm(land,1.15,-.72,.68,.28);
-    // A single soft shoreline highlight follows the large island perimeter.
-    const shore=new THREE.Mesh(new THREE.RingGeometry(1.95,2.12,48),new THREE.MeshBasicMaterial({color:'#fff0c8',transparent:true,opacity:.42,side:THREE.DoubleSide}));
-    shore.rotation.x=-Math.PI/2;shore.scale.set(1,1,.88);shore.position.y=-.13;land.add(shore);
+    // Two little wooden cabins with pitched roofs, doors and bright windows.
+    const cabin=(x,z,scale=1)=>{
+      const base=.28;
+      prop(new THREE.BoxGeometry(.68,.48,.58),wood,x,base+.24,z,scale,scale,scale);
+      const r=prop(new THREE.ConeGeometry(.55,.42,4),roof,x,base+.68,z,scale,scale,scale);
+      r.rotation.y=Math.PI/4;
+      prop(new THREE.BoxGeometry(.14,.29,.035),darkWood,x,base+.145,z+.30*scale,scale,scale,scale);
+      prop(new THREE.BoxGeometry(.13,.13,.035),glass,x-.20*scale,base+.31,z+.30*scale,scale,scale,scale);
+      prop(new THREE.BoxGeometry(.13,.13,.035),glass,x+.20*scale,base+.31,z+.30*scale,scale,scale,scale);
+      prop(new THREE.BoxGeometry(.12,.035,.08),cream,x,base+.08,z+.34*scale,scale,scale,scale);
+    };
+    cabin(-.92,-.48,.92);
+    cabin(.92,.78,.78);
+    // A recognizable travelling merchant stall: counter, striped canopy, sign and goods.
+    prop(new THREE.BoxGeometry(.78,.12,.48),darkWood,.12,.39,-1.05);
+    prop(new THREE.BoxGeometry(.84,.12,.54),wood,.12,.49,-1.05);
+    prop(new THREE.BoxGeometry(.88,.10,.62),cream,.12,.91,-1.05);
+    for(let i=0;i<4;i++){
+      const stripe=prop(new THREE.BoxGeometry(.20,.105,.63),i%2?roof:cream,-.21+i*.22,.92,-1.05);
+      stripe.rotation.z=-.04;
+    }
+    for(const x of [-.27,.51])prop(new THREE.CylinderGeometry(.035,.035,.78,6),wood,x,.72,-1.05);
+    prop(new THREE.BoxGeometry(.52,.22,.045),roof,.12,1.17,-1.39);
+    prop(new THREE.BoxGeometry(.38,.12,.025),cream,.12,1.17,-1.415);
+    // Crates, barrels, a tiny lantern and a welcoming campfire.
+    for(const [x,z] of [[-.42,-1.52],[.55,-1.55],[1.52,.15]]){
+      prop(new THREE.BoxGeometry(.25,.25,.25),wood,x,.36,z);
+      prop(new THREE.BoxGeometry(.27,.035,.27),cream,x,.49,z);
+    }
+    for(const [x,z] of [[-.45,.92],[1.42,-.12]]){
+      prop(new THREE.CylinderGeometry(.12,.14,.30,8),darkWood,x,.40,z);
+      for(const y of [.30,.50])prop(new THREE.TorusGeometry(.13,.018,4,8),cream,x,y,z);
+    }
+    prop(new THREE.BoxGeometry(.08,.18,.08),cream,1.55,.65,.55);
+    prop(new THREE.SphereGeometry(.09,7,5),this.material('#ffd16a'),1.55,.78,.55);
+    prop(new THREE.ConeGeometry(.18,.28,6),this.material('#e98a45'),-.05,.40,1.42);
+    prop(new THREE.ConeGeometry(.10,.20,6),this.material('#ffe08a'),-.05,.52,1.42);
+    // Palms frame the village without hiding the buildings.
+    this.addPalm(land,-1.55,-.15,.92,.30);
+    this.addPalm(land,1.48,1.25,.78,.30);
+    this.addPalm(land,.45,-1.82,.72,.30);
+    // Small landing pier and mooring posts make the island feel inhabited.
+    prop(new THREE.BoxGeometry(.34,.10,.92),wood,0,.02,2.42);
+    for(const x of [-.17,.17])for(const z of [2.08,2.72]){
+      prop(new THREE.CylinderGeometry(.045,.055,.42,6),darkWood,x,.17,z);
+    }
+    // Hexagonal shoreline trim, matching the island silhouette.
+    const shore=new THREE.Mesh(new THREE.RingGeometry(2.40,2.52,6),new THREE.MeshBasicMaterial({color:'#fff0c8',transparent:true,opacity:.48,side:THREE.DoubleSide}));
+    shore.rotation.x=-Math.PI/2;shore.position.y=-.13;land.add(shore);
     land.rotation.y=(((tile.q*5+tile.r*3)%6)+6)%6*Math.PI/3;
   }
   addPalm(parent,x,z,s,baseY){
