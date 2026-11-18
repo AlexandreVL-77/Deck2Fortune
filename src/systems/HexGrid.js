@@ -6,7 +6,14 @@ function hash(seed,q,r){let h=(seed^Math.imul(q|0,0x45d9f3b)^Math.imul(r|0,0x119
 export function makeTile(seed,q,r){
   if(q===0&&r===0)return{q,r,kind:'sea'};
   const n=hash(seed,q,r),near=hexDistance({q,r},{q:0,r:0});let kind='sea';
-  if(n>.955&&near>2)kind='volcano';else if(n>.925&&near>2)kind='storm';else if(n>.79&&near>1)kind='island';
+  // Un banc de nuages occupe cinq cases en croix et reste déterministe.
+  const cloudShape=[[0,0],[1,0],[-1,0],[0,1],[0,-1]];
+  const coveredByCloud=cloudShape.some(([dq,dr])=>{
+    const aq=q-dq,ar=r-dr;
+    return hexDistance({q:aq,r:ar},{q:0,r:0})>2&&hash(seed,aq,ar)>.997;
+  });
+  if(coveredByCloud)kind='storm';
+  else if(n>.955&&near>2)kind='volcano';else if(n>.79&&near>1)kind='island';
   return{q,r,kind};
 }
 export function makeIslandMap(radius=7,seed=1){const tiles=[];for(let q=-radius;q<=radius;q++)for(let r=-radius;r<=radius;r++)if(hexDistance({q,r},{q:0,r:0})<=radius)tiles.push(makeTile(seed,q,r));return tiles;}
