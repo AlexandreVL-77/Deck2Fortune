@@ -15,6 +15,7 @@ const art={
 function cardArt(card){if(card.image)return `<img class="card-art-image" src="${card.image}" alt="${card.name}" loading="lazy">`;if(art[card.id])return art[card.id];return art.cutlass;}
 function cardTypeLabel(card){return card.type==='attack'?'ATTAQUE':card.type==='move'?'MOUVEMENT':card.type==='blessing'?'BÉNÉDICTION':'SOUTIEN';}
 export function renderCards(state){
+  const handInfo=document.querySelector('.hand-heading small');if(handInfo)handInfo.textContent=state.inCombat?`Pioche ${state.drawPile.length} · Défausse ${state.discardPile.length}`:'4 cartes · touche pour sélectionner';
   $('cards').innerHTML=state.hand.map((c,i)=>`<button class="card ${i===state.selectedCard?'selected':''}" data-card="${i}" aria-label="${c.name}"><span class="card-type">${cardTypeLabel(c)}</span><span class="card-art">${cardArt(c)}</span><strong>${c.name}</strong><small>${c.type==='attack'?`${c.power} dégâts · portée ${c.range}`:c.description}</small></button>`).join('');
   $('hp').textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;
   const stormWarning=$('storm-warning');if(stormWarning)stormWarning.classList.toggle('visible',state.inStorm&&!state.sunk);
