@@ -184,23 +184,22 @@ export class ThreeWorld {
   }
   addArchipelago(group,tile){
     // A single, clearly hexagonal landmass with a slightly irregular natural coastline.
-    const makeCoastShape=(scale=1)=>{
+    const makeCoastShape=(radius=2.48)=>{
+      // Six straight, equal sides: a true regular hexagon, not a rounded polygon.
       const s=new THREE.Shape();
-      const pts=[[-2.35,-1.30],[-.12,-2.52],[2.18,-1.24],[2.34,1.18],[.08,2.48],[-2.22,1.30]];
-      s.moveTo(pts[0][0]*scale,pts[0][1]*scale);
-      for(let i=0;i<pts.length;i++){
-        const a=pts[i],b=pts[(i+1)%pts.length];
-        const mid=[(a[0]+b[0])*.5*scale,(a[1]+b[1])*.5*scale];
-        s.quadraticCurveTo(a[0]*scale,a[1]*scale,mid[0],mid[1]);
+      for(let i=0;i<6;i++){
+        const angle=(i*Math.PI/3)+Math.PI/6;
+        const x=Math.cos(angle)*radius,z=Math.sin(angle)*radius;
+        if(i===0)s.moveTo(x,z);else s.lineTo(x,z);
       }
       s.closePath();return s;
     };
     const land=new THREE.Group();group.add(land);
-    const sandGeo=new THREE.ExtrudeGeometry(makeCoastShape(1),{depth:.34,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.07,bevelThickness:.08,curveSegments:3});
+    const sandGeo=new THREE.ExtrudeGeometry(makeCoastShape(2.48),{depth:.34,bevelEnabled:true,bevelSegments:2,steps:1,bevelSize:.07,bevelThickness:.08,curveSegments:3});
     sandGeo.rotateX(-Math.PI/2);
     const sand=new THREE.Mesh(sandGeo,this.material('#efd39a',true));
     sand.position.y=-.12;sand.castShadow=true;sand.receiveShadow=true;land.add(sand);
-    const grassGeo=new THREE.ExtrudeGeometry(makeCoastShape(.87),{depth:.13,bevelEnabled:true,bevelSegments:2,bevelSize:.06,bevelThickness:.05,curveSegments:3});
+    const grassGeo=new THREE.ExtrudeGeometry(makeCoastShape(2.13),{depth:.13,bevelEnabled:true,bevelSegments:2,bevelSize:.06,bevelThickness:.05,curveSegments:3});
     grassGeo.rotateX(-Math.PI/2);
     const grass=new THREE.Mesh(grassGeo,this.material('#79bd70',true));
     grass.position.y=.22;grass.castShadow=true;grass.receiveShadow=true;land.add(grass);
@@ -259,12 +258,12 @@ export class ThreeWorld {
     this.addPalm(land,1.48,1.25,.78,.30);
     this.addPalm(land,.45,-1.82,.72,.30);
     // Small landing pier and mooring posts make the island feel inhabited.
-    prop(new THREE.BoxGeometry(.34,.10,.92),wood,0,.02,2.42);
-    for(const x of [-.17,.17])for(const z of [2.08,2.72]){
+    prop(new THREE.BoxGeometry(.34,.10,.58),wood,0,.02,1.88);
+    for(const x of [-.17,.17])for(const z of [1.66,2.10]){
       prop(new THREE.CylinderGeometry(.045,.055,.42,6),darkWood,x,.17,z);
     }
     // Hexagonal shoreline trim, matching the island silhouette.
-    const shore=new THREE.Mesh(new THREE.RingGeometry(2.40,2.52,6),new THREE.MeshBasicMaterial({color:'#fff0c8',transparent:true,opacity:.48,side:THREE.DoubleSide}));
+    const shore=new THREE.Mesh(new THREE.RingGeometry(2.43,2.54,6),new THREE.MeshBasicMaterial({color:'#fff0c8',transparent:true,opacity:.48,side:THREE.DoubleSide}));
     shore.rotation.x=-Math.PI/2;shore.position.y=-.13;land.add(shore);
     land.rotation.y=(((tile.q*5+tile.r*3)%6)+6)%6*Math.PI/3;
   }
