@@ -5,11 +5,11 @@ export function axialToPixel(q,r,size){return{x:size*Math.sqrt(3)*(q+r/2),y:size
 function hash(seed,q,r){let h=(seed^Math.imul(q|0,0x45d9f3b)^Math.imul(r|0,0x119de1f3))|0;h=Math.imul(h^(h>>>16),0x45d9f3b);h=Math.imul(h^(h>>>16),0x45d9f3b);return((h^(h>>>16))>>>0)/4294967296;}
 
 const ISLAND_SHAPES=[
-  // Grandes îles : chaque liste représente une seule masse de terre composée de 7 à 10 cases.
+  // Formes compactes et connectées : entre 5 et 7 cases maximum.
+  [[0,0],[1,0],[0,1],[-1,1],[-1,0]],
+  [[0,0],[1,0],[0,1],[-1,1],[-1,0],[0,-1]],
   [[0,0],[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]],
-  [[0,0],[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1],[2,-1]],
-  [[0,0],[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1],[1,1],[0,2]],
-  [[0,0],[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1],[2,-1],[2,-2],[-1,2]]
+  [[0,0],[1,0],[0,1],[-1,1],[-1,0],[0,-1],[2,-1]]
 ];
 function rotateAxial([q,r],turns){for(let i=0;i<turns;i++)[q,r]=[-r,q+r];return[q,r];}
 function findArchipelagoOrigin(seed,q,r,near){
