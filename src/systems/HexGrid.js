@@ -13,11 +13,11 @@ const ISLAND_SHAPES=[
 function rotateAxial([q,r],turns){for(let i=0;i<turns;i++)[q,r]=[-r,q+r];return[q,r];}
 function belongsToIslandCluster(seed,q,r,near){
   if(near<=3)return false;
-  // 2% chance per eligible cluster origin; each origin creates a connected 3–5 tile island.
+  // 0.5% chance per eligible cluster origin; each origin creates a connected 3–5 tile archipelago.
   for(let oq=q-2;oq<=q+2;oq++)for(let or=r-2;or<=r+2;or++){
     if(hexDistance({q:oq,r:or},{q,r})>2||hexDistance({q:oq,r:or},{q:0,r:0})<=3)continue;
     const roll=hash(seed,oq,or);
-    if(roll<.98)continue;
+    if(roll<.995)continue;
     const shapeIndex=Math.floor(hash(seed^0x51ed270b,oq,or)*ISLAND_SHAPES.length);
     const turns=Math.floor(hash(seed^0x2c1b3c6d,oq,or)*6);
     const shape=ISLAND_SHAPES[shapeIndex].map(p=>rotateAxial(p,turns));
@@ -36,7 +36,8 @@ export function makeTile(seed,q,r){
     return hexDistance({q:aq,r:ar},{q:0,r:0})>2&&hash(seed,aq,ar)>.997;
   });
   if(coveredByCloud)kind='storm';
-  else if(belongsToIslandCluster(seed,q,r,near))kind='island';
+  else if(belongsToIslandCluster(seed,q,r,near))kind='archipelago';
+  else if(n>.98&&near>3)kind='island';
   else if(n>.9997&&near>5)kind='volcano';
   return{q,r,kind};
 }
