@@ -11,7 +11,8 @@ export class CombatSystem {
       if (dist > card.range) return { ok: false, message: 'L’ennemi est hors de portée.' };
       const weapon = card.weapon === 'melee' ? s.melee : s.ranged;
       if (weapon.cooldown > 0) return { ok: false, message: `${weapon.name} recharge encore.` };
-      const hit = Math.random() * 100 < weapon.luck;
+      const effectiveLuck = Math.min(100, weapon.luck * (s.luckBoostTurns > 0 ? 2 : 1));
+      const hit = Math.random() * 100 < effectiveLuck;
       if (hit) s.damageEnemy(card.power ?? weapon.damage);
       this.setCooldown(weapon);
       this.replaceCard(index);
@@ -33,6 +34,13 @@ export class CombatSystem {
       s.emit();
       return { ok: true, message: 'Manœuvre effectuée.' };
     }
+    if (card.type === 'blessing') {
+      s.luckBoostTurns = 2;
+      s.negativeEffects = [];
+      this.replaceCard(index);
+      s.emit();
+      return { ok: true, message: 'La mer te bénit : chance doublée pendant 2 tours !' };
+    }
     if (card.type === 'heal') {
       s.hp = Math.min(s.maxHp, s.hp + card.power);
       this.replaceCard(index);
@@ -43,7 +51,9 @@ export class CombatSystem {
   }
   setCooldown(weapon) { weapon.cooldown = weapon.maxCooldown; }
   replaceCard(index) {
-    this.state.hand[index] = { ...CARD_LIBRARY[Math.floor(Math.random() * CARD_LIBRARY.length)] };
+    const pool = (this.state.deck || []).map(id => CARD_LIBRARY.find(card => card.id === id)).filter(Boolean);
+    const source = pool.length ? pool : CARD_LIBRARY;
+    this.state.hand[index] = { ...source[Math.floor(Math.random() * source.length)] };
     this.state.emit();
   }
   enemyTurn() {
@@ -52,6 +62,7 @@ export class CombatSystem {
     const dist = hexDistance(s.player, s.enemy);
     if (dist <= 2 && Math.random() < .72) s.damagePlayer(4);
     for (const weapon of [s.melee, s.ranged]) weapon.cooldown = Math.max(0, weapon.cooldown - 1);
+    if (s.luckBoostTurns > 0) s.luckBoostTurns--;
     s.turn++;
     s.emit();
   }
