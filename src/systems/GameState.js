@@ -185,7 +185,7 @@ export class GameState {
     if (this.hp === 0) { this.sunk = true; this.inStorm = false; }
     this.emit();
   }
-  startCombat() { if (this.sunk) return; this.inCombat = true; this.drawPile = shuffle(this.deck); this.discardPile = []; this.hand = this.drawFromDeck(4); this.selectedCard = 0; this.turn = 1; this.luckBoostTurns = 0; this.emit(); }
+  startCombat() { if (this.sunk || this.inCombat) return; this.enemy.hp = this.enemy.maxHp; this.inCombat = true; this.drawPile = shuffle(this.deck); this.discardPile = []; this.hand = this.drawFromDeck(4); this.selectedCard = 0; this.turn = 1; this.luckBoostTurns = 0; this.emit(); }
   endCombat() { this.inCombat = false; this.enemy.hp = this.enemy.maxHp; this.drawPile = []; this.discardPile = []; this.luckBoostTurns = 0; this.emit(); }
   spendGold(amount) {
     const cost = finiteNumber(amount, -1, 0, Number.MAX_SAFE_INTEGER);
