@@ -197,7 +197,7 @@ export class ThreeWorld {
       const cx=HEX_SIZE*Math.sqrt(3)*(q+r/2),cz=HEX_SIZE*1.5*r;
       const vertices=[];
       for(let i=0;i<6;i++){
-        const angle=i*Math.PI/3;
+        const angle=i*Math.PI/3+Math.PI/6;
         vertices.push([cx+Math.cos(angle)*radius,cz+Math.sin(angle)*radius]);
       }
       for(let i=0;i<6;i++)addEdge(vertices[i],vertices[(i+1)%6]);
