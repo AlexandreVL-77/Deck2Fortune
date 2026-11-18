@@ -235,13 +235,31 @@ export class ThreeWorld {
       geo.rotateX(-Math.PI/2);
       return geo;
     };
-    // Relief en pente douce, avec un liseré de sable visible et sans grande paroi verticale.
-    const sandGeo=extrude(roundedShape(.84),.25,.12,.10);
+    // Plage en pente : une base basse et très biseautée évite l'effet de falaise.
+    // Le bevel déborde légèrement du contour dessiné et forme une vraie transition vers l'eau.
+    const sandGeo=extrude(roundedShape(.68),.10,.15,.09);
     const sand=new THREE.Mesh(sandGeo,this.material('#efd39a'));
-    sand.position.y=-.13;sand.castShadow=true;sand.receiveShadow=true;land.add(sand);
-    const grassGeo=extrude(roundedShape(.76),.12,.085,.07);
+    sand.position.y=-.16;sand.castShadow=true;sand.receiveShadow=true;land.add(sand);
+    const grassGeo=extrude(roundedShape(.59),.075,.12,.065);
     const grass=new THREE.Mesh(grassGeo,this.material('#79bd70'));
-    grass.position.y=.14;grass.castShadow=true;grass.receiveShadow=true;land.add(grass);
+    grass.position.y=.015;grass.castShadow=true;grass.receiveShadow=true;land.add(grass);
+
+    // Écume qui entoure toute la côte (et non un simple anneau hexagonal).
+    // Elle est animée avec les autres effets d'eau dans animateWorld().
+    const shoreline=roundedShape(.99);
+    const innerPoints=roundedShape(.82).getPoints(16);
+    const innerPath=new THREE.Path();
+    innerPath.moveTo(innerPoints[0].x,innerPoints[0].y);
+    for(let i=1;i<innerPoints.length;i++)innerPath.lineTo(innerPoints[i].x,innerPoints[i].y);
+    innerPath.closePath();
+    shoreline.holes.push(innerPath);
+    const foamGeo=new THREE.ShapeGeometry(shoreline,16);
+    foamGeo.rotateX(-Math.PI/2);
+    const foam=new THREE.Mesh(foamGeo,this.foamMat);
+    foam.position.y=-.165;
+    foam.userData.phase=tile.q+tile.r*.7;
+    group.add(foam);
+    this.foams.push(foam);
 
     // Quelques bosses de terrain arrondies donnent du volume sans créer de murs.
     const hillMat=this.material('#68b96d');
