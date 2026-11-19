@@ -244,7 +244,11 @@ export class ThreeWorld {
     // Écume qui entoure toute la côte (et non un simple anneau hexagonal).
     // Elle est animée avec les autres effets d'eau dans animateWorld().
     const shoreline=roundedShape(.99);
-    const innerPoints=roundedShape(.82).getPoints(16);
+    const outerPoints=shoreline.getPoints(24);
+    const innerPoints=roundedShape(.82).getPoints(24);
+    // ShapeUtils expects hole contours wound opposite to the outer shoreline.
+    // Matching winding makes the foam triangulation unstable on concave archipelagos.
+    if(THREE.ShapeUtils.isClockWise(outerPoints)===THREE.ShapeUtils.isClockWise(innerPoints))innerPoints.reverse();
     const innerPath=new THREE.Path();
     innerPath.moveTo(innerPoints[0].x,innerPoints[0].y);
     for(let i=1;i<innerPoints.length;i++)innerPath.lineTo(innerPoints[i].x,innerPoints[i].y);
