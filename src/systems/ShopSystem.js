@@ -4,7 +4,7 @@ const BOOSTER_PRICE=45;
 const REPAIR_PRICE=30;
 const WEAPON_UPGRADE_PRICE=80;
 const MAX_WEAPON_DAMAGE=20;
-const RARE_CARDS=new Set(['broadside','cutlass','pistol']);
+const RARE_CARDS=new Set(['broadside','cutlass','pistol','golden-compass','spyglass']);
 
 function drawCard(guaranteedRare=false){
   const pool=guaranteedRare?CARD_LIBRARY.filter(card=>RARE_CARDS.has(card.id)):CARD_LIBRARY;
