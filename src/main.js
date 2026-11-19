@@ -8,6 +8,7 @@ const state=new GameState();
 const world=new ThreeWorld(document.getElementById('game'),state);
 const home=document.getElementById('home-screen'),hud=document.getElementById('hud');
 const shopPanel=document.getElementById('home-shop-panel');
+const loading=document.getElementById('loading-screen');
 function updateHomeStats(){
   document.getElementById('home-captain').textContent=state.captainName;
   document.getElementById('home-ship').textContent=state.shipName;
@@ -18,14 +19,15 @@ function updateHomeStats(){
   if(meleeInfo)meleeInfo.textContent=`${state.melee.name} · ${state.melee.damage} dégâts`;
   if(rangedInfo)rangedInfo.textContent=`${state.ranged.name} · ${state.ranged.damage} dégâts`;
 }
-function enterGame(){shopPanel.hidden=true;home.classList.add('home-hidden');hud.classList.remove('hidden');world.setHome(false);renderCards(state);renderDrawer(state);}
+function enterGame(){loading.hidden=true;document.body.classList.remove('is-loading');shopPanel.hidden=true;home.classList.add('home-hidden');hud.classList.remove('hidden');world.setHome(false);renderCards(state);renderDrawer(state);}
+function launchGame(reset=false){if(reset){state.newWorld();state.emit();world.resetWorld();}loading.hidden=false;document.body.classList.add('is-loading');window.setTimeout(enterGame,2600);}
 function returnToMenu(){
   state.camera={x:world.target.x,z:world.target.z};state.saveProgress();
   hud.classList.add('hidden');home.classList.remove('home-hidden');world.setHome(true);
   document.getElementById('continue-game').hidden=false;updateHomeStats();
 }
-document.getElementById('start-game').addEventListener('click',()=>{state.newWorld();state.emit();world.resetWorld();enterGame();});
-document.getElementById('continue-game').addEventListener('click',enterGame);
+document.getElementById('start-game').addEventListener('click',()=>launchGame(true));
+document.getElementById('continue-game').addEventListener('click',()=>launchGame(false));
 document.getElementById('quit-adventure').addEventListener('click',returnToMenu);
 document.getElementById('home-shop-button').addEventListener('click',()=>{shopPanel.hidden=false;});
 document.getElementById('close-home-shop').addEventListener('click',()=>{shopPanel.hidden=true;});

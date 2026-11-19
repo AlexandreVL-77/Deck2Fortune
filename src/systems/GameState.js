@@ -71,6 +71,8 @@ export class GameState {
     };
     const visited = Array.isArray(saved?.visited) ? saved.visited : [];
     this.visited = new Set(visited.filter(key => typeof key === 'string' && /^-?\d+,-?\d+$/.test(key)).slice(0, 100000));
+    const revealed = Array.isArray(saved?.revealedClouds) ? saved.revealedClouds : [];
+    this.revealedClouds = new Set(revealed.filter(key => typeof key === 'string' && /^-?\d+,-?\d+$/.test(key)).slice(0, 100000));
     this.sunk = !!saved?.sunk || this.hp <= 0;
     this.inStorm = !!saved?.inStorm && !this.sunk;
     this.enemy = { q: 2, r: -1, hp: 18, maxHp: 18, name: 'Corsaire des Brumes' };
@@ -99,7 +101,7 @@ export class GameState {
     this.listeners = new Set();
   }
   setDeck(ids) {
-    if (!Array.isArray(ids) || ids.length < DECK_MIN_SIZE || ids.length > DECK_MAX_SIZE) return false;
+    if (!Array.isArray(ids) || ids.length !== DECK_MAX_SIZE) return false;
     const counts = {};
     for (const id of ids) {
       if (!CARD_LIBRARY.some(card => card.id === id)) return false;
@@ -146,7 +148,7 @@ export class GameState {
     try {
       localStorage.setItem(WORLD_KEY, JSON.stringify({
         seed: this.seed, player: this.player, camera: this.camera, hp: this.hp,
-        visited: [...this.visited], inStorm: this.inStorm, sunk: this.sunk,
+        visited: [...this.visited], revealedClouds: [...this.revealedClouds], inStorm: this.inStorm, sunk: this.sunk,
         ownedBoosters: this.ownedBoosters, cardCollection: this.cardCollection, melee: this.melee, ranged: this.ranged
       }));
     } catch {}
@@ -157,6 +159,7 @@ export class GameState {
     this.camera = { x: 0, z: 0 };
     this.hp = this.maxHp;
     this.visited = new Set();
+    this.revealedClouds.clear();
     this.inStorm = false;
     this.sunk = false;
     this.inCombat = false;
