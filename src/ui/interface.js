@@ -12,7 +12,7 @@ const art={
   repair:'<svg viewBox="0 0 32 32"><path d="M6 21l7-12 13 8-7 11z"/><path d="M15 14l7 5M16 5v6m-3-3h6"/></svg>',
   pistol:'<svg viewBox="0 0 32 32"><path d="M5 10h21v6H15l-2 7H8l2-7H5z"/><path d="M20 16l3 4m-12-10v-3"/></svg>'
 };
-function cardArt(card){if(card.image)return `<img class="card-art-image" src="${card.image}" alt="${card.name}" loading="lazy">`;if(art[card.id])return art[card.id];return art.cutlass;}
+function cardArt(card){if(card.image)return `<img class="card-art-image" src="${card.image}" alt="${card.name}" loading="lazy" decoding="async" fetchpriority="low">`;if(art[card.id])return art[card.id];return art.cutlass;}
 function cardTypeLabel(card){return card.type==='attack'?'ATTAQUE':card.type==='move'?'MOUVEMENT':card.type==='blessing'?'BÉNÉDICTION':card.type==='utility'?'EXPLORATION':'SOUTIEN';}
 export function renderCards(state){
   const handInfo=document.querySelector('.hand-heading small');if(handInfo)handInfo.textContent=state.inCombat?`Pioche ${state.drawPile.length} · Défausse ${state.discardPile.length}`:'4 cartes · touche pour sélectionner';
@@ -75,7 +75,7 @@ export function renderDrawer(state){
       }).join('');
       const collection=CARD_LIBRARY.map(card=>{
         const have=state.cardCollection[card.id]||0,inDeck=counts[card.id]||0;
-        const image=card.image?'<img src="'+card.image+'" alt="'+card.name+'" loading="lazy">':'<span class="royale-card-icon">'+card.icon+'</span>';
+        const image=card.image?'<img src="'+card.image+'" alt="'+card.name+'" loading="lazy" decoding="async" fetchpriority="low">':'<span class="royale-card-icon">'+card.icon+'</span>';
         const rarity=card.rarity==='epic'?'ÉPIQUE':card.rarity==='rare'?'RARE':'COMMUNE';
         return '<button class="royale-collection-card '+card.rarity+' '+(inDeck?'chosen':'')+'" data-add-card="'+card.id+'" '+(have<=inDeck||draft.length>=DECK_MAX_SIZE?'disabled':'')+'>'+image+'<span class="royale-card-copy"><b>'+card.name+'</b><small>'+rarity+' · ×'+have+' possédée(s)</small><em>'+card.description+'</em></span><strong>'+(inDeck?'×'+inDeck:'＋')+'</strong></button>';
       }).join('');
