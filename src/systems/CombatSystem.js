@@ -3,9 +3,13 @@ import { createHand } from '../data/cards.js';
 
 const compassDirection=(from,to)=>{
   const dq=to.q-from.q,dr=to.r-from.r;
-  const angle=Math.atan2(Math.sqrt(3)*(dq+dr/2),1.5*dr);
-  const labels=['est','sud-est','sud-ouest','ouest','nord-ouest','nord-est'];
-  return labels[Math.round(((angle+Math.PI*2)%(Math.PI*2))/(Math.PI/3))%6];
+  const targetX=Math.sqrt(3)*(dq+dr/2),targetZ=1.5*dr;
+  const directions=[
+    [1,0,'est'],[1,-1,'nord-est'],[0,-1,'nord-ouest'],
+    [-1,0,'ouest'],[-1,1,'sud-ouest'],[0,1,'sud-est']
+  ];
+  return directions.map(([q,r,label])=>({label,dot:targetX*Math.sqrt(3)*(q+r/2)+targetZ*1.5*r}))
+    .sort((a,b)=>b.dot-a.dot)[0].label;
 };
 
 export class CombatSystem {
@@ -58,16 +62,17 @@ export class CombatSystem {
     const s=this.state;
     if(card.effect==='compass'){
       let nearest=null,best=Infinity;
-      for(let q=-18;q<=18;q++)for(let r=-18;r<=18;r++){
-        const tile=makeTile(s.seed,q,r);
+      for(let q=s.player.q-18;q<=s.player.q+18;q++)for(let r=s.player.r-18;r<=s.player.r+18;r++){
+        const tile=makeTile(s.seed,q,r,true);
         if(tile.kind!=='island'&&tile.kind!=='archipelago'&&tile.kind!=='volcano')continue;
         const distance=hexDistance(s.player,tile);
         if(distance>0&&distance<best){best=distance;nearest=tile;}
       }
       if(!nearest)return{ok:false,message:'La boussole ne trouve aucun trésor dans ces eaux.'};
       const direction=compassDirection(s.player,nearest);
-      const nearIsland=DIRECTIONS.some(([dq,dr])=>{
-        const tile=makeTile(s.seed,s.player.q+dq,s.player.r+dr);
+      const currentTile=makeTile(s.seed,s.player.q,s.player.r,true);
+      const nearIsland=['island','archipelago','volcano'].includes(currentTile.kind)||DIRECTIONS.some(([dq,dr])=>{
+        const tile=makeTile(s.seed,s.player.q+dq,s.player.r+dr,true);
         return tile.kind==='island'||tile.kind==='archipelago'||tile.kind==='volcano';
       });
       if(nearIsland)s.gold+=15;
