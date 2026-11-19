@@ -20,7 +20,7 @@ function updateHomeStats(){
   if(rangedInfo)rangedInfo.textContent=`${state.ranged.name} · ${state.ranged.damage} dégâts`;
 }
 function enterGame(){loading.hidden=true;document.body.classList.remove('is-loading');shopPanel.hidden=true;home.classList.add('home-hidden');hud.classList.remove('hidden');world.setHome(false);renderCards(state);renderDrawer(state);}
-function launchGame(reset=false){if(reset){state.newWorld();state.emit();world.resetWorld();}loading.hidden=false;document.body.classList.add('is-loading');window.setTimeout(enterGame,2600);}
+function launchGame(reset=false){if(reset){state.newWorld();state.emit();world.resetWorld();}loading.hidden=false;document.body.classList.add('is-loading');window.setTimeout(enterGame,7200);}
 function returnToMenu(){
   state.camera={x:world.target.x,z:world.target.z};state.saveProgress();
   hud.classList.add('hidden');home.classList.remove('home-hidden');world.setHome(true);
