@@ -101,7 +101,7 @@ export class GameState {
     this.listeners = new Set();
   }
   setDeck(ids) {
-    if (!Array.isArray(ids) || ids.length < DECK_MIN_SIZE || ids.length > DECK_MAX_SIZE) return false;
+    if (!Array.isArray(ids) || ids.length !== DECK_MAX_SIZE) return false;
     const counts = {};
     for (const id of ids) {
       if (!CARD_LIBRARY.some(card => card.id === id)) return false;
@@ -159,6 +159,7 @@ export class GameState {
     this.camera = { x: 0, z: 0 };
     this.hp = this.maxHp;
     this.visited = new Set();
+    this.revealedClouds.clear();
     this.inStorm = false;
     this.sunk = false;
     this.inCombat = false;
