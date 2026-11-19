@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 420">
+<metadata id="ai-phase-marker">PHASE_1: ship emerges from behind the water planet. PHASE_2_START: after 1.9 seconds, the ship stays fixed while the all-water hexagonal planet rotates continuously.</metadata>
+<defs>
+ <radialGradient id="ocean"><stop stop-color="#37d9ee"/><stop offset=".72" stop-color="#087cb8"/><stop offset="1" stop-color="#06416f"/></radialGradient>
+ <linearGradient id="rim" x2="0" y2="1"><stop stop-color="#8ff7ff"/><stop offset=".5" stop-color="#1789c3"/><stop offset="1" stop-color="#073c75"/></linearGradient>
+ <pattern id="hexes" width="36" height="31" patternUnits="userSpaceOnUse"><path d="M9 1H27L35 15.5 27 30H9L1 15.5Z" fill="none" stroke="#a4f8ff" stroke-width="1.6" opacity=".58"/></pattern>
+ <clipPath id="sphere"><circle cx="210" cy="224" r="122"/></clipPath>
+ <filter id="soft"><feGaussianBlur stdDeviation="5"/></filter>
+</defs>
+<!-- drifting clouds -->
+<g fill="#fff" stroke="#c8f2ff" stroke-width="3">
+ <g opacity=".95"><animateTransform attributeName="transform" type="translate" values="0 0;12 -5;0 0" dur="6s" repeatCount="indefinite"/><ellipse cx="74" cy="155" rx="33" ry="23"/><circle cx="60" cy="144" r="20"/><circle cx="87" cy="139" r="22"/></g>
+ <g opacity=".95"><animateTransform attributeName="transform" type="translate" values="0 0;-14 5;0 0" dur="7s" repeatCount="indefinite"/><ellipse cx="340" cy="170" rx="37" ry="24"/><circle cx="323" cy="157" r="20"/><circle cx="351" cy="151" r="24"/></g>
+ <g opacity=".9"><animateTransform attributeName="transform" type="translate" values="0 0;8 4;0 0" dur="8s" repeatCount="indefinite"/><ellipse cx="82" cy="310" rx="36" ry="23"/><circle cx="66" cy="298" r="18"/><circle cx="94" cy="294" r="22"/></g>
+ <g opacity=".9"><animateTransform attributeName="transform" type="translate" values="0 0;-8 -5;0 0" dur="9s" repeatCount="indefinite"/><ellipse cx="340" cy="315" rx="36" ry="23"/><circle cx="322" cy="303" r="18"/><circle cx="351" cy="298" r="22"/></g>
+</g>
+<!-- ship passing behind the planet -->
+<g id="ship-behind" transform="translate(0 0)">
+ <animate attributeName="opacity" values="1;1;0" keyTimes="0;.55;1" dur="2.1s" fill="freeze"/>
+ <g transform="translate(177 62)" stroke="#553421" stroke-width="4" stroke-linejoin="round">
+  <path d="M-25 40h75l-12 22H-10Z" fill="#8b4c2d"/><path d="M12 38V-8" stroke="#5b3825" stroke-width="6"/><path d="M8-4q-36 8-29 37H8Z" fill="#fff0ce"/><path d="M17 1q36 7 30 35H17Z" fill="#f0d29d"/><path d="M-36 40h91" stroke="#e4ad63" stroke-width="5"/>
+ </g>
+</g>
+<!-- water-only planet -->
+<g id="planet-rotation">
+ <animateTransform attributeName="transform" type="rotate" from="0 210 224" to="360 210 224" begin="2.1s" dur="8s" repeatCount="indefinite"/>
+ <circle cx="210" cy="224" r="127" fill="#042c58" opacity=".3" filter="url(#soft)"/>
+ <circle cx="210" cy="224" r="122" fill="url(#ocean)" stroke="url(#rim)" stroke-width="8"/>
+ <g clip-path="url(#sphere)"><rect x="85" y="99" width="250" height="250" fill="url(#hexes)"/><path d="M90 185q60-35 120-4t130-4M88 270q55-25 110 0t135-4" fill="none" stroke="#9cf5ff" stroke-width="4" opacity=".38"/></g>
+ <path d="M132 143q45-45 98-39" fill="none" stroke="#c1ffff" stroke-width="8" stroke-linecap="round" opacity=".6"/>
+</g>
+<!-- boat comes out and stays on top while planet rotates -->
+<g id="ship-on-top" opacity="0">
+ <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;.48;.72;1" dur="2.1s" fill="freeze"/>
+ <animateTransform attributeName="transform" type="translate" values="0 45;0 45;0 0;0 0" keyTimes="0;.48;.8;1" dur="2.1s" fill="freeze"/>
+ <g transform="translate(178 57)" stroke="#56351f" stroke-width="4" stroke-linejoin="round">
+  <path d="M-32 40h92l-16 26H-16Z" fill="#8c4d2c"/><path d="M12 39V-20" stroke="#5a3926" stroke-width="7"/><path d="M7-15q-44 10-37 49H7Z" fill="#fff0cf"/><path d="M18-7q42 10 37 41H18Z" fill="#efd09b"/><path d="M-40 41h110" stroke="#e7b66d" stroke-width="5"/><path d="M-4 67q20 8 42 0" fill="none" stroke="#c4f7ff" stroke-width="4"/>
+ </g>
+</g>
+</svg>
