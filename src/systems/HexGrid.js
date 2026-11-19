@@ -27,7 +27,7 @@ function findArchipelagoOrigin(seed,q,r,near){
   return null;
 }
 
-export function makeTile(seed,q,r){
+export function makeTile(seed,q,r,revealCloud=false){
   if(q===0&&r===0)return{q,r,kind:'sea'};
   const n=hash(seed,q,r),near=hexDistance({q,r},{q:0,r:0});
   const islandRoll=hash(seed^0x1b873593,q,r),volcanoRoll=hash(seed^0x6d2b79f5,q,r);let kind='sea';
@@ -38,7 +38,7 @@ export function makeTile(seed,q,r){
     return hexDistance({q:aq,r:ar},{q:0,r:0})>2&&hash(seed,aq,ar)>.997;
   });
   const archipelagoOrigin=findArchipelagoOrigin(seed,q,r,near);
-  if(coveredByCloud)kind='storm';
+  if(coveredByCloud&&!revealCloud)kind='storm';
   else if(archipelagoOrigin)kind='archipelago';
   else if(volcanoRoll>.995&&near>5)kind='volcano';
   else if(islandRoll>.97&&near>3)kind='island';
