@@ -222,7 +222,7 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 
 
 /* Deck2Fortune home screen: calmer nautical framing and the supplied wordmark */
-.home-screen{isolation:isolate;background:linear-gradient(180deg,#062a3a20 0%,#062a3a10 58%,#06283b30 100%),url('../assets/ui/menu-background.webp') center/100% 100% no-repeat}
+.home-screen{isolation:isolate;background:linear-gradient(180deg,#062a3a20 0%,#062a3a10 58%,#06283b30 100%),url('../assets/ui/menu-background.svg') center/100% 100% no-repeat}
 .home-screen::before{content:"";position:absolute;inset:8px;z-index:0;pointer-events:none;border:0;border-radius:0;box-shadow:none}
 .home-title{position:absolute;top:18%;left:50%;transform:translateX(-50%);width:min(88%,480px);margin:0;text-align:center}
 .home-title .home-logo{display:block;width:min(100%,340px);max-height:clamp(82px,17vh,145px);object-fit:contain;margin:0 auto 4px;filter:drop-shadow(0 5px 7px #001521aa)}
@@ -267,3 +267,23 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 @media(max-height:700px){.royale-collection{max-height:140px}.royale-slot{height:76px}}
 
 .royale-slot.filled>i{position:absolute;inset:4px 0 19px;display:grid;place-items:center;font-size:30px;font-style:normal;color:#8b5a34;text-shadow:0 2px 0 #fff1c9}
+
+/* Reliable illustrated portrait menu and centered parchment layout */
+.home-screen{background:linear-gradient(180deg,#082d3a18 0%,#082d3a08 55%,#082d3a35 100%),url('../assets/ui/menu-background.svg') center/100% 100% no-repeat}
+.home-top{position:absolute;top:max(18px,env(safe-area-inset-top));left:7%;right:7%;padding:7px 10px;z-index:3}
+.home-title{position:absolute;top:21%;left:50%;transform:translateX(-50%);width:min(82%,420px);margin:0;text-align:center}
+.home-title .home-logo{display:block;width:min(100%,300px);max-height:clamp(72px,13vh,118px);object-fit:contain;margin:0 auto 3px;filter:drop-shadow(0 3px 4px #69412666)}
+.home-title .title-kicker{font-size:8px;letter-spacing:2px;color:#93603b;text-shadow:none}
+.home-title p{margin:3px 0 0;font-size:clamp(11px,3vw,14px);color:#795035;text-shadow:none}
+.home-voyage-stats{position:absolute;left:11%;right:11%;bottom:34%;width:auto;margin:0;padding:9px 12px;display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;border:2px solid #b47b46;border-radius:12px;background:linear-gradient(145deg,#fff5dcf2,#ecd09cf2);box-shadow:0 3px 0 #8b5937,inset 0 0 0 1px #fff8e9;color:#68472f}
+.home-voyage-stats>div{display:grid;gap:2px;min-width:0}
+.home-voyage-stats small{font-size:7px;letter-spacing:1px;color:#a16b3d}
+.home-voyage-stats strong{font-size:clamp(10px,3vw,13px);color:#68472f}
+.home-actions{position:absolute;left:15%;right:15%;bottom:21%;width:auto;margin:0;gap:7px}
+.home-actions .start-button{padding:12px 13px;border-radius:10px;font-size:10px;letter-spacing:1px;box-shadow:0 3px 0 #69412b,0 6px 12px #0003}
+.home-actions .continue-button{padding:8px 10px;font-size:8px;letter-spacing:1px;background:#fff1d4dd;border-color:#b17a49;color:#70482d}
+.home-footer{display:none}
+.home-shop-panel{z-index:8;top:30%;bottom:20%;max-height:50%;overflow:auto;background:linear-gradient(145deg,#fff3d4,#e9c98e);border:3px solid #a96f40;box-shadow:0 8px 24px #36201366}
+.loading-screen{background:radial-gradient(ellipse at 50% 45%,#39b8c8 0%,#126b89 52%,#062e4c 100%)}
+.loading-screen .loading-animation{display:block;width:min(58vw,240px);height:auto;image-rendering:auto;filter:drop-shadow(0 7px 16px #00132155)}
+@media(max-height:720px){.home-title{top:18%}.home-title .home-logo{max-height:clamp(64px,12vh,92px)}.home-voyage-stats{bottom:33%;padding:7px 9px}.home-actions{bottom:19%}}
