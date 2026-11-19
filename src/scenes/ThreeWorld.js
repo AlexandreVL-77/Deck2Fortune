@@ -141,7 +141,7 @@ export class ThreeWorld {
       if(this.chunks.has(key))continue;
       const group=new THREE.Group(),[chunkQ,chunkR]=key.split(',').map(Number);
       for(let q=chunkQ*CHUNK_SIZE;q<(chunkQ+1)*CHUNK_SIZE;q++)for(let r=chunkR*CHUNK_SIZE;r<(chunkR+1)*CHUNK_SIZE;r++){
-        const data=makeTile(this.state.seed,q,r),pos=this.tilePosition(q,r),tileGroup=new THREE.Group();tileGroup.position.copy(pos);
+        const key=this.key(q,r),hidden=makeTile(this.state.seed,q,r),data=hidden.kind==='storm'&&this.state.revealedClouds?.has(key)?makeTile(this.state.seed,q,r,true):hidden,pos=this.tilePosition(q,r),tileGroup=new THREE.Group();tileGroup.position.copy(pos);
         const base=new THREE.Mesh(this.baseGeo,this.waterMat);base.position.y=-.29;base.receiveShadow=true;base.userData.tile=data;tileGroup.add(base);
         this.tiles.push(base);this.tileByKey.set(this.key(q,r),{data,group:tileGroup,base});
         const ring=new THREE.Mesh(this.ringGeo,this.ringMat);ring.position.y=-.175;tileGroup.add(ring);
@@ -594,9 +594,9 @@ export class ThreeWorld {
         window.dispatchEvent(new CustomEvent('pirate-toast',{detail:'Un corsaire des brumes approche ! Prépare tes cartes !'}));
       }
     }else{
-      const message=tile.kind==='island'?'Île découverte : +5 or !':'Volcan découvert : +12 or !';
+      const message=tile.kind==='island'||tile.kind==='archipelago'?'Île découverte : +5 or !':'Volcan découvert : +12 or !';
       const rewardKey=this.key(tile.q,tile.r);
-      if(!this.state.visited.has(rewardKey)){if(tile.kind==='island')this.state.gold+=5;if(tile.kind==='volcano')this.state.gold+=12;this.state.visited.add(rewardKey);}
+      if(!this.state.visited.has(rewardKey)){if(tile.kind==='island'||tile.kind==='archipelago')this.state.gold+=5;if(tile.kind==='volcano')this.state.gold+=12;this.state.visited.add(rewardKey);}
       window.dispatchEvent(new CustomEvent('pirate-toast',{detail:message}));
     }
     this.state.emit();
