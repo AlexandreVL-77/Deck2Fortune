@@ -14,7 +14,7 @@ export class ThreeWorld {
     this.tiles=[]; this.tileByKey=new Map(); this.highlightMeshes=[];
     this.ray=new THREE.Raycaster(); this.pointer=new THREE.Vector2();
     this.drag=null; this.target=new THREE.Vector3(state.camera?.x||0,0,state.camera?.z||0); this.cameraPanOffset=new THREE.Vector3(); this.chunks=new Map();
-    this.crests=[]; this.foams=[]; this.smokes=[]; this.cloudGroups=[]; this.heading=0;
+    this.crests=[]; this.foams=[]; this.smokes=[]; this.cloudGroups=[]; this.heading=0; this.lastRevealCount=state.revealedClouds?.size||0;
     this.stormDamageAccumulator=0; this.lastFrameTime=0; this.sinkingStartedAt=null; this.lastLightning=0;
     this.toonGradient=this.makeToonGradient();
     this.scene=new THREE.Scene();
@@ -131,6 +131,7 @@ export class ThreeWorld {
     materials.forEach(material=>material.dispose());
   }
   updateChunks(force=false){
+    if(force&&this.chunks.size){for(const group of this.chunks.values()){this.scene.remove(group);this.disposeChunk(group);}this.chunks.clear();this.tiles=[];this.tileByKey.clear();this.foams=[];this.smokes=[];this.cloudGroups=[];}
     const qCenter=(Math.sqrt(3)/3*this.target.x-this.target.z/3)/HEX_SIZE;
     const rCenter=(2/3*this.target.z)/HEX_SIZE;
     const cq=Math.floor(qCenter/CHUNK_SIZE),cr=Math.floor(rCenter/CHUNK_SIZE);
@@ -663,6 +664,7 @@ export class ThreeWorld {
       this.target.lerp(followTarget,.14);
       this.state.camera={x:this.target.x,z:this.target.z};
     }
+    if((this.state.revealedClouds?.size||0)!==this.lastRevealCount){this.lastRevealCount=this.state.revealedClouds.size;this.chunkCenter=null;this.updateChunks(true);this.updateHighlights();}
     this.updateChunks(); this.ocean.position.x=this.target.x; this.ocean.position.z=this.target.z;
     if(!this.state.sunk)sp.y=SHIP_Y+Math.sin(t*1.7)*.03;
     let dh=this.heading-this.ship.rotation.y; dh=Math.atan2(Math.sin(dh),Math.cos(dh)); this.ship.rotation.y+=dh*.12;
