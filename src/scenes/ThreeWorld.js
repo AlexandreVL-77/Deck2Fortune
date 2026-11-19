@@ -110,7 +110,8 @@ export class ThreeWorld {
     this.foamMat=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.6,depthWrite:false});
     this.cloudShadowGeo=new THREE.CircleGeometry(.72,28);this.cloudShadowGeo.rotateX(-Math.PI/2);
     this.cloudShadowMat=new THREE.MeshBasicMaterial({map:this.softShadowTexture(),transparent:true,depthWrite:false});
-    this.updateChunks(true);
+    // The map is created only when the player starts/continues a voyage.
+    // The home screen does not need hundreds of hidden hex meshes.
   }
   disposeChunk(group){
     const sharedGeometries=new Set([
@@ -669,7 +670,8 @@ export class ThreeWorld {
       this.state.camera={x:this.target.x,z:this.target.z};
     }
     if((this.state.revealedClouds?.size||0)!==this.lastRevealCount){this.lastRevealCount=this.state.revealedClouds.size;this.chunkCenter=null;this.updateChunks(true);this.updateHighlights();}
-    this.updateChunks(); this.ocean.position.x=this.target.x; this.ocean.position.z=this.target.z;
+    if(!this.home)this.updateChunks();
+    this.ocean.position.x=this.target.x; this.ocean.position.z=this.target.z;
     if(!this.state.sunk)sp.y=SHIP_Y+Math.sin(t*1.7)*.03;
     let dh=this.heading-this.ship.rotation.y; dh=Math.atan2(Math.sin(dh),Math.cos(dh)); this.ship.rotation.y+=dh*.12;
     this.ship.rotation.z=Math.sin(t*.8)*.03; this.ship.rotation.x=Math.sin(t*1.1)*.025;
