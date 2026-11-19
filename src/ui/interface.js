@@ -71,7 +71,7 @@ export function renderDrawer(state){
       const counts=draft.reduce((map,id)=>{map[id]=(map[id]||0)+1;return map;},{});
       const slots=Array.from({length:DECK_MAX_SIZE},(_,i)=>{
         const card=draft[i]?CARD_LIBRARY.find(item=>item.id===draft[i]):null;
-        return card?'<button class="royale-slot filled '+card.rarity+'" data-remove-slot="'+i+'" aria-label="Retirer '+card.name+'"><img src="'+(card.image||'')+'" alt=""><span>'+card.name+'</span><b>−</b></button>':'<div class="royale-slot empty"><span>'+(i+1)+'</span><small>VIDE</small></div>';
+        return card?'<button class="royale-slot filled '+card.rarity+'" data-remove-slot="'+i+'" aria-label="Retirer '+card.name+'">'+(card.image?'<img src="'+card.image+'" alt="">':'<i>'+card.icon+'</i>')+'<span>'+card.name+'</span><b>−</b></button>':'<div class="royale-slot empty"><span>'+(i+1)+'</span><small>VIDE</small></div>';
       }).join('');
       const collection=CARD_LIBRARY.map(card=>{
         const have=state.cardCollection[card.id]||0,inDeck=counts[card.id]||0;
@@ -86,7 +86,7 @@ export function renderDrawer(state){
     };
     renderDeck();
   } else if(drawer.dataset.tab==='arsenal'){
-    const collection=CARD_LIBRARY.map(card=>`<div class="crew-item"><span>${card.icon} <b>${card.name}</b><br><small>${card.type==='attack'?'Attaque':card.type==='move'?'Navigation':card.type==='blessing'?'Bénédiction':'Soutien'}</small></span><b>×${state.cardCollection[card.id]||0}</b></div>`).join('');
+    const collection=CARD_LIBRARY.map(card=>`<div class="crew-item"><span>${card.icon} <b>${card.name}</b><br><small>${card.type==='attack'?'Attaque':card.type==='move'?'Navigation':card.type==='blessing'?'Bénédiction':card.type==='utility'?'Exploration':'Soutien'}</small></span><b>×${state.cardCollection[card.id]||0}</b></div>`).join('');
     const total=Object.values(state.cardCollection).reduce((sum,count)=>sum+count,0);
     drawer.innerHTML=`<div class="drawer-title">⚔ Arsenal du capitaine</div><div class="crew-item"><span><b>${state.melee.name}</b><br><small>Arme de mêlée · coups rapprochés</small></span><b>${state.melee.damage} ATQ</b></div><div class="crew-item"><span><b>${state.ranged.name}</b><br><small>Arme à distance · tir précis</small></span><b>${state.ranged.damage} ATQ</b></div><p class="drawer-note">Améliore ton équipement au fil de tes explorations.</p><div class="drawer-title" style="margin-top:12px">Collection de cartes · ${total}</div>${collection}`;
   } else drawer.innerHTML='';
