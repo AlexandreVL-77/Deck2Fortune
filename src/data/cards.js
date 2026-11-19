@@ -12,7 +12,7 @@ export const CARD_LIBRARY = [
   { id:'spyglass', name:'Longue-vue', icon:'🔭', type:'utility', rarity:'rare', image:'./assets/cards/Longue-vue sur l’océan découvert.png', effect:'reveal', radius:3, description:'Révèle les cases sous les nuages dans un rayon de 3 hexagones.' }
 ];
 export const DEFAULT_DECK = ['broadside','grapple','sidestep','cutlass','repair','pistol','sea-blessing','emergency-planks'];
-export const DECK_MIN_SIZE = 4;
+export const DECK_MIN_SIZE = 8;
 export const DECK_MAX_SIZE = 8;
 export const shuffle = items => {
   const result = [...items];
