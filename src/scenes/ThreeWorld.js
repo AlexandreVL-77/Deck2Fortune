@@ -184,134 +184,112 @@ export class ThreeWorld {
     this.addPalm(isle,-.18,-.02,.9,.22);
     this.addPalm(isle,.28,.22,.62,.15);
   }
-  addArchipelago(group,tile){
-    // Côte organique volontairement en retrait : l'île ne touche jamais les bords des hexagones.
-    const cells=tile.archipelagoOrigin?.shape?.length?tile.archipelagoOrigin.shape:[[0,0],[1,0],[0,1]];
+  /** Contour fermé de l'archipel (union des hexagones) dans le repère local de la tuile d'origine. */
+  archipelagoOutline(cells){
     const edgeMap=new Map();
-    const vertexKey=p=>p.map(v=>Math.round(v*10000)/10000).join(',');
-    const addEdge=(a,b)=>{
-      const ka=vertexKey(a),kb=vertexKey(b),key=ka<kb?ka+'|'+kb:kb+'|'+ka;
-      if(edgeMap.has(key))edgeMap.delete(key);else edgeMap.set(key,{a,b});
-    };
+    const vk=p=>p.map(v=>Math.round(v*1000)/1000).join(',');
+    const addEdge=(a,b)=>{const ka=vk(a),kb=vk(b),key=ka<kb?ka+'|'+kb:kb+'|'+ka;if(edgeMap.has(key))edgeMap.delete(key);else edgeMap.set(key,{a,b});};
     for(const [q,r] of cells){
-      const cx=HEX_SIZE*Math.sqrt(3)*(q+r/2),cz=HEX_SIZE*1.5*r;
-      const vertices=[];
-      for(let i=0;i<6;i++){
-        const angle=i*Math.PI/3+Math.PI/6;
-        vertices.push([cx+Math.cos(angle)*HEX_SIZE,cz+Math.sin(angle)*HEX_SIZE]);
-      }
-      for(let i=0;i<6;i++)addEdge(vertices[i],vertices[(i+1)%6]);
+      const cx=HEX_SIZE*Math.sqrt(3)*(q+r/2),cz=HEX_SIZE*1.5*r,v=[];
+      for(let i=0;i<6;i++){const a=i*Math.PI/3+Math.PI/6;v.push([cx+Math.cos(a)*HEX_SIZE,cz+Math.sin(a)*HEX_SIZE]);}
+      for(let i=0;i<6;i++)addEdge(v[i],v[(i+1)%6]);
     }
     const edges=[...edgeMap.values()],chains=[];
     while(edges.length){
       const chain=[edges[0].a,edges[0].b];edges.splice(0,1);
-      while(vertexKey(chain[chain.length-1])!==vertexKey(chain[0])){
-        const last=vertexKey(chain[chain.length-1]);
-        const index=edges.findIndex(e=>vertexKey(e.a)===last||vertexKey(e.b)===last);
-        if(index<0)break;
-        const edge=edges.splice(index,1)[0];
-        chain.push(vertexKey(edge.a)===last?edge.b:edge.a);
+      while(vk(chain[chain.length-1])!==vk(chain[0])){
+        const last=vk(chain[chain.length-1]);
+        const i=edges.findIndex(e=>vk(e.a)===last||vk(e.b)===last);if(i<0)break;
+        const e=edges.splice(i,1)[0];chain.push(vk(e.a)===last?e.b:e.a);
       }
       if(chain.length>=4)chains.push(chain.slice(0,-1));
     }
-    const outline=chains.sort((a,b)=>b.length-a.length)[0]||[[-1,-1],[1,-1],[1,1],[-1,1]];
-    // Silhouette en vrais segments : on conserve les facettes hexagonales low-poly.
-    const roundedShape=(scale)=>{
-      const points=outline.map(([x,z])=>[x*scale,z*scale]);
-      const shape=new THREE.Shape();
-      shape.moveTo(points[0][0],points[0][1]);
-      for(let i=1;i<points.length;i++)shape.lineTo(points[i][0],points[i][1]);
-      shape.closePath();
-      return shape;
-    };
-    const land=new THREE.Group();group.add(land);
-    const extrude=(shape,depth,bevelSize,bevelThickness)=>{
-      const geo=new THREE.ExtrudeGeometry(shape,{
-        depth,bevelEnabled:true,bevelSegments:5,steps:1,
-        bevelSize,bevelThickness,curveSegments:10
-      });
-      geo.rotateX(-Math.PI/2);
-      return geo;
-    };
-    // Plage en pente : une base basse et très biseautée évite l'effet de falaise.
-    // Le bevel déborde légèrement du contour dessiné et forme une vraie transition vers l'eau.
-    const sandGeo=extrude(roundedShape(.68),.10,.15,.09);
-    const sand=new THREE.Mesh(sandGeo,this.material('#efd39a'));
-    sand.position.y=-.16;sand.castShadow=true;sand.receiveShadow=true;land.add(sand);
-    const grassGeo=extrude(roundedShape(.59),.075,.12,.065);
-    const grass=new THREE.Mesh(grassGeo,this.material('#79bd70'));
-    grass.position.y=.015;grass.castShadow=true;grass.receiveShadow=true;land.add(grass);
-
-    // Écume qui entoure toute la côte (et non un simple anneau hexagonal).
-    // Elle est animée avec les autres effets d'eau dans animateWorld().
-    const shoreline=roundedShape(.99);
-    const outerPoints=shoreline.getPoints(24);
-    const innerPoints=roundedShape(.82).getPoints(24);
-    // ShapeUtils expects hole contours wound opposite to the outer shoreline.
-    // Matching winding makes the foam triangulation unstable on concave archipelagos.
-    if(THREE.ShapeUtils.isClockWise(outerPoints)===THREE.ShapeUtils.isClockWise(innerPoints))innerPoints.reverse();
-    const innerPath=new THREE.Path();
-    innerPath.moveTo(innerPoints[0].x,innerPoints[0].y);
-    for(let i=1;i<innerPoints.length;i++)innerPath.lineTo(innerPoints[i].x,innerPoints[i].y);
-    innerPath.closePath();
-    shoreline.holes.push(innerPath);
-    const foamGeo=new THREE.ShapeGeometry(shoreline,1);
-    foamGeo.rotateX(-Math.PI/2);
-    const foam=new THREE.Mesh(foamGeo,this.foamMat);
-    foam.position.y=-.165;
-    foam.userData.phase=tile.q+tile.r*.7;
-    group.add(foam);
-    this.foams.push(foam);
-
-    // Quelques bosses de terrain arrondies donnent du volume sans créer de murs.
-    const hillMat=this.material('#68b96d');
-    const hill=(x,z,sx,sy,sz)=>{
-      const mesh=new THREE.Mesh(new THREE.DodecahedronGeometry(1,0),hillMat);
-      mesh.position.set(x,.22,z);mesh.scale.set(sx,sy,sz);
-      mesh.castShadow=true;mesh.receiveShadow=true;land.add(mesh);
-    };
-    hill(-.48,-.12,.92,.22,.68);
-    hill(.48,.38,.68,.17,.58);
-    hill(.02,-.58,.58,.13,.43);
-
-    // Les constructions sont plus petites et regroupées au centre pour rester dans la côte.
-    const decor=new THREE.Group();
-    const randomA=Math.abs(Math.sin(tile.q*127.1+tile.r*311.7)*43758.5453)%1;
-    const randomB=Math.abs(Math.sin(tile.q*269.5+tile.r*183.3+17)*24634.6345)%1;
-    decor.scale.setScalar(.54+randomA*.06);
-    decor.rotation.y=randomB*Math.PI*2;
-    decor.position.set((randomA-.5)*.12,0,(randomB-.5)*.12);
-    land.add(decor);
-    const prop=(geo,mat,x,y,z,sx=1,sy=1,sz=1)=>{
-      const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.scale.set(sx,sy,sz);
-      m.castShadow=true;m.receiveShadow=true;decor.add(m);return m;
-    };
-    const wood=this.material('#93603d',true),darkWood=this.material('#68442f',true);
-    const roof=this.material('#b85e43',true),cream=this.material('#f5dfb2',true);
-    const glass=this.material('#b9e8e4',true);
-    const cabin=(x,z,s=1)=>{
-      const y=.27;
-      prop(new THREE.BoxGeometry(.62,.42,.54),wood,x,y+.21,z,s,s,s);
-      const top=prop(new THREE.ConeGeometry(.49,.36,4),roof,x,y+.60,z,s,s,s);
-      top.rotation.y=Math.PI/4;
-      prop(new THREE.BoxGeometry(.12,.24,.025),darkWood,x,y+.12,z+.275*s,s,s,s);
-      prop(new THREE.BoxGeometry(.12,.12,.025),glass,x-.18*s,y+.27,z+.275*s,s,s,s);
-    };
-    cabin(-.82,-.28,.9);
-    cabin(.78,.48,.72);
-    // Petit ponton court, sans pièces qui flottent au-delà de l'île.
-    prop(new THREE.BoxGeometry(.28,.08,.48),wood,.05,.22,1.28);
-    for(const x of [-.13,.13])for(const z of [1.12,1.44]){
-      prop(new THREE.CylinderGeometry(.035,.045,.28,6),darkWood,x,.12,z);
+    return chains.sort((a,b)=>b.length-a.length)[0]||[[-1,-1],[1,-1],[1,1],[-1,1]];
+  }
+  /** Décale un polygone vers l'intérieur (d>0) ou l'extérieur (d<0) puis l'arrondit (Chaikin). */
+  offsetOutline(poly,d,smooth=2){
+    let area=0;for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length];area+=a[0]*b[1]-b[0]*a[1];}
+    const sgn=area>0?1:-1,n=poly.length;let pts=[];
+    for(let i=0;i<n;i++){
+      const p=poly[(i+n-1)%n],c=poly[i],q=poly[(i+1)%n];
+      const nrm=(a,b)=>{const dx=b[0]-a[0],dz=b[1]-a[1],l=Math.hypot(dx,dz)||1;return[-sgn*dz/l,sgn*dx/l];};
+      const n1=nrm(p,c),n2=nrm(c,q);let bx=n1[0]+n2[0],bz=n1[1]+n2[1];const bl=Math.hypot(bx,bz)||1;bx/=bl;bz/=bl;
+      const k=d/Math.max(.45,bx*n1[0]+bz*n1[1]);
+      pts.push([c[0]+bx*k,c[1]+bz*k]);
     }
-    this.addPalm(decor,-1.28,.68,.22,.25);
-    this.addPalm(decor,1.25,-.72,.20,.25);
-    // Contour discret et arrondi, aligné sur la vraie géométrie de l'île.
-    const coastPoints=roundedShape(.84).getPoints(12).map(p=>new THREE.Vector3(p.x,.025,p.y));
-    const coastGeo=new THREE.BufferGeometry().setFromPoints(coastPoints);
-    const coast=new THREE.LineLoop(coastGeo,new THREE.LineBasicMaterial({color:'#fff0c8',transparent:true,opacity:.38}));
-    land.add(coast);
-    land.rotation.y=(((tile.q*5+tile.r*3)%6)+6)%6*Math.PI/3;
+    for(let it=0;it<smooth;it++){
+      const out=[];
+      for(let i=0;i<pts.length;i++){const a=pts[i],b=pts[(i+1)%pts.length];out.push([a[0]*.75+b[0]*.25,a[1]*.75+b[1]*.25],[a[0]*.25+b[0]*.75,a[1]*.25+b[1]*.75]);}
+      pts=out;
+    }
+    return pts;
+  }
+  addArchipelago(group,tile){
+    const cells=tile.archipelagoOrigin?.shape?.length?tile.archipelagoOrigin.shape:[[0,0],[1,0],[0,1]];
+    const base=this.archipelagoOutline(cells);
+    const centers=cells.map(([q,r])=>[HEX_SIZE*Math.sqrt(3)*(q+r/2),HEX_SIZE*1.5*r]);
+    const cx=centers.reduce((s,c)=>s+c[0],0)/centers.length,cz=centers.reduce((s,c)=>s+c[1],0)/centers.length;
+    const toShape=pts=>{const s=new THREE.Shape();s.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)s.lineTo(pts[i][0],pts[i][1]);s.closePath();return s;};
+    const flat=(pts,y,mat,order=0)=>{const g=new THREE.ShapeGeometry(toShape(pts));g.rotateX(-Math.PI/2);const m=new THREE.Mesh(g,mat);m.position.y=y;m.renderOrder=order;return m;};
+    const slab=(pts,depth,bevel,y,mat)=>{
+      const g=new THREE.ExtrudeGeometry(toShape(pts),{depth,bevelEnabled:true,bevelSegments:2,bevelSize:bevel,bevelThickness:bevel*.8,curveSegments:1});
+      g.rotateX(-Math.PI/2);const m=new THREE.Mesh(g,mat);m.position.y=y;m.castShadow=true;m.receiveShadow=true;return m;
+    };
+    const rng=(()=>{let a=(tile.q*73856093^tile.r*19349663^0x9e3779b9)>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};})();
+    const land=new THREE.Group();group.add(land);
+    // Lagon peu profond + écume animée autour de toute la côte.
+    const lagoonMat=new THREE.MeshBasicMaterial({color:'#aef0e0',transparent:true,opacity:.5,depthWrite:false});
+    land.add(flat(this.offsetOutline(base,-.12,2),-.285,lagoonMat,1));
+    const foamPts=this.offsetOutline(base,.10,2),foamIn=this.offsetOutline(base,.30,2);
+    const foamShape=toShape(foamPts);foamShape.holes.push(new THREE.Path(foamIn.map(p=>new THREE.Vector2(p[0],p[1]))));
+    const foamGeo=new THREE.ShapeGeometry(foamShape);foamGeo.rotateX(-Math.PI/2);
+    const foam=new THREE.Mesh(foamGeo,this.foamMat);foam.position.set(cx,-.2,cz);foam.userData.phase=tile.q+tile.r*.7;
+    foam.geometry.translate(-cx,0,-cz);group.add(foam);this.foams.push(foam);
+    // Plage puis herbe : deux dalles biseautées, silhouette organique.
+    const sandPts=this.offsetOutline(base,.28,2),grassPts=this.offsetOutline(base,.58,2),hillPts=this.offsetOutline(base,.95,1);
+    land.add(slab(sandPts,.20,.05,-.22,this.material('#f1d79e',true)));
+    land.add(slab(grassPts,.08,.07,-.03,this.material('#7cc46f',true)));
+    const GY=.06;
+    const inside=(pts,x,z)=>{let c=false;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const a=pts[i],b=pts[j];if((a[1]>z)!==(b[1]>z)&&x<(b[0]-a[0])*(z-a[1])/(b[1]-a[1])+a[0])c=!c;}return c;};
+    const sample=(pts,tries=40)=>{let minx=1e9,maxx=-1e9,minz=1e9,maxz=-1e9;for(const p of pts){minx=Math.min(minx,p[0]);maxx=Math.max(maxx,p[0]);minz=Math.min(minz,p[1]);maxz=Math.max(maxz,p[1]);}
+      for(let i=0;i<tries;i++){const x=minx+rng()*(maxx-minx),z=minz+rng()*(maxz-minz);if(inside(pts,x,z))return[x,z];}return[cx,cz];};
+    const add=(geo,mat,x,y,z,sx=1,sy=1,sz=1)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=true;m.receiveShadow=true;land.add(m);return m;};
+    // Relief : un massif central (avec sommet rocheux sur les grands archipels) + collines.
+    const big=cells.length>=6;
+    const hillMat=this.material('#5fb065',true),hillMat2=this.material('#72c273',true),rock=this.material('#9a9a92',true),rockDark=this.material('#7e7f79',true);
+    const peak=add(new THREE.ConeGeometry(1,1,7),hillMat,cx,GY+(big?.42:.3),cz,big?1.05:.8,big?.9:.6,big?1.05:.8);peak.rotation.y=rng()*3;
+    if(big){add(new THREE.ConeGeometry(.5,.5,6),rock,cx,GY+.78,cz,1,1,1).rotation.y=rng()*3;add(new THREE.ConeGeometry(.28,.3,6),new THREE.MeshToonMaterial({color:'#f4f1e6',gradientMap:this.toonGradient,flatShading:true}),cx,GY+1.02,cz);}
+    for(let i=0;i<Math.max(2,cells.length-3);i++){const [x,z]=sample(hillPts);if(Math.hypot(x-cx,z-cz)<.6)continue;add(new THREE.IcosahedronGeometry(1,0),i%2?hillMat:hillMat2,x,GY+.04,z,.5+rng()*.3,.22+rng()*.14,.45+rng()*.25);}
+    // Palmiers + rochers côté plage.
+    const palms=3+Math.min(4,cells.length-3);
+    for(let i=0;i<palms;i++){
+      const k=Math.floor(rng()*grassPts.length),p=grassPts[k];
+      const x=p[0]+(cx-p[0])*.14,z=p[1]+(cz-p[1])*.14;
+      this.addPalm(land,x,z,.26+rng()*.1,GY+.02);
+    }
+    for(let i=0;i<4;i++){const p=sandPts[Math.floor(rng()*sandPts.length)];add(new THREE.DodecahedronGeometry(.07+rng()*.05,0),i%2?rock:rockDark,p[0]+(cx-p[0])*.08,-.02,p[1]+(cz-p[1])*.08);}
+    // Village : une ou deux cabanes + ponton tourné vers le large.
+    const wood=this.material('#93603d',true),darkWood=this.material('#68442f',true),roof=this.material('#c2603f',true),cream=this.material('#f5dfb2',true);
+    const cabin=(x,z,s,ry)=>{
+      const g=new THREE.Group();g.position.set(x,GY,z);g.rotation.y=ry;g.scale.setScalar(s);land.add(g);
+      const part=(geo,mat,px,py,pz)=>{const m=new THREE.Mesh(geo,mat);m.position.set(px,py,pz);m.castShadow=true;g.add(m);return m;};
+      part(new THREE.BoxGeometry(.56,.36,.46),cream,0,.18,0);
+      part(new THREE.ConeGeometry(.46,.34,4),roof,0,.52,0).rotation.y=Math.PI/4;
+      part(new THREE.BoxGeometry(.11,.2,.03),darkWood,0,.1,.235);
+      part(new THREE.BoxGeometry(.1,.1,.03),this.material('#b9e8e4',true),-.17,.22,.235);
+    };
+    const c1=sample(grassPts);cabin(c1[0],c1[1],.9,rng()*6.28);
+    if(big){const c2=sample(grassPts);if(Math.hypot(c2[0]-c1[0],c2[1]-c1[1])>.7)cabin(c2[0],c2[1],.75,rng()*6.28);}
+    // Ponton : sur le point du contour le plus tourné vers le sud (le joueur le voit).
+    let pi=0;for(let i=1;i<sandPts.length;i++)if(sandPts[i][1]>sandPts[pi][1])pi=i;
+    const dp=sandPts[pi],dir=Math.atan2(dp[0]-cx,dp[1]-cz),px=dp[0]+Math.sin(dir)*.18,pz=dp[1]+Math.cos(dir)*.18;
+    const dock=new THREE.Group();dock.position.set(px,-.02,pz);dock.rotation.y=dir;land.add(dock);
+    const plank=new THREE.Mesh(new THREE.BoxGeometry(.3,.06,.62),wood);plank.position.z=.1;plank.castShadow=true;dock.add(plank);
+    for(const x of [-.13,.13])for(const z of [-.12,.3]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.03,.04,.3,6),darkWood);post.position.set(x,-.08,z);dock.add(post);}
+    // Petit voilier amarré.
+    const boat=new THREE.Group();boat.position.set(Math.sin(dir)*.5,-.34,Math.cos(dir)*.5+.1);dock.add(boat);boat.position.set(.28,-.2,.28);
+    const hull=new THREE.Mesh(new THREE.BoxGeometry(.16,.07,.34),this.material('#b2703f',true));boat.add(hull);
+    const sail=new THREE.Mesh(new THREE.PlaneGeometry(.2,.24),new THREE.MeshToonMaterial({color:'#fff4d6',side:THREE.DoubleSide,gradientMap:this.toonGradient}));sail.position.y=.17;sail.rotation.y=Math.PI/2;boat.add(sail);
   }
   addPalm(parent,x,z,s,baseY){
     const p=new THREE.Group(); p.position.set(x,baseY,z); parent.add(p);
