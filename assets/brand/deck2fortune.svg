@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-labelledby="title">
+<title id="title">Deck2Fortune</title>
+<defs>
+ <linearGradient id="wood" x2="0" y2="1"><stop stop-color="#f8d99b"/><stop offset=".52" stop-color="#bd7841"/><stop offset="1" stop-color="#70412c"/></linearGradient>
+ <linearGradient id="gold" x2="0" y2="1"><stop stop-color="#fff0b7"/><stop offset=".48" stop-color="#e6ad52"/><stop offset="1" stop-color="#9d5d2d"/></linearGradient>
+ <linearGradient id="paper" x2="0" y2="1"><stop stop-color="#fff2ce"/><stop offset="1" stop-color="#dca969"/></linearGradient>
+ <linearGradient id="blue" x2="0" y2="1"><stop stop-color="#2686bb"/><stop offset="1" stop-color="#103a61"/></linearGradient>
+ <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur in="SourceAlpha" stdDeviation="7"/><feOffset dy="8"/><feComponentTransfer><feFuncA type="linear" slope=".55"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<g filter="url(#shadow)" stroke="#4d2c1e" stroke-width="9" stroke-linejoin="round">
+ <path d="M450 28 710 176 710 345 450 492 190 345 190 176Z" fill="url(#blue)" stroke="#e9bd6b" stroke-width="16"/>
+ <circle cx="450" cy="260" r="190" fill="url(#wood)" stroke="#61391f" stroke-width="16"/>
+ <circle cx="450" cy="260" r="157" fill="#8b4f2e" stroke="url(#gold)" stroke-width="15"/>
+ <circle cx="450" cy="260" r="126" fill="#164d72" stroke="#f1c878" stroke-width="9"/>
+ <g fill="url(#wood)" stroke="#59321d" stroke-width="8">
+  <rect x="430" y="22" width="40" height="128" rx="18"/>
+  <rect x="430" y="370" width="40" height="128" rx="18"/>
+  <rect x="214" y="240" width="120" height="40" rx="18" transform="rotate(-90 274 260)"/>
+  <rect x="566" y="240" width="120" height="40" rx="18" transform="rotate(-90 626 260)"/>
+  <rect x="278" y="76" width="38" height="118" rx="18" transform="rotate(-45 297 135)"/>
+  <rect x="584" y="76" width="38" height="118" rx="18" transform="rotate(45 603 135)"/>
+  <rect x="278" y="326" width="38" height="118" rx="18" transform="rotate(45 297 385)"/>
+  <rect x="584" y="326" width="38" height="118" rx="18" transform="rotate(-45 603 385)"/>
+ </g>
+ <g fill="url(#gold)" stroke="#684020" stroke-width="5">
+  <circle cx="450" cy="112" r="13"/><circle cx="450" cy="408" r="13"/>
+  <circle cx="302" cy="260" r="13"/><circle cx="598" cy="260" r="13"/>
+  <circle cx="345" cy="155" r="13"/><circle cx="555" cy="155" r="13"/>
+  <circle cx="345" cy="365" r="13"/><circle cx="555" cy="365" r="13"/>
+ </g>
+ <path d="M76 212 Q125 167 208 185 L692 185 Q775 167 824 212 L796 260 824 308 Q775 353 692 333 L208 333 Q125 353 76 308 L104 260Z" fill="url(#paper)" stroke="#6c3f25" stroke-width="11"/>
+ <path d="M91 210 Q145 198 200 206 L700 206 Q755 198 809 210 M91 310 Q145 322 200 314 L700 314 Q755 322 809 310" fill="none" stroke="#fff0c2" stroke-width="7" opacity=".8"/>
+ <path d="M450 302 464 340 450 378 436 340Z" fill="url(#gold)" stroke="#5b351e" stroke-width="6"/>
+</g>
+<text x="450" y="282" text-anchor="middle" font-family="Georgia,serif" font-size="91" font-weight="bold" letter-spacing="-4" fill="#4b2417" stroke="#f4ce80" stroke-width="3" paint-order="stroke">Deck<tspan fill="url(#blue)" stroke="#e8b85e" stroke-width="4">2</tspan>Fortune</text>
+</svg>
