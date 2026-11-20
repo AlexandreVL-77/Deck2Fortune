@@ -4,12 +4,13 @@ const BOOSTER_PRICE=45;
 const REPAIR_PRICE=30;
 const WEAPON_UPGRADE_PRICE=80;
 const MAX_WEAPON_DAMAGE=20;
-const RARE_CARDS=new Set(['broadside','cutlass','pistol']);
-
+const WEIGHT={common:70,rare:25,epic:5};
 function drawCard(guaranteedRare=false){
-  const pool=guaranteedRare?CARD_LIBRARY.filter(card=>RARE_CARDS.has(card.id)):CARD_LIBRARY;
-  const card=pool[Math.floor(Math.random()*pool.length)];
-  return {...card};
+  const pool=CARD_LIBRARY.filter(card=>!guaranteedRare||card.rarity!=='common');
+  let roll=Math.random()*pool.reduce((sum,card)=>sum+WEIGHT[card.rarity],0);
+  let pick=pool[pool.length-1];
+  for(const card of pool){roll-=WEIGHT[card.rarity];if(roll<0){pick=card;break;}}
+  return {...pick};
 }
 
 export class ShopSystem {
@@ -18,7 +19,7 @@ export class ShopSystem {
     if(!this.state.spendGold(BOOSTER_PRICE))return {ok:false,message:'Pas assez de pièces !'};
     const cards=Array.from({length:4},()=>drawCard());
     cards.push(drawCard(true));
-    cards.forEach(card=>{this.state.cardCollection[card.id]=(this.state.cardCollection[card.id]||0)+1;});
+    cards.forEach(card=>{card.isNew=!(this.state.cardCollection[card.id]>0)||undefined;this.state.cardCollection[card.id]=(this.state.cardCollection[card.id]||0)+1;});
     this.state.ownedBoosters++;
     this.state.emit();
     return {ok:true,message:'Booster ouvert : 5 cartes ajoutées à ta collection !',cards};

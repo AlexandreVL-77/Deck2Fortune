@@ -1,4 +1,5 @@
 import './styles.css';
+import './ui.css';
 import './booster.css';
 import { GameState } from './systems/GameState.js';
 import { ShopSystem } from './systems/ShopSystem.js';
@@ -42,3 +43,6 @@ document.getElementById('home-upgrade-ranged').addEventListener('click',()=>home
 document.getElementById('continue-game').hidden=!localStorage.getItem('deck2fortune.world');
 bindUI(state,world);state.subscribe(updateHomeStats);renderCards(state);renderDrawer(state);updateHomeStats();
 window.deck2fortune={world,state};
+
+const __loader=document.getElementById('loader');const __hide=()=>{__loader?.classList.add('done');setTimeout(()=>__loader?.remove(),700);};setTimeout(__hide,2200);
+document.getElementById('start-game')?.addEventListener('click',()=>{if(!__loader)return;});
