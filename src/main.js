@@ -45,25 +45,38 @@ function enterGame() {
 }
 
 function launchGame(reset = false) {
-  // Let the browser paint the real loading GIF before building the 3D map.
   loading.hidden = false;
   document.body.classList.add('is-loading');
-  const startedAt = performance.now();
 
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    const activeWorld = ensureWorld();
-    if (reset) {
-      state.newWorld();
-      state.emit();
-      activeWorld.resetWorld();
-    } else {
-      // Prepare the map while the loading animation is visible.
-      activeWorld.setHome(false);
+  const animation = loading.querySelector('.loading-animation');
+  const beginWorld = () => {
+    // Give the browser a real paint opportunity after the original GIF is ready.
+    window.setTimeout(() => {
+      const activeWorld = ensureWorld();
+      if (reset) {
+        state.newWorld();
+        state.emit();
+        activeWorld.resetWorld();
+      } else {
+        activeWorld.setHome(false);
+      }
+      // Only a short hand-off after the world is ready; no artificial 7.2s wait.
+      window.setTimeout(enterGame, 180);
+    }, 90);
+  };
+
+  if (animation && !animation.complete) {
+    animation.addEventListener('load', beginWorld, { once: true });
+    animation.addEventListener('error', () => {
+      console.error('Impossible de charger assets/loading/planet-ship.gif');
+      beginWorld();
+    }, { once: true });
+  } else {
+    if (animation && animation.naturalWidth === 0) {
+      console.error('GIF de chargement introuvable ou illisible:', animation.currentSrc);
     }
-    const minimumLoadingTime = 1250;
-    const remaining = Math.max(250, minimumLoadingTime - (performance.now() - startedAt));
-    window.setTimeout(enterGame, remaining);
-  }));
+    requestAnimationFrame(() => requestAnimationFrame(beginWorld));
+  }
 }
 
 function returnToMenu() {
