@@ -221,7 +221,7 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 
 
 /* Deck2Fortune home screen: calmer nautical framing and the supplied wordmark */
-.home-screen{isolation:isolate;background:linear-gradient(180deg,#062a3a20 0%,#062a3a10 58%,#06283b30 100%),url('../assets/ui/menu-background.webp?v=4') center/100% 100% no-repeat}
+.home-screen{isolation:isolate;background:linear-gradient(180deg,#062a3a20 0%,#062a3a10 58%,#06283b30 100%),linear-gradient(180deg,#062a3a20 0%,#062a3a10 58%,#06283b30 100%)}
 .home-screen::before{content:"";position:absolute;inset:8px;z-index:0;pointer-events:none;border:0;border-radius:0;box-shadow:none}
 .home-title{position:absolute;top:18%;left:50%;transform:translateX(-50%);width:min(88%,480px);margin:0;text-align:center}
 .home-title .home-logo{display:block;width:min(100%,340px);max-height:clamp(82px,17vh,145px);object-fit:contain;margin:0 auto 4px;filter:drop-shadow(0 5px 7px #001521aa)}
@@ -286,3 +286,13 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 .loading-screen{background:radial-gradient(ellipse at 50% 45%,#39b8c8 0%,#126b89 52%,#062e4c 100%)}
 .loading-screen .loading-animation{display:block;width:min(58vw,240px);height:auto;image-rendering:auto;filter:drop-shadow(0 7px 16px #00132155)}
 @media(max-height:720px){.home-title{top:18%}.home-title .home-logo{max-height:clamp(64px,12vh,92px)}.home-voyage-stats{bottom:33%;padding:7px 9px}.home-actions{bottom:19%}}
+
+/* Render the original menu background as a normal HTML image so Pages serves it reliably. */
+#home-screen{isolation:isolate;overflow:hidden}
+#home-screen .home-background{position:absolute;inset:0;z-index:0;width:100%;height:100%;display:block;object-fit:fill;pointer-events:none}
+#home-screen .home-vignette{z-index:0}
+#home-screen .home-top,#home-screen .home-title,#home-screen .home-actions,#home-screen .home-footer,#home-screen .home-voyage-stats,#home-screen .home-shop-panel{z-index:2}
+#home-screen .home-logo{display:block;visibility:visible;opacity:1}
+#loading-screen[hidden]{display:none!important}
+#loading-screen:not([hidden]){display:flex!important;visibility:visible;opacity:1}
+#loading-screen .loading-animation{display:block!important;visibility:visible;opacity:1;width:min(58vw,240px);height:auto;max-height:42vh;object-fit:contain}
