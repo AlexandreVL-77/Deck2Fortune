@@ -296,3 +296,17 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 #loading-screen[hidden]{display:none!important}
 #loading-screen:not([hidden]){display:flex!important;visibility:visible;opacity:1}
 #loading-screen .loading-animation{display:block!important;visibility:visible;opacity:1;width:min(58vw,240px);height:auto;max-height:42vh;object-fit:contain}
+
+
+/* Restore the actual menu artwork supplied in assets/ui. */
+#home-screen.home-screen{
+  background-image:linear-gradient(180deg,#082d3a18 0%,#082d3a08 55%,#082d3a35 100%),url('../assets/ui/menu-background.webp');
+  background-position:center;
+  background-size:100% 100%;
+  background-repeat:no-repeat;
+}
+#home-screen .home-logo{position:relative;z-index:2;max-width:82vw}
+#game-shell>#game{z-index:0}
+#game-shell>#home-screen{z-index:20}
+#game-shell>#loading-screen{z-index:60}
+#loading-screen .loading-animation{width:min(72vw,320px);max-height:48vh;object-fit:contain}
