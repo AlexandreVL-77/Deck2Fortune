@@ -128,7 +128,8 @@ export class GameState {
         this.drawPile = shuffle(this.discardPile); this.discardPile = [];
       }
       if (!this.drawPile.length) break;
-      const card = CARD_LIBRARY.find(item => item.id === this.drawPile.pop());
+      const id = this.drawPile.pop();
+      const card = CARD_LIBRARY.find(item => item.id === id);
       if (card) drawn.push({...card});
     }
     return drawn;
