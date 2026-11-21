@@ -62,7 +62,11 @@ function draw() {
     hex(x, y, size * .98);
     // L'atlas cartographie le monde généré autour du navire, pas uniquement les cases visitées.
     const t = makeTile(state.seed, q, r, !!state.revealedClouds?.has(key));
-    // Toute case appartenant à une île ou à un archipel est une cible sélectionnable,\n    // même si aucun emoji n'est dessiné sur cette case précise.\n    if (t.kind === 'island') marks.push({ x, y, q, r, label: 'Île', emoji: '🏝', isIsland: true });\n    else if (t.kind === 'archipelago') marks.push({ x, y, q, r, label: 'Île de l’archipel', emoji: '🏝', isIsland: true });\n    c.fillStyle = t.kind === 'archipelago' ? '#8fcf7a' : t.kind === 'island' ? '#a8d98a' : t.kind === 'volcano' ? '#c9825a' : t.kind === 'storm' ? '#aab4bd' : '#bfe3e0';
+    // Toute case appartenant à une île ou à un archipel est une cible sélectionnable,
+    // même si aucun emoji n'est dessiné sur cette case précise.
+    if (t.kind === 'island') marks.push({ x, y, q, r, label: 'Île', emoji: '🏝', isIsland: true });
+    else if (t.kind === 'archipelago') marks.push({ x, y, q, r, label: 'Île de l’archipel', emoji: '🏝', isIsland: true });
+    c.fillStyle = t.kind === 'archipelago' ? '#8fcf7a' : t.kind === 'island' ? '#a8d98a' : t.kind === 'volcano' ? '#c9825a' : t.kind === 'storm' ? '#aab4bd' : '#bfe3e0';
     c.fill(); c.strokeStyle = '#a07a45aa'; c.lineWidth = .8; c.stroke();
     const mark = (emoji, label, scale = 1, isIsland = false) => { c.font = `${size * 1.15 * scale}px serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(emoji, x, y + 1); marks.push({ x, y, q, r, label, emoji, isIsland }); };
     if (t.kind === 'volcano') mark('🌋', 'Volcan');
