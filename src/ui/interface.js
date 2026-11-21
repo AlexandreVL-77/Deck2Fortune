@@ -1,3 +1,4 @@
+import { openDeckScreen } from './deckScreen.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
 import { CARD_LIBRARY, DECK_MIN_SIZE, DECK_MAX_SIZE } from '../data/cards.js';
@@ -106,7 +107,7 @@ export function bindUI(state,game){
   $('flee').onclick=()=>{state.endCombat();toast('Tu as pris le large.');};
   document.querySelectorAll('[data-tab]').forEach(btn=>btn.onclick=()=>{
     document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b===btn));
-    $('drawer').dataset.tab=btn.dataset.tab;renderDrawer(state);
+    if(btn.dataset.tab==='deck'){openDeckScreen({state,onChange:()=>renderCards(state)});return;}$('drawer').dataset.tab=btn.dataset.tab;renderDrawer(state);
     document.querySelector('.map-hint').style.opacity=btn.dataset.tab==='map'?'1':'0';
   });
   window.addEventListener('pirate-toast',e=>toast(e.detail));
