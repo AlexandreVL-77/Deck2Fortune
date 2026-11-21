@@ -113,6 +113,7 @@ export function bindUI(state,game){
     if(result.ok&&playedCard?.type==='move')game.syncShipToPlayer();
     toast(result.message);
   });
+  $('open-map').onclick=()=>openMapScreen(state);
   $('end-turn').onclick=()=>{combat.endTurn();toast(state.hp===0?'Ton navire est à la dérive…':'Au tour des corsaires !');};
   $('flee').onclick=()=>{state.endCombat();toast('Tu as pris le large.');};
   document.querySelectorAll('[data-tab]').forEach(btn=>btn.onclick=()=>{
