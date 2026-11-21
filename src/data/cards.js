@@ -5,9 +5,13 @@ export const CARD_LIBRARY = [
   { id:'rum-of-fortune', name:'Rhum de fortune', icon:'🍹', type:'heal', rarity:'common', image:'./assets/cards/Carte de rhum nautique fantastique.png?v=4', healRatio:.5, luckPenalty:10, description:'Soigne de 50% les dégâts du capitaine mais baisse de 10% ta Luck.' },
   { id:'spyglass', name:'Longue-vue', icon:'🔭', type:'utility', rarity:'rare', image:'./assets/cards/Longue-vue sur l’océan découvert.png?v=4', effect:'reveal', radius:3, description:'Révèle les cases sous les nuages dans un rayon de 3 hexagones.' }
 ];
-export const DEFAULT_DECK = ['sea-blessing','emergency-planks','golden-compass','rum-of-fortune','spyglass'];
-export const DECK_MIN_SIZE = 5;
-export const DECK_MAX_SIZE = 5;
+export const DEFAULT_DECK = ['sea-blessing','emergency-planks','golden-compass','rum-of-fortune'];
+export const DECK_MIN_SIZE = 4;
+export const DECK_MAX_SIZE = 6;
+/** Lest : la cale du navire a une capacité limitée, chaque carte pèse selon sa rareté. */
+export const LEST_CAPACITY = 12;
+export const cardLest = card => card ? ({ common: 2, rare: 3, epic: 5 }[card.rarity] || 2) : 0;
+export const deckLest = ids => ids.reduce((sum, id) => sum + cardLest(CARD_LIBRARY.find(c => c.id === id)), 0);
 export const shuffle = items => {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
