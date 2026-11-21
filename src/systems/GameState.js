@@ -155,7 +155,7 @@ export class GameState {
     this.saveProgress();
     this.listeners.forEach(fn => fn(this));
   }
-  /** Marque les cases autour du navire comme cartographiées (rayon 3). */
+  /** Ajoute ou retire un waypoint de l'Atlas, limité aux coordonnées de la carte. */\n  toggleWaypoint(q, r) {\n    if (!Number.isSafeInteger(q) || !Number.isSafeInteger(r)) return false;\n    const index = this.waypoints.findIndex(point => point.q === q && point.r === r);\n    if (index >= 0) this.waypoints.splice(index, 1);\n    else { if (this.waypoints.length >= 100) this.waypoints.shift(); this.waypoints.push({ q, r }); }\n    this.saveProgress();\n    this.emit();\n    return true;\n  }\n  /** Marque les cases autour du navire comme cartographiées (rayon 3). */
   explore(q = this.player.q, r = this.player.r, radius = 3) {
     for (let dq = -radius; dq <= radius; dq++) for (let dr = Math.max(-radius, -dq - radius); dr <= Math.min(radius, -dq + radius); dr++) this.explored.add((q + dq) + ',' + (r + dr));
   }
@@ -172,7 +172,7 @@ export class GameState {
     try {
       localStorage.setItem(WORLD_KEY, JSON.stringify({
         seed: this.seed, player: this.player, camera: this.camera, hp: this.hp,
-        visited: [...this.visited], explored: [...this.explored], revealedClouds: [...this.revealedClouds], inStorm: this.inStorm, sunk: this.sunk,
+        visited: [...this.visited], explored: [...this.explored], revealedClouds: [...this.revealedClouds], waypoints: this.waypoints, inStorm: this.inStorm, sunk: this.sunk,
         ownedBoosters: this.ownedBoosters, cardCollection: this.cardCollection, melee: this.melee, ranged: this.ranged
       }));
     } catch {}
