@@ -10,7 +10,10 @@ const css = `
 #map-screen .pos{padding:6px 10px;border-radius:12px;background:#2d4f5d;color:#ffe8a8;font-weight:800;font-size:12px}
 #map-screen .frame{position:relative;flex:1;min-height:0;border-radius:18px;border:5px solid #8a5a35;box-shadow:inset 0 0 0 3px #d9b36c,0 4px 12px #0008;overflow:hidden;background:#f1deaa}
 #map-screen canvas{width:100%;height:100%;display:block;touch-action:none}
-#map-screen .info{margin-top:8px;padding:10px 12px;border-radius:16px;background:linear-gradient(#f9e9bd,#ecd194);border:2px solid #b57a43;font-size:13px;font-weight:700;min-height:20px;display:flex;align-items:center;gap:8px}\n#map-screen .info-text{flex:1}\n#map-screen .waypoint-action{border:2px solid #8a3d2c;border-radius:10px;padding:7px 10px;background:linear-gradient(#f8d18b,#e9a84f);color:#512b1b;font-weight:900;font-size:12px;white-space:nowrap}\n#map-screen .waypoint-action[hidden]{display:none}
+#map-screen .info{margin-top:8px;padding:10px 12px;border-radius:16px;background:linear-gradient(#f9e9bd,#ecd194);border:2px solid #b57a43;font-size:13px;font-weight:700;min-height:20px;display:flex;align-items:center;gap:8px}
+#map-screen .info-text{flex:1}
+#map-screen .waypoint-action{border:2px solid #8a3d2c;border-radius:10px;padding:7px 10px;background:linear-gradient(#f8d18b,#e9a84f);color:#512b1b;font-weight:900;font-size:12px;white-space:nowrap}
+#map-screen .waypoint-action[hidden]{display:none}
 #map-screen .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;font-weight:800;color:#ffe8a8;margin-top:6px}`;
 const R = 12; // rayon d'affichage en cases
 let root, canvas, ctx2d, state, pan = { x: 0, y: 0 }, drag = null, selected = null, marks = [];
@@ -24,7 +27,13 @@ function build() {
   <div class="legend"><span>⛵ Toi</span><span>🏝 Grande île</span><span>🌋 Volcan</span><span>⚓ Comptoir</span><span>⛈ Tempête</span></div>`;
   document.body.appendChild(root);
   canvas = root.querySelector('canvas'); ctx2d = canvas.getContext('2d');
-  root.querySelector('.back').onclick = () => { root.hidden = true; };\n  root.querySelector('.waypoint-action').onclick = () => {\n    if (!selected?.isIsland || typeof state.toggleWaypoint !== 'function') return;\n    state.toggleWaypoint(selected.q, selected.r);\n    updateSelectionInfo();\n    draw();\n  };
+  root.querySelector('.back').onclick = () => { root.hidden = true; };
+  root.querySelector('.waypoint-action').onclick = () => {
+    if (!selected?.isIsland || typeof state.toggleWaypoint !== 'function') return;
+    state.toggleWaypoint(selected.q, selected.r);
+    updateSelectionInfo();
+    draw();
+  };
   canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false }; canvas.setPointerCapture(e.pointerId); });
   canvas.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true; pan.x = drag.px + dx; pan.y = drag.py + dy; draw(); });
   canvas.addEventListener('pointerup', e => { if (drag && !drag.moved) pick(e); drag = null; });
@@ -61,7 +70,15 @@ function draw() {
     else if (t.kind === 'archipelago') { const o = t.archipelagoOrigin; if (o.comptoir && o.q === q && o.r === r) mark('⚓', 'Comptoir marchand', 1.1); else if (o.q === q && o.r === r) mark('🏝', 'Grande île', 1, true); }
     else if (t.kind === 'storm') mark('⛈', 'Tempête', .8);
   }
-  // Waypoints : visibles uniquement sur l'Atlas, jamais dans le monde 3D.\n  for (const waypoint of state.waypoints || []) {\n    const [wx, wy] = toScreen(waypoint.q, waypoint.r);\n    if (wx < -size || wy < -size || wx > w + size || wy > h + size) continue;\n    c.beginPath(); c.arc(wx + size * .58, wy - size * .58, Math.max(7, size * .38), 0, Math.PI * 2);\n    c.fillStyle = '#b83c2f'; c.fill(); c.strokeStyle = '#fff0c4'; c.lineWidth = 1.5; c.stroke();\n    c.font = `${Math.max(10, size * .48)}px serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#fff'; c.fillText('⚑', wx + size * .58, wy - size * .58);\n  }\n  // Rose des vents & quadrillage de coordonnées
+  // Waypoints : visibles uniquement sur l'Atlas, jamais dans le monde 3D.
+  for (const waypoint of state.waypoints || []) {
+    const [wx, wy] = toScreen(waypoint.q, waypoint.r);
+    if (wx < -size || wy < -size || wx > w + size || wy > h + size) continue;
+    c.beginPath(); c.arc(wx + size * .58, wy - size * .58, Math.max(7, size * .38), 0, Math.PI * 2);
+    c.fillStyle = '#b83c2f'; c.fill(); c.strokeStyle = '#fff0c4'; c.lineWidth = 1.5; c.stroke();
+    c.font = `${Math.max(10, size * .48)}px serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#fff'; c.fillText('⚑', wx + size * .58, wy - size * .58);
+  }
+  // Rose des vents & quadrillage de coordonnées
   c.fillStyle = '#7a4a2b'; c.font = '700 11px Fredoka, sans-serif'; c.textAlign = 'center';
   c.fillText('N', w / 2, 12); c.fillText('S', w / 2, h - 5); c.fillText('O', 8, h / 2); c.fillText('E', w - 8, h / 2);
   // Navire
