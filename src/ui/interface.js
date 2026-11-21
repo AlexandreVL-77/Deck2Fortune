@@ -19,7 +19,15 @@ function cardArt(card){if(card.image)return `<img class="card-art-image" src="${
 function cardTypeLabel(card){return card.type==='attack'?'ATTAQUE':card.type==='move'?'MOUVEMENT':card.type==='blessing'?'BÉNÉDICTION':card.type==='utility'?'EXPLORATION':'SOUTIEN';}
 export function renderCards(state){
   const handInfo=document.querySelector('.hand-heading small');if(handInfo)handInfo.textContent=state.inCombat?`Pioche ${state.drawPile.length} · Défausse ${state.discardPile.length}`:'4 cartes · touche pour sélectionner';
-  $('cards').innerHTML=state.hand.map((c,i)=>`<button class="card image-card ${i===state.selectedCard?'selected':''}" data-card="${i}" aria-label="${c.name}" title="${c.name}"><img class="card-art-image" src="${c.image}" alt="${c.name}" draggable="false" loading="lazy" decoding="async"></button>`).join('');
+  const cards=$('cards');
+  // Ne recrée pas les éléments <img> à chaque déplacement/émission d'état :
+  // les images restent montées et leur décodage ne clignote plus.
+  const handKey=state.hand.map(c=>c.id+'|'+c.image).join('||');
+  if(cards.dataset.handKey!==handKey){
+    cards.innerHTML=state.hand.map((c,i)=>`<button class="card image-card" data-card="${i}" aria-label="${c.name}" title="${c.name}"><img class="card-art-image" src="${c.image}" alt="${c.name}" draggable="false" loading="eager" decoding="async"></button>`).join('');
+    cards.dataset.handKey=handKey;
+  }
+  cards.querySelectorAll('[data-card]').forEach((button,i)=>button.classList.toggle('selected',i===state.selectedCard));
   $('hp').textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;
   const stormWarning=$('storm-warning');if(stormWarning)stormWarning.classList.toggle('visible',state.inStorm&&!state.sunk);
   $('hud').classList.toggle('ship-sunk',!!state.sunk);$('gold').textContent=state.gold;$('ship').textContent=state.shipName;
