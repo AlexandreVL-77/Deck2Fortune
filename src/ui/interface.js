@@ -16,7 +16,7 @@ function cardArt(card){if(card.image)return `<img class="card-art-image" src="${
 function cardTypeLabel(card){return card.type==='attack'?'ATTAQUE':card.type==='move'?'MOUVEMENT':card.type==='blessing'?'BÉNÉDICTION':card.type==='utility'?'EXPLORATION':'SOUTIEN';}
 export function renderCards(state){
   const handInfo=document.querySelector('.hand-heading small');if(handInfo)handInfo.textContent=state.inCombat?`Pioche ${state.drawPile.length} · Défausse ${state.discardPile.length}`:'4 cartes · touche pour sélectionner';
-  $('cards').innerHTML=state.hand.map((c,i)=>`<button class="card ${i===state.selectedCard?'selected':''}" data-card="${i}" aria-label="${c.name}"><span class="card-type">${cardTypeLabel(c)}</span><span class="card-art">${cardArt(c)}</span><strong>${c.name}</strong><small>${c.type==='attack'?`${c.power} dégâts · portée ${c.range}`:c.description}</small></button>`).join('');
+  $('cards').innerHTML=state.hand.map((c,i)=>`<button class="card image-card ${i===state.selectedCard?'selected':''}" data-card="${i}" aria-label="${c.name}" title="${c.name}"><img class="card-art-image" src="${c.image}" alt="${c.name}" draggable="false" loading="lazy" decoding="async"></button>`).join('');
   $('hp').textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;
   const stormWarning=$('storm-warning');if(stormWarning)stormWarning.classList.toggle('visible',state.inStorm&&!state.sunk);
   $('hud').classList.toggle('ship-sunk',!!state.sunk);$('gold').textContent=state.gold;$('ship').textContent=state.shipName;
@@ -71,18 +71,16 @@ export function renderDrawer(state){
       const counts=draft.reduce((map,id)=>{map[id]=(map[id]||0)+1;return map;},{});
       const slots=Array.from({length:DECK_MAX_SIZE},(_,i)=>{
         const card=draft[i]?CARD_LIBRARY.find(item=>item.id===draft[i]):null;
-        return card?'<button class="royale-slot filled '+card.rarity+'" data-remove-slot="'+i+'" aria-label="Retirer '+card.name+'">'+(card.image?'<img src="'+card.image+'" alt="">':'<i>'+card.icon+'</i>')+'<span>'+card.name+'</span><b>−</b></button>':'<div class="royale-slot empty"><span>'+(i+1)+'</span><small>VIDE</small></div>';
+        return card?'<button class="deck-image-slot" data-remove-slot="'+i+'" aria-label="Retirer '+card.name+'" title="Retirer '+card.name+'"><img src="'+card.image+'" alt="'+card.name+'" draggable="false"></button>':'<div class="deck-image-slot empty" aria-label="Emplacement vide"></div>';
       }).join('');
       const collection=CARD_LIBRARY.map(card=>{
         const have=state.cardCollection[card.id]||0,inDeck=counts[card.id]||0;
-        const image=card.image?'<img src="'+card.image+'" alt="'+card.name+'" loading="lazy" decoding="async" fetchpriority="low">':'<span class="royale-card-icon">'+card.icon+'</span>';
-        const rarity=card.rarity==='epic'?'ÉPIQUE':card.rarity==='rare'?'RARE':'COMMUNE';
-        return '<button class="royale-collection-card '+card.rarity+' '+(inDeck?'chosen':'')+'" data-add-card="'+card.id+'" '+(have<=inDeck||draft.length>=DECK_MAX_SIZE?'disabled':'')+'>'+image+'<span class="royale-card-copy"><b>'+card.name+'</b><small>'+rarity+' · ×'+have+' possédée(s)</small><em>'+card.description+'</em></span><strong>'+(inDeck?'×'+inDeck:'＋')+'</strong></button>';
+        return '<button class="deck-library-image '+(have<=inDeck?'unavailable':'')+'" data-add-card="'+card.id+'" aria-label="Ajouter '+card.name+'" title="'+card.name+'" '+(have<=inDeck||draft.length>=DECK_MAX_SIZE?'disabled':'')+'><img src="'+card.image+'" alt="'+card.name+'" draggable="false" loading="lazy" decoding="async"></button>';
       }).join('');
-      drawer.innerHTML='<div class="drawer-title">⚓ Ton deck de combat</div><p class="drawer-note">Compose ton paquet de 8 cartes, comme dans un jeu de cartes tactique. Choisis les cartes de ta collection ; les doublons sont limités au nombre de copies possédées.</p><div class="royale-deck-head"><b>DECK ACTIF</b><span>'+draft.length+' / '+DECK_MAX_SIZE+'</span></div><div class="royale-deck-slots">'+slots+'</div><div class="deck-count"><b>'+draft.length+' / '+DECK_MAX_SIZE+'</b><span>cartes sélectionnées · minimum '+DECK_MIN_SIZE+'</span><i class="deck-count-meter"><i style="width:'+(draft.length/DECK_MAX_SIZE*100)+'%"></i></i></div><div class="royale-collection-heading">COLLECTION <small>'+Object.values(state.cardCollection).reduce((sum,count)=>sum+count,0)+' cartes</small></div><div class="royale-collection">'+collection+'</div><button id="save-deck" class="identity-save" '+(draft.length!==DECK_MAX_SIZE?'disabled':'')+'>SAUVEGARDER LE DECK <span>✦</span></button><small class="identity-hint">Ton deck est sauvegardé sur cet appareil et utilisé au prochain combat.</small>';
+      drawer.innerHTML='<div class="drawer-title">⚓ Charger / gérer mon deck</div><p class="drawer-note">Choisis les illustrations pour composer ton deck actif. Les images sont les cartes : aucun cadre ni texte superposé.</p><div class="royale-deck-head"><b>DECK ÉQUIPÉ</b><span>'+draft.length+' / '+DECK_MAX_SIZE+'</span></div><div class="deck-image-slots">'+slots+'</div><div class="royale-collection-heading">CARTES DISPONIBLES <small>'+CARD_LIBRARY.length+' illustrations</small></div><div class="deck-image-library">'+collection+'</div><button id="save-deck" class="identity-save" '+(draft.length!==DECK_MAX_SIZE?'disabled':'')+'>ÉQUIPER CE DECK <span>✦</span></button><small class="identity-hint">Le deck équipé sera utilisé pour tes prochaines parties.</small>';
       drawer.querySelectorAll('[data-add-card]').forEach(button=>button.onclick=()=>{if(draft.length<DECK_MAX_SIZE)draft.push(button.dataset.addCard);renderDeck();});
       drawer.querySelectorAll('[data-remove-slot]').forEach(button=>button.onclick=()=>{draft.splice(Number(button.dataset.removeSlot),1);renderDeck();});
-      $('save-deck').onclick=()=>{if(state.setDeck(draft))toast('Deck sauvegardé ! Il sera utilisé au prochain combat.');else toast('Ajoute 8 cartes et vérifie ta collection.');};
+      $('save-deck').onclick=()=>{if(state.setDeck(draft))toast('Deck équipé et sauvegardé !');else toast('Complète les 5 emplacements.');};
     };
     renderDeck();
   } else if(drawer.dataset.tab==='arsenal'){
