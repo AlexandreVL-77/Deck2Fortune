@@ -50,9 +50,8 @@ function draw() {
   for (let dq = -span; dq <= span; dq++) for (let dr = -span; dr <= span; dr++) {
     const q = p.q + dq, r = p.r + dr, key = q + ',' + r, [x, y] = toScreen(q, r);
     if (x < -size || y < -size || x > w + size || y > h + size) continue;
-    const known = state.explored.has(key);
     hex(x, y, size * .98);
-    if (!known) { c.strokeStyle = '#c9a463' + '40'; c.lineWidth = .6; c.stroke(); continue; }
+    // L'atlas cartographie le monde généré autour du navire, pas uniquement les cases visitées.
     const t = makeTile(state.seed, q, r, !!state.revealedClouds?.has(key));
     c.fillStyle = t.kind === 'archipelago' ? '#8fcf7a' : t.kind === 'island' ? '#a8d98a' : t.kind === 'volcano' ? '#c9825a' : t.kind === 'storm' ? '#aab4bd' : '#bfe3e0';
     c.fill(); c.strokeStyle = '#a07a45aa'; c.lineWidth = .8; c.stroke();
