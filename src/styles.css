@@ -343,3 +343,17 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
   filter:drop-shadow(0 1px 2px #001b2b66);
 }
 .nav-icon img{display:block;width:25px;height:25px;object-fit:contain;margin:0 auto;vertical-align:middle}
+
+/* Icône Deck originale sur le premier médaillon du menu d'accueil. */
+#home-screen .home-deck-icon{
+  position:absolute;
+  z-index:3;
+  left:32.5%;
+  bottom:1.2%;
+  width:clamp(42px,11vw,68px);
+  height:clamp(42px,11vw,68px);
+  object-fit:contain;
+  transform:translateX(-50%);
+  pointer-events:none;
+  filter:drop-shadow(0 2px 2px #59351f88);
+}
