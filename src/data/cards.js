@@ -8,7 +8,7 @@ export const CARD_LIBRARY = [
 export const DEFAULT_DECK = ['sea-blessing','emergency-planks','golden-compass','rum-of-fortune'];
 export const DECK_MIN_SIZE = 4;
 export const DECK_MAX_SIZE = 6;
-/** Lest : la cale du navire a une capacité limitée, chaque carte pèse selon sa rareté. */
+/** Matelots : l'équipage disponible est limité, chaque carte en mobilise selon sa rareté. */
 export const LEST_CAPACITY = 12;
 export const cardLest = card => card ? ({ common: 2, rare: 3, epic: 5 }[card.rarity] || 2) : 0;
 export const deckLest = ids => ids.reduce((sum, id) => sum + cardLest(CARD_LIBRARY.find(c => c.id === id)), 0);
