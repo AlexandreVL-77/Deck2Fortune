@@ -91,6 +91,21 @@ function returnToMenu() {
 
 document.getElementById('start-game').addEventListener('click', () => launchGame(true));
 document.getElementById('continue-game').addEventListener('click', () => launchGame(false));
+document.getElementById('home-deck-button').addEventListener('click', () => {
+  // Open the actual in-game deck drawer from the main menu without starting a new voyage.
+  const activeWorld = ensureWorld();
+  loading.hidden = true;
+  document.body.classList.remove('is-loading');
+  shopPanel.hidden = true;
+  home.classList.add('home-hidden');
+  hud.classList.remove('hidden');
+  activeWorld.setHome(false);
+  const drawer = document.getElementById('drawer');
+  drawer.dataset.tab = 'deck';
+  document.querySelectorAll('[data-tab]').forEach(button => button.classList.toggle('active', false));
+  renderCards(state);
+  renderDrawer(state);
+});
 document.getElementById('quit-adventure').addEventListener('click', returnToMenu);
 document.getElementById('home-shop-button').addEventListener('click', () => { shopPanel.hidden = false; });
 document.getElementById('close-home-shop').addEventListener('click', () => { shopPanel.hidden = true; });
