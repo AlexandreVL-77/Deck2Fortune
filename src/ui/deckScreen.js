@@ -60,13 +60,13 @@ function render() {
   const rest = CARD_LIBRARY.filter(c => !deck.includes(c.id));
   root.innerHTML = `
   <div class="dk-top"><button class="dk-back" aria-label="Retour">‹</button><h2>Mon Deck</h2><span class="dk-count" style="${valid() ? '' : 'background:#c0462f'}">${deck.length}/${DECK_MAX_SIZE}</span></div>
-  <div class="dk-panel"><div class="dk-label"><span>DECK DE COMBAT</span><span>⚖ Lest ${lest}/${LEST_CAPACITY}</span></div>
-    <div class="dk-slots">${slots.map((c, i) => c ? `<button class="dk-card" data-slot="${c.id}">${img(c)}<span class="lw">${cardLest(c)}</span></button>` : `<div class="empty">+</div>`).join('')}</div>
+  <div class="dk-panel"><div class="dk-label"><span>DECK DE COMBAT</span><span>🏴‍☠️ Matelots ${lest}/${LEST_CAPACITY}</span></div>
+    <div class="dk-slots">${slots.map((c, i) => c ? `<button class="dk-card" data-slot="${c.id}">${img(c)}<span class="lw">${cardLest(c)}👥</span></button>` : `<div class="empty">+</div>`).join('')}</div>
     <div class="dk-lest ${lest >= LEST_CAPACITY ? 'full' : ''}"><i style="width:${Math.min(100, lest / LEST_CAPACITY * 100)}%"></i></div>
-    <div class="dk-next">Main : <i>4 cartes</i> · la cale ne peut pas tout porter !</div></div>
+    <div class="dk-next">Main : <i>4 cartes</i> · ton équipage ne peut pas tout manœuvrer !</div></div>
   <div class="dk-coll"><div class="dk-label" style="color:#fff;text-shadow:0 1px #0006"><span>COLLECTION</span><span>${rest.length} en réserve</span></div>
     <div class="dk-grid">${rest.map(c => { const have = (state.cardCollection[c.id] || 0) > 0;
-      return `<button class="dk-card ${have ? '' : 'lock'}" data-card="${c.id}">${img(c)}<span class="lw">${cardLest(c)}</span></button>`; }).join('') || '<p class="dk-hint" style="grid-column:1/-1">Toutes tes cartes sont dans le deck.</p>'}</div>
+      return `<button class="dk-card ${have ? '' : 'lock'}" data-card="${c.id}">${img(c)}<span class="lw">${cardLest(c)}👥</span></button>`; }).join('') || '<p class="dk-hint" style="grid-column:1/-1">Toutes tes cartes sont dans le deck.</p>'}</div>
     <p class="dk-hint">Touche une carte du deck pour la ranger, ou une carte de la collection pour l’utiliser.</p></div>
   <div class="dk-sheet" hidden></div>`;
   root.querySelector('.dk-back').onclick = close;
@@ -81,20 +81,20 @@ function openSheet() {
   const { state } = ctx, card = CARD_LIBRARY.find(c => c.id === detail); if (!card) return;
   const have = (state.cardCollection[card.id] || 0) > 0;
   const full = draft.length >= DECK_MAX_SIZE, over = deckLest(draft) + cardLest(card) > LEST_CAPACITY;
-  const label = !have ? 'À TROUVER EN BOOSTER' : full ? 'DECK COMPLET' : over ? 'CALE TROP CHARGÉE' : 'UTILISER';
+  const label = !have ? 'À TROUVER EN BOOSTER' : full ? 'DECK COMPLET' : over ? 'PAS ASSEZ DE MATELOTS' : 'UTILISER';
   const sheet = root.querySelector('.dk-sheet'); sheet.hidden = false;
-  sheet.innerHTML = `<div><div class="dk-card">${img(card)}</div><div><h3>${card.name}</h3><span class="tag ${card.rarity}">${(RARITY[card.rarity] || '').toUpperCase()} · LEST ${cardLest(card)}</span><p>${card.description}</p>
+  sheet.innerHTML = `<div><div class="dk-card">${img(card)}</div><div><h3>${card.name}</h3><span class="tag ${card.rarity}">${(RARITY[card.rarity] || '').toUpperCase()} · ${cardLest(card)} MATELOTS</span><p>${card.description}</p>
     <button class="dk-act ${have && !full && !over ? '' : 'off'}">${label}</button></div></div>`;
   sheet.onclick = e => { if (e.target === sheet) sheet.hidden = true; };
   sheet.querySelector('.dk-act').onclick = () => {
     if (have && !full && !over) { draft.push(card.id); commit(); say(`${card.name} équipée !`); }
-    else if (have) say(full ? 'Deck complet : range une carte d’abord.' : 'La cale est trop chargée : range une carte.');
+    else if (have) say(full ? 'Deck complet : range une carte d’abord.' : 'Pas assez de matelots : range une carte.');
     sheet.hidden = true; render();
   };
 }
 
 function close() {
-  if (!valid()) return say(draft.length < DECK_MIN_SIZE ? `Il faut au moins ${DECK_MIN_SIZE} cartes.` : 'La cale est trop chargée.');
+  if (!valid()) return say(draft.length < DECK_MIN_SIZE ? `Il faut au moins ${DECK_MIN_SIZE} cartes.` : 'Pas assez de matelots.');
   commit(); root.hidden = true; ctx.onClose?.();
 }
 /** Ouvre l'écran Deck plein écran (indépendant du tiroir de jeu). */
