@@ -30,7 +30,7 @@ export function renderCards(state){
   cards.querySelectorAll('[data-card]').forEach((button,i)=>button.classList.toggle('selected',i===state.selectedCard));
   $('hp').textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;
   const stormWarning=$('storm-warning');if(stormWarning)stormWarning.classList.toggle('visible',state.inStorm&&!state.sunk);
-  $('hud').classList.toggle('ship-sunk',!!state.sunk);$('gold').textContent=state.gold;$('ship').textContent=state.shipName;
+  $('hud').classList.toggle('ship-sunk',!!state.sunk);$('gold').textContent=state.gold;
   const fill=$('health-fill');if(fill)fill.style.width=`${state.hp/state.maxHp*100}%`;
   $('enemy-name').textContent=state.enemy.name;$('enemy-hp').textContent=`${state.enemy.hp} ♥`;
   $('enemy-bar-fill').style.width=`${state.enemy.hp/state.enemy.maxHp*100}%`;
