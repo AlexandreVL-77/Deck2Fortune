@@ -62,10 +62,12 @@ export class GameState {
   constructor() {
     const identity = loadIdentity();
     const saved = loadWorld();
-    this.maxHp = 24;
+    this.maxHp = 32;
     this._gold = loadGold();
     this.treasures = loadTreasures();
-    this.hp = finiteNumber(saved?.hp, this.maxHp, 0, this.maxHp);
+    // Les anciennes sauvegardes étaient sur 24 PV : conversion proportionnelle vers 32.
+    const savedHp = saved?.hp == null ? this.maxHp : finiteNumber(saved.hp, 24, 0, 24);
+    this.hp = saved?.hp == null ? this.maxHp : Math.min(this.maxHp, savedHp * (this.maxHp / 24));
     this.shipName = identity.shipName;
     this.captainName = identity.captainName;
     this.seed = safeInteger(saved?.seed, makeSeed(), 1, 0x7fffffff);
