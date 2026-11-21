@@ -526,3 +526,14 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 #drawer{bottom:calc(env(safe-area-inset-bottom) + 125px);max-height:42%}
 @media(max-width:370px){.resource-chip{padding:5px 7px;gap:4px}.hull-resource{min-width:108px}.future-resource{width:28px;min-width:28px}.map-medallion{width:49px;height:49px;flex-basis:49px}.map-medallion span{font-size:24px}}
 @media(max-height:650px){#hand-panel.hand-panel{bottom:calc(env(safe-area-inset-bottom) + 5px)}#cards .card.image-card{max-height:19vh}#combat-panel{max-height:29%}}
+
+/* Icônes circulaires illustrées pour les ressources et la carte. */
+.resource-chip{display:flex;align-items:center;justify-content:flex-start;gap:7px;min-height:0;padding:0;border:0;background:transparent;box-shadow:none;color:#fff0c7;}
+.resource-icon-frame{display:grid;place-items:center;flex:0 0 39px;width:39px;height:39px;border:2px solid #f3c45d;border-radius:50%;background:radial-gradient(circle at 35% 25%,#39536a,#14283a 72%);box-shadow:0 2px 0 #603b25,0 3px 8px #10202d88,inset 0 0 0 2px #714820;overflow:hidden;}
+.resource-icon-frame img{display:block;width:35px;height:35px;object-fit:contain;}
+.resource-chip>strong{font-size:14px;font-weight:900;line-height:1;color:#fff0c7;text-shadow:0 2px 3px #15232d,0 0 4px #15232d;white-space:nowrap;}
+.navigation-resources{gap:10px;align-items:center;}
+.hull-resource,.gold-resource,.plank-resource{min-width:0;flex:0 0 auto;}
+.map-medallion{overflow:hidden;}
+.map-medallion img{display:block;width:49px;height:49px;object-fit:contain;}
+@media(max-width:370px){.resource-icon-frame{flex-basis:34px;width:34px;height:34px}.resource-icon-frame img{width:31px;height:31px}.resource-chip>strong{font-size:12px}.navigation-resources{gap:7px}.map-medallion img{width:44px;height:44px}}
