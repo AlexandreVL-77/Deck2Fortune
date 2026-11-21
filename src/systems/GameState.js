@@ -157,7 +157,16 @@ export class GameState {
     this.listeners.forEach(fn => fn(this));
   }
   /** Ajoute ou retire un waypoint de l'Atlas, limité aux coordonnées de la carte. */
-  toggleWaypoint(q, r) {\n    if (!Number.isSafeInteger(q) || !Number.isSafeInteger(r)) return false;\n    const index = this.waypoints.findIndex(point => point.q === q && point.r === r);\n    if (index >= 0) this.waypoints.splice(index, 1);\n    else { if (this.waypoints.length >= 100) this.waypoints.shift(); this.waypoints.push({ q, r }); }\n    this.saveProgress();\n    this.emit();\n    return true;\n  }\n  /** Marque les cases autour du navire comme cartographiées (rayon 3). */
+  toggleWaypoint(q, r) {
+    if (!Number.isSafeInteger(q) || !Number.isSafeInteger(r)) return false;
+    const index = this.waypoints.findIndex(point => point.q === q && point.r === r);
+    if (index >= 0) this.waypoints.splice(index, 1);
+    else { if (this.waypoints.length >= 100) this.waypoints.shift(); this.waypoints.push({ q, r }); }
+    this.saveProgress();
+    this.emit();
+    return true;
+  }
+  /** Marque les cases autour du navire comme cartographiées (rayon 3). */
   explore(q = this.player.q, r = this.player.r, radius = 3) {
     for (let dq = -radius; dq <= radius; dq++) for (let dr = Math.max(-radius, -dq - radius); dr <= Math.min(radius, -dq + radius); dr++) this.explored.add((q + dq) + ',' + (r + dr));
   }
