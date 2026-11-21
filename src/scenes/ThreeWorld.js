@@ -3,7 +3,8 @@ import { rollTreasure } from '../systems/Treasure.js';
 import { makeTile, axialToPixel, hexDistance, DIRECTIONS } from '../systems/HexGrid.js';
 
 const CHUNK_SIZE=6;
-const CHUNK_RADIUS=1;
+// Précharge une couronne de chunks hors écran autour du joueur pour éviter l'apparition tardive des îles.
+const CHUNK_RADIUS=2;
 const HEX_SIZE = 1.12;
 const VIEW_HEIGHT = 13.8;
 const OCEAN_Y = -.42;
