@@ -93,7 +93,6 @@ function returnToMenu() {
 document.getElementById('start-game').addEventListener('click', () => launchGame(true));
 document.getElementById('continue-game').addEventListener('click', () => launchGame(false));
 document.getElementById('home-deck-button').addEventListener('click', () => openDeckScreen({ state, onChange: () => renderCards(state) }));
-document.getElementById('quit-adventure').addEventListener('click', returnToMenu);
 document.getElementById('home-shop-button').addEventListener('click', () => { shopPanel.hidden = false; });
 document.getElementById('close-home-shop').addEventListener('click', () => { shopPanel.hidden = true; });
 
