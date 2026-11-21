@@ -25,7 +25,7 @@ function updateHomeStats() {
   document.getElementById('home-captain').textContent = state.captainName;
   document.getElementById('home-ship').textContent = state.shipName;
   document.getElementById('home-gold').textContent = state.gold;
-  document.getElementById('home-hp').textContent = Math.ceil(state.hp);
+  document.getElementById('home-hp').textContent = `${Math.ceil(state.hp)} / ${state.maxHp}`;
   document.getElementById('home-owned-boosters').textContent = state.ownedBoosters;
   const meleeInfo = document.getElementById('home-melee-info');
   const rangedInfo = document.getElementById('home-ranged-info');
