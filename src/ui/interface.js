@@ -1,10 +1,12 @@
-import { openDeckScreen } from './deckScreen.js';
+import { openMapScreen } from './mapScreen.js';
+import { openComptoir } from './comptoirScreen.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
 import { CARD_LIBRARY, DECK_MIN_SIZE, DECK_MAX_SIZE } from '../data/cards.js';
 const $=id=>document.getElementById(id);
 let toastTimer;
-function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);}
+const SHOWN=/trésor|[+]\s?\d+\s?or/i;
+function toast(message){if(!SHOWN.test(String(message)))return;const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);}
 const art={
   broadside:'<svg viewBox="0 0 32 32"><path d="M5 19h22l-3 5H8z"/><path d="M8 18l2-8h12l2 8M13 10V6h6v4"/><path d="M4 14l4-2m16 2 4-2M13 24l-2 3m8-3 2 3"/></svg>',
   grapple:'<svg viewBox="0 0 32 32"><path d="M16 4v13m0 0c-1 7-10 7-10 1m10-1c1 7 10 7 10 1M16 17l-5-5m5 5 5-5"/><path d="M12 4h8"/></svg>',
@@ -107,8 +109,9 @@ export function bindUI(state,game){
   $('flee').onclick=()=>{state.endCombat();toast('Tu as pris le large.');};
   document.querySelectorAll('[data-tab]').forEach(btn=>btn.onclick=()=>{
     document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b===btn));
-    if(btn.dataset.tab==='deck'){openDeckScreen({state,onChange:()=>renderCards(state)});return;}$('drawer').dataset.tab=btn.dataset.tab;renderDrawer(state);
+    if(btn.dataset.tab==='atlas'){btn.classList.remove('active');document.querySelector('[data-tab="map"]')?.classList.add('active');openMapScreen(state);return;}$('drawer').dataset.tab=btn.dataset.tab;renderDrawer(state);
     document.querySelector('.map-hint').style.opacity=btn.dataset.tab==='map'?'1':'0';
   });
   window.addEventListener('pirate-toast',e=>toast(e.detail));
+  window.addEventListener('pirate-comptoir',()=>openComptoir(state,toast));
 }

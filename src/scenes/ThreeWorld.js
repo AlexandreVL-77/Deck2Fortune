@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { rollTreasure } from '../systems/Treasure.js';
 import { makeTile, axialToPixel, hexDistance, DIRECTIONS } from '../systems/HexGrid.js';
 
 const CHUNK_SIZE=6;
@@ -132,7 +133,7 @@ export class ThreeWorld {
     materials.forEach(material=>material.dispose());
   }
   updateChunks(force=false){
-    if(force&&this.chunks.size){for(const group of this.chunks.values()){this.scene.remove(group);this.disposeChunk(group);}this.chunks.clear();this.tiles=[];this.tileByKey.clear();this.foams=[];this.smokes=[];this.cloudGroups=[];}
+    if(force&&this.chunks.size){for(const group of this.chunks.values()){this.scene.remove(group);this.disposeChunk(group);}this.chunks.clear();this.tiles=[];this.tileByKey.clear();this.foams=[];this.releaseAllArchipelagos();this.smokes=[];this.cloudGroups=[];}
     const qCenter=(Math.sqrt(3)/3*this.target.x-this.target.z/3)/HEX_SIZE;
     const rCenter=(2/3*this.target.z)/HEX_SIZE;
     const cq=Math.floor(qCenter/CHUNK_SIZE),cr=Math.floor(rCenter/CHUNK_SIZE);
@@ -148,7 +149,7 @@ export class ThreeWorld {
         this.tiles.push(base);this.tileByKey.set(this.key(q,r),{data,group:tileGroup,base});
         const ring=new THREE.Mesh(this.ringGeo,this.ringMat);ring.position.y=-.175;tileGroup.add(ring);
         if(data.kind==='island')this.addIsland(tileGroup,data);
-        if(data.kind==='archipelago'&&data.archipelagoOrigin?.q===q&&data.archipelagoOrigin?.r===r)this.addArchipelago(tileGroup,data);
+        if(data.kind==='archipelago'&&data.archipelagoOrigin)this.ensureArchipelago(data);
         if(data.kind==='volcano')this.addVolcano(tileGroup,data);
         if(data.kind==='storm')this.addCloud(tileGroup,data);
         group.add(tileGroup);
@@ -157,12 +158,38 @@ export class ThreeWorld {
     }
     for(const [key,group] of this.chunks){
       if(wanted.has(key))continue;
+      for(const base of this.tiles){const t=base.userData.tile;if(t.kind==='archipelago'&&Math.floor(t.q/CHUNK_SIZE)+','+Math.floor(t.r/CHUNK_SIZE)===key)this.releaseArchipelagoCell(t);}
       this.scene.remove(group);this.disposeChunk(group);this.chunks.delete(key);
       for(const base of this.tiles){const tile=base.userData.tile;if(Math.floor(tile.q/CHUNK_SIZE)+','+Math.floor(tile.r/CHUNK_SIZE)===key)this.tileByKey.delete(this.key(tile.q,tile.r));}
       this.tiles=this.tiles.filter(base=>{const tile=base.userData.tile;return Math.floor(tile.q/CHUNK_SIZE)+','+Math.floor(tile.r/CHUNK_SIZE)!==key;});
       const removed=new Set();group.traverse(obj=>removed.add(obj));this.foams=this.foams.filter(obj=>!removed.has(obj));this.smokes=this.smokes.filter(obj=>!removed.has(obj));this.cloudGroups=this.cloudGroups.filter(obj=>!removed.has(obj));
     }
   }
+  /** Une île géante appartient à la scène (pas à un chunk) : elle reste posée tant qu'une de ses cases est chargée. */
+  ensureArchipelago(tile){
+    const o=tile.archipelagoOrigin,okey=o.q+','+o.r;
+    if(!this.archipelagos)this.archipelagos=new Map();
+    let entry=this.archipelagos.get(okey);
+    if(!entry){
+      const group=new THREE.Group();group.position.copy(this.tilePosition(o.q,o.r));
+      this.addArchipelago(group,{q:o.q,r:o.r,archipelagoOrigin:o});
+      this.scene.add(group);entry={group,cells:new Set()};this.archipelagos.set(okey,entry);
+    }
+    entry.cells.add(this.key(tile.q,tile.r));
+  }
+  releaseArchipelagoCell(tile){
+    const o=tile.archipelagoOrigin;if(!o||!this.archipelagos)return;
+    const okey=o.q+','+o.r,entry=this.archipelagos.get(okey);if(!entry)return;
+    entry.cells.delete(this.key(tile.q,tile.r));
+    if(!entry.cells.size)this.disposeArchipelago(okey,entry);
+  }
+  disposeArchipelago(okey,entry){
+    this.scene.remove(entry.group);
+    const removed=new Set();entry.group.traverse(obj=>removed.add(obj));
+    this.foams=this.foams.filter(obj=>!removed.has(obj));
+    this.disposeChunk(entry.group);this.archipelagos.delete(okey);
+  }
+  releaseAllArchipelagos(){if(this.archipelagos)for(const [k,e] of [...this.archipelagos])this.disposeArchipelago(k,e);}
   addFoam(group,tile){
     const foam=new THREE.Mesh(this.foamGeo,this.foamMat);
     foam.position.y=-.17; foam.userData.phase=tile.q+tile.r*.7; group.add(foam); this.foams.push(foam);
@@ -257,9 +284,12 @@ export class ThreeWorld {
     // Relief : un massif central (avec sommet rocheux sur les grands archipels) + collines.
     const big=cells.length>=6;
     const hillMat=this.material('#5fb065',true),hillMat2=this.material('#72c273',true),rock=this.material('#9a9a92',true),rockDark=this.material('#7e7f79',true);
+    const port=!!tile.archipelagoOrigin?.comptoir;
+    if(!port){
     const peak=add(new THREE.ConeGeometry(1,1,7),hillMat,cx,GY+(big?.42:.3),cz,big?1.05:.8,big?.9:.6,big?1.05:.8);peak.rotation.y=rng()*3;
     if(big){add(new THREE.ConeGeometry(.5,.5,6),rock,cx,GY+.78,cz,1,1,1).rotation.y=rng()*3;add(new THREE.ConeGeometry(.28,.3,6),new THREE.MeshToonMaterial({color:'#f4f1e6',gradientMap:this.toonGradient,flatShading:true}),cx,GY+1.02,cz);}
-    for(let i=0;i<Math.max(2,cells.length-3);i++){const [x,z]=sample(hillPts);if(Math.hypot(x-cx,z-cz)<.6)continue;add(new THREE.IcosahedronGeometry(1,0),i%2?hillMat:hillMat2,x,GY+.04,z,.5+rng()*.3,.22+rng()*.14,.45+rng()*.25);}
+    }
+    for(let i=0;i<Math.max(2,cells.length-3);i++){const [x,z]=sample(hillPts);if(Math.hypot(x-cx,z-cz)<.6)continue;const rad=.28+rng()*.12;if(![[1,0],[-1,0],[0,1],[0,-1]].every(([dx,dz])=>inside(grassPts,x+dx*rad,z+dz*rad)))continue;add(new THREE.IcosahedronGeometry(1,0),i%2?hillMat:hillMat2,x,GY+.04,z,rad,.2+rng()*.1,rad);}
     // Palmiers + rochers côté plage.
     const palms=3+Math.min(4,cells.length-3);
     for(let i=0;i<palms;i++){
@@ -268,28 +298,50 @@ export class ThreeWorld {
       this.addPalm(land,x,z,.26+rng()*.1,GY+.02);
     }
     for(let i=0;i<4;i++){const p=sandPts[Math.floor(rng()*sandPts.length)];add(new THREE.DodecahedronGeometry(.07+rng()*.05,0),i%2?rock:rockDark,p[0]+(cx-p[0])*.08,-.02,p[1]+(cz-p[1])*.08);}
-    // Village : une ou deux cabanes + ponton tourné vers le large.
-    const wood=this.material('#93603d',true),darkWood=this.material('#68442f',true),roof=this.material('#c2603f',true),cream=this.material('#f5dfb2',true);
-    const cabin=(x,z,s,ry)=>{
+    if(tile.archipelagoOrigin?.comptoir)this.addComptoir(land,{GY,sandPts,grassPts,inside,rng,add});
+    else{
+      // Île sauvage : buissons et rochers supplémentaires, aucune construction.
+      const bush=this.material('#4fa35a',true);
+      for(let i=0;i<5;i++){const [x,z]=sample(grassPts);add(new THREE.IcosahedronGeometry(1,0),bush,x,GY+.07,z,.13+rng()*.07,.1,.13+rng()*.07);}
+    }
+  }
+  /** Comptoir : petit port marchand construit autour de la case d'origine (celle qui ouvre le menu). */
+  addComptoir(land,{GY,sandPts,grassPts,inside,rng}){
+    const wood=this.material('#93603d',true),darkWood=this.material('#68442f',true),roof=this.material('#c2603f',true),cream=this.material('#f5dfb2',true),glass=this.material('#b9e8e4',true);
+    const house=(x,z,s,ry)=>{
       const g=new THREE.Group();g.position.set(x,GY,z);g.rotation.y=ry;g.scale.setScalar(s);land.add(g);
       const part=(geo,mat,px,py,pz)=>{const m=new THREE.Mesh(geo,mat);m.position.set(px,py,pz);m.castShadow=true;g.add(m);return m;};
       part(new THREE.BoxGeometry(.56,.36,.46),cream,0,.18,0);
       part(new THREE.ConeGeometry(.46,.34,4),roof,0,.52,0).rotation.y=Math.PI/4;
       part(new THREE.BoxGeometry(.11,.2,.03),darkWood,0,.1,.235);
-      part(new THREE.BoxGeometry(.1,.1,.03),this.material('#b9e8e4',true),-.17,.22,.235);
+      part(new THREE.BoxGeometry(.1,.1,.03),glass,-.17,.22,.235);
     };
-    const c1=sample(grassPts);cabin(c1[0],c1[1],.9,rng()*6.28);
-    if(big){const c2=sample(grassPts);if(Math.hypot(c2[0]-c1[0],c2[1]-c1[1])>.7)cabin(c2[0],c2[1],.75,rng()*6.28);}
-    // Ponton : sur le point du contour le plus tourné vers le sud (le joueur le voit).
-    let pi=0;for(let i=1;i<sandPts.length;i++)if(sandPts[i][1]>sandPts[pi][1])pi=i;
-    const dp=sandPts[pi],dir=Math.atan2(dp[0]-cx,dp[1]-cz),px=dp[0]+Math.sin(dir)*.18,pz=dp[1]+Math.cos(dir)*.18;
+    // Ponton : point du rivage le plus proche de la case d'origine, orienté vers le large.
+    let pi=0,best=1e9;for(let i=0;i<sandPts.length;i++){const d=Math.hypot(sandPts[i][0],sandPts[i][1]);if(d<best){best=d;pi=i;}}
+    const dp=sandPts[pi],dir=Math.atan2(dp[0],dp[1]);
+    // Maisons en arc de cercle autour de l'origine, à l'opposé du ponton, seulement si elles sont sur l'herbe.
+    let placed=0;
+    for(let k=0;k<7&&placed<3;k++){
+      const ang=dir+Math.PI+(k-3)*.8,x=Math.sin(ang)*.62,z=Math.cos(ang)*.62;
+      if(!inside(grassPts,x,z))continue;house(x,z,1.05+rng()*.12,ang+Math.PI);placed++;
+    }
+    if(!placed)house(0,0,.8,dir);
+    const px=dp[0]+Math.sin(dir)*.2,pz=dp[1]+Math.cos(dir)*.2;
     const dock=new THREE.Group();dock.position.set(px,-.02,pz);dock.rotation.y=dir;land.add(dock);
-    const plank=new THREE.Mesh(new THREE.BoxGeometry(.3,.06,.62),wood);plank.position.z=.1;plank.castShadow=true;dock.add(plank);
-    for(const x of [-.13,.13])for(const z of [-.12,.3]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.03,.04,.3,6),darkWood);post.position.set(x,-.08,z);dock.add(post);}
-    // Petit voilier amarré.
-    const boat=new THREE.Group();boat.position.set(Math.sin(dir)*.5,-.34,Math.cos(dir)*.5+.1);dock.add(boat);boat.position.set(.28,-.2,.28);
-    const hull=new THREE.Mesh(new THREE.BoxGeometry(.16,.07,.34),this.material('#b2703f',true));boat.add(hull);
+    const plank=new THREE.Mesh(new THREE.BoxGeometry(.32,.06,.7),wood);plank.position.z=.12;plank.castShadow=true;dock.add(plank);
+    for(const x of [-.14,.14])for(const z of [-.14,.34]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.03,.04,.3,6),darkWood);post.position.set(x,-.08,z);dock.add(post);}
+    const boat=new THREE.Group();boat.position.set(.3,-.2,.3);dock.add(boat);
+    boat.add(new THREE.Mesh(new THREE.BoxGeometry(.16,.07,.34),this.material('#b2703f',true)));
     const sail=new THREE.Mesh(new THREE.PlaneGeometry(.2,.24),new THREE.MeshToonMaterial({color:'#fff4d6',side:THREE.DoubleSide,gradientMap:this.toonGradient}));sail.position.y=.17;sail.rotation.y=Math.PI/2;boat.add(sail);
+    // Étal marchand rayé, tonneaux et pavillon doré pour reconnaître le comptoir de loin.
+    const sx=Math.sin(dir)*.1,sz=Math.cos(dir)*.1;
+    const stall=new THREE.Group();stall.position.set(sx,GY,sz);stall.scale.setScalar(1.25);stall.rotation.y=dir;land.add(stall);
+    const top=new THREE.Mesh(new THREE.ConeGeometry(.3,.18,6),this.material('#e0534a',true));top.position.y=.42;top.castShadow=true;stall.add(top);
+    for(const [x,z] of [[-.17,-.17],[.17,-.17],[-.17,.17],[.17,.17]]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.34,5),darkWood);post.position.set(x,.17,z);stall.add(post);}
+    const table=new THREE.Mesh(new THREE.BoxGeometry(.34,.05,.26),wood);table.position.y=.14;stall.add(table);
+    const barrel=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.12,8),darkWood);barrel.position.set(.3,.06,.1);stall.add(barrel);
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.7,5),darkWood);pole.position.set(-.35,.35,-.1);stall.add(pole);
+    const flag=new THREE.Mesh(new THREE.PlaneGeometry(.22,.14),new THREE.MeshToonMaterial({color:'#ffcf4a',side:THREE.DoubleSide,gradientMap:this.toonGradient}));flag.position.set(-.24,.62,-.1);stall.add(flag);
   }
   addPalm(parent,x,z,s,baseY){
     const p=new THREE.Group(); p.position.set(x,baseY,z); parent.add(p);
@@ -565,6 +617,7 @@ export class ThreeWorld {
       this.state.camera={x:this.target.x,z:this.target.z};
       const d=this.shipTarget.clone().sub(from);
       if(d.lengthSq()>.01)this.heading=Math.atan2(d.x,d.z);
+      this.state.explore();
       this.updateHighlights();
       if(tile.kind==='storm'){
         this.state.enterStorm();
@@ -578,10 +631,14 @@ export class ThreeWorld {
         window.dispatchEvent(new CustomEvent('pirate-toast',{detail:'Un corsaire des brumes approche ! Prépare tes cartes !'}));
       }
     }else{
-      const message=tile.kind==='island'||tile.kind==='archipelago'?'Île découverte : +5 or !':'Volcan découvert : +12 or !';
-      const rewardKey=this.key(tile.q,tile.r);
-      if(!this.state.visited.has(rewardKey)){if(tile.kind==='island'||tile.kind==='archipelago')this.state.gold+=5;if(tile.kind==='volcano')this.state.gold+=12;this.state.visited.add(rewardKey);}
-      window.dispatchEvent(new CustomEvent('pirate-toast',{detail:message}));
+      const origin=tile.archipelagoOrigin,rewardKey=this.key(tile.q,tile.r);
+      if(tile.kind==='archipelago'&&origin?.comptoir&&tile.q===origin.q&&tile.r===origin.r){
+        window.dispatchEvent(new CustomEvent('pirate-comptoir'));
+      }else if(!this.state.visited.has(rewardKey)){
+        this.state.visited.add(rewardKey);
+        const treasure=rollTreasure(tile.kind);
+        if(treasure){this.state.addTreasure(treasure);window.dispatchEvent(new CustomEvent('pirate-toast',{detail:`Trésor découvert : ${treasure.icon} ${treasure.name} !`}));}
+      }
     }
     this.state.emit();
   }

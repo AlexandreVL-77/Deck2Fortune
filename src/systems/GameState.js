@@ -3,6 +3,13 @@ import { WEAPONS } from '../data/weapons.js';
 
 const IDENTITY_KEY = 'deck2fortune.identity';
 const GOLD_KEY = 'deck2fortune.gold';
+const TREASURE_KEY = 'deck2fortune.treasures';
+function loadTreasures() {
+  try {
+    const list = JSON.parse(localStorage.getItem(TREASURE_KEY) || '[]');
+    return Array.isArray(list) ? list.filter(t => t && typeof t.name === 'string' && Number.isFinite(t.value)).slice(0, 500).map(t => ({ name: t.name, icon: String(t.icon || '💎'), value: Math.max(0, Math.floor(t.value)) })) : [];
+  } catch { return []; }
+}
 const WORLD_KEY = 'deck2fortune.world';
 const DEFAULT_IDENTITY = { shipName: 'La Mouette', captainName: 'Milo la Brise' };
 
@@ -57,6 +64,7 @@ export class GameState {
     const saved = loadWorld();
     this.maxHp = 24;
     this._gold = loadGold();
+    this.treasures = loadTreasures();
     this.hp = finiteNumber(saved?.hp, this.maxHp, 0, this.maxHp);
     this.shipName = identity.shipName;
     this.captainName = identity.captainName;
@@ -70,7 +78,9 @@ export class GameState {
       z: finiteNumber(saved?.camera?.z, 0)
     };
     const visited = Array.isArray(saved?.visited) ? saved.visited : [];
+    this.explored = new Set((Array.isArray(saved?.explored) ? saved.explored : []).filter(key => typeof key === 'string' && /^-?\d+,-?\d+$/.test(key)).slice(0, 30000));
     this.visited = new Set(visited.filter(key => typeof key === 'string' && /^-?\d+,-?\d+$/.test(key)).slice(0, 100000));
+    this.explore();
     const revealed = Array.isArray(saved?.revealedClouds) ? saved.revealedClouds : [];
     this.revealedClouds = new Set(revealed.filter(key => typeof key === 'string' && /^-?\d+,-?\d+$/.test(key)).slice(0, 100000));
     this.sunk = !!saved?.sunk || this.hp <= 0;
@@ -145,11 +155,24 @@ export class GameState {
     this.saveProgress();
     this.listeners.forEach(fn => fn(this));
   }
+  /** Marque les cases autour du navire comme cartographiées (rayon 3). */
+  explore(q = this.player.q, r = this.player.r, radius = 3) {
+    for (let dq = -radius; dq <= radius; dq++) for (let dr = Math.max(-radius, -dq - radius); dr <= Math.min(radius, -dq + radius); dr++) this.explored.add((q + dq) + ',' + (r + dr));
+  }
+  saveTreasures() { try { localStorage.setItem(TREASURE_KEY, JSON.stringify(this.treasures)); } catch {} }
+  addTreasure(treasure) { this.treasures.push(treasure); this.saveTreasures(); this.emit(); }
+  /** Vend un trésor (index) ou tous (index omis) ; renvoie l'or gagné. */
+  sellTreasures(index = null) {
+    const sold = index === null ? this.treasures.splice(0) : this.treasures.splice(index, 1);
+    const total = sold.reduce((sum, t) => sum + t.value, 0);
+    this.gold += total; this.saveTreasures(); this.emit();
+    return total;
+  }
   saveProgress() {
     try {
       localStorage.setItem(WORLD_KEY, JSON.stringify({
         seed: this.seed, player: this.player, camera: this.camera, hp: this.hp,
-        visited: [...this.visited], revealedClouds: [...this.revealedClouds], inStorm: this.inStorm, sunk: this.sunk,
+        visited: [...this.visited], explored: [...this.explored], revealedClouds: [...this.revealedClouds], inStorm: this.inStorm, sunk: this.sunk,
         ownedBoosters: this.ownedBoosters, cardCollection: this.cardCollection, melee: this.melee, ranged: this.ranged
       }));
     } catch {}
@@ -160,6 +183,8 @@ export class GameState {
     this.camera = { x: 0, z: 0 };
     this.hp = this.maxHp;
     this.visited = new Set();
+    this.explored = new Set();
+    this.explore(0, 0);
     this.revealedClouds.clear();
     this.inStorm = false;
     this.sunk = false;
@@ -202,7 +227,7 @@ export class GameState {
     const damage = finiteNumber(amount, 0, 0, 999);
     if (this.sunk || damage <= 0) return;
     this.enemy.hp = Math.max(0, this.enemy.hp - damage);
-    if (this.enemy.hp === 0) { this.gold += 35; this.inCombat = false; }
+    if (this.enemy.hp === 0) { this.gold += 35; this.inCombat = false; try { window.dispatchEvent(new CustomEvent('pirate-toast', { detail: '+35 or !' })); } catch {} }
     this.emit();
   }
   damagePlayer(amount) { this.damageHull(amount); }
