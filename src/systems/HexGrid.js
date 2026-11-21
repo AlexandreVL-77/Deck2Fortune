@@ -12,17 +12,26 @@ const ISLAND_SHAPES=[
   [[0,0],[1,0],[0,1],[-1,1],[-1,0],[0,-1],[2,-1]]
 ];
 function rotateAxial([q,r],turns){for(let i=0;i<turns;i++)[q,r]=[-r,q+r];return[q,r];}
+/** Un centre d'archipel n'existe que s'il est le plus "fort" dans un rayon de 5 : les îles ne se chevauchent jamais. */
+function isArchipelagoOrigin(seed,oq,or){
+  if(hexDistance({q:oq,r:or},{q:0,r:0})<=3)return false;
+  const roll=hash(seed,oq,or);
+  if(roll<.992)return false;
+  for(let dq=-5;dq<=5;dq++)for(let dr=-5;dr<=5;dr++){
+    if((!dq&&!dr)||hexDistance({q:0,r:0},{q:dq,r:dr})>5)continue;
+    const other=hash(seed,oq+dq,or+dr);
+    if(other>=.992&&(other>roll||(other===roll&&(dq<0||(dq===0&&dr<0)))))return false;
+  }
+  return true;
+}
 function findArchipelagoOrigin(seed,q,r,near){
   if(near<=3)return null;
-  // 0.8% chance per eligible cluster origin; each origin creates one large hexagonal island.
   for(let oq=q-2;oq<=q+2;oq++)for(let or=r-2;or<=r+2;or++){
-    if(hexDistance({q:oq,r:or},{q,r})>2||hexDistance({q:oq,r:or},{q:0,r:0})<=3)continue;
-    const roll=hash(seed,oq,or);
-    if(roll<.992)continue;
+    if(hexDistance({q:oq,r:or},{q,r})>2||!isArchipelagoOrigin(seed,oq,or))continue;
     const shapeIndex=Math.floor(hash(seed^0x51ed270b,oq,or)*ISLAND_SHAPES.length);
     const turns=Math.floor(hash(seed^0x2c1b3c6d,oq,or)*6);
     const shape=ISLAND_SHAPES[shapeIndex].map(p=>rotateAxial(p,turns));
-    if(shape.some(([dq,dr])=>oq+dq===q&&or+dr===r))return {q:oq,r:or,shape};
+    if(shape.some(([dq,dr])=>oq+dq===q&&or+dr===r))return {q:oq,r:or,shape,comptoir:hash(seed^0x7f4a7c15,oq,or)>.5};
   }
   return null;
 }
@@ -38,8 +47,8 @@ export function makeTile(seed,q,r,revealCloud=false){
     return hexDistance({q:aq,r:ar},{q:0,r:0})>2&&hash(seed,aq,ar)>.997;
   });
   const archipelagoOrigin=findArchipelagoOrigin(seed,q,r,near);
-  if(coveredByCloud&&!revealCloud)kind='storm';
-  else if(archipelagoOrigin)kind='archipelago';
+  if(archipelagoOrigin)kind='archipelago';
+  else if(coveredByCloud&&!revealCloud)kind='storm';
   else if(volcanoRoll>.995&&near>5)kind='volcano';
   else if(islandRoll>.97&&near>3)kind='island';
   return{q,r,kind,archipelagoOrigin};
