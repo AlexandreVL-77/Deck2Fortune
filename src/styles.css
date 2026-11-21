@@ -342,3 +342,4 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
   object-fit:contain;
   filter:drop-shadow(0 1px 2px #001b2b66);
 }
+.nav-icon img{display:block;width:25px;height:25px;object-fit:contain;margin:0 auto;vertical-align:middle}
