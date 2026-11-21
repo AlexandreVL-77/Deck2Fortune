@@ -387,3 +387,33 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 @media(max-height:680px){
   #home-screen .home-deck-medallion{width:58px;bottom:10px}
 }
+
+
+/* Ajustements du menu : médaillon remonté et zone tactile limitée au bouton Jouer. */
+#home-screen .home-deck-medallion{
+  bottom:clamp(26px,4.2%,44px);
+}
+#home-screen .home-actions .start-button{
+  box-sizing:border-box;
+  position:relative;
+  width:clamp(164px,48vw,252px);
+  height:clamp(50px,9vh,76px);
+  margin-inline:auto;
+  padding:0;
+  clip-path:polygon(8% 0,92% 0,100% 50%,92% 100%,8% 100%,0 50%);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+#home-screen .home-actions .start-button img{
+  width:100%;
+  height:100%;
+  object-fit:fill;
+  pointer-events:none;
+}
+@media(max-height:680px){
+  #home-screen .home-deck-medallion{bottom:22px}
+  #home-screen .home-actions .start-button{
+    width:clamp(150px,44vw,220px);
+    height:48px;
+  }
+}
