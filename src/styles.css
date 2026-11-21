@@ -483,3 +483,18 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 @media(max-height:700px){
   .deck-image-library{max-height:160px}
 }
+
+
+/* Le médaillon du menu principal est le seul accès au constructeur de deck. */
+#home-screen .home-deck-medallion{
+  appearance:none;
+  -webkit-appearance:none;
+  padding:0;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+#home-screen .home-deck-medallion:focus-visible{
+  outline:3px solid #f6dfa8;
+  outline-offset:4px;
+}
+.bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr))}
