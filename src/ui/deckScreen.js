@@ -1,4 +1,4 @@
-import { CARD_LIBRARY, DECK_MAX_SIZE } from '../data/cards.js';
+import { CARD_LIBRARY, DECK_MAX_SIZE, DECK_MIN_SIZE, LEST_CAPACITY, cardLest, deckLest } from '../data/cards.js';
 
 const RARITY = { common: 'Commune', rare: 'Rare', epic: 'Épique' };
 const css = `
@@ -11,7 +11,10 @@ const css = `
 #deck-screen .dk-count{padding:6px 12px;border-radius:14px;background:#2d4f5d;color:#ffe8a8;font-weight:800;font-size:13px;border:2px solid #fff3}
 #deck-screen .dk-panel{border-radius:22px;background:linear-gradient(#f9e9bd,#ecd194);border:3px solid #b57a43;box-shadow:0 5px #7a4a2b,inset 0 0 0 2px #fff6;padding:10px}
 #deck-screen .dk-label{display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:11px;letter-spacing:2px;color:#7a4a2b;margin:0 2px 8px}
-#deck-screen .dk-slots{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+#deck-screen .dk-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 14%}
+#deck-screen .dk-slots .empty{aspect-ratio:5/7;border-radius:10px;border:2px dashed #b57a43;display:grid;place-items:center;color:#b57a43;font-weight:900;font-size:20px}
+#deck-screen .dk-lest{height:12px;border-radius:8px;background:#0003;overflow:hidden;margin-top:9px}#deck-screen .dk-lest i{display:block;height:100%;background:linear-gradient(90deg,#f6d38c,#e29a4a);transition:width .25s}#deck-screen .dk-lest.full i{background:linear-gradient(90deg,#f08a6a,#d24b3a)}
+#deck-screen .lw{position:absolute;right:3px;top:3px;min-width:18px;height:18px;border-radius:9px;background:#2d4f5d;color:#ffe8a8;font-size:10px;font-weight:900;display:grid;place-items:center;padding:0 4px}
 #deck-screen .dk-card{position:relative;aspect-ratio:5/7;border-radius:10px;overflow:hidden;border:0;padding:0;background:#0003;box-shadow:0 3px 6px #0004;transition:transform .15s}
 #deck-screen .dk-card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 #deck-screen .dk-slots .dk-card.sel{outline:3px solid #ffd45a;transform:translateY(-6px) scale(1.04);box-shadow:0 0 14px #ffd45a}
@@ -37,7 +40,9 @@ const css = `
 #deck-screen .dk-act.off{background:#9aa;box-shadow:0 4px #678}
 @keyframes dkf{from{opacity:0}}@keyframes dku{from{transform:translateY(60px)}}`;
 
-let root, selSlot = 0, detail = null, ctx;
+let root, detail = null, ctx, draft = [];
+const valid = () => draft.length >= DECK_MIN_SIZE && draft.length <= DECK_MAX_SIZE && deckLest(draft) <= LEST_CAPACITY;
+const commit = () => { if (valid() && ctx.state.setDeck([...draft])) ctx.onChange?.(); };
 const toastEl = () => document.getElementById('toast');
 function say(msg) { const t = toastEl(); if (!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
 
@@ -50,39 +55,47 @@ const img = card => `<img src="${card.image}" alt="${card.name}" draggable="fals
 
 function render() {
   const { state } = ctx;
-  const deck = state.deck;
+  const deck = draft, lest = deckLest(deck);
   const slots = Array.from({ length: DECK_MAX_SIZE }, (_, i) => CARD_LIBRARY.find(c => c.id === deck[i]));
-  const rare = deck.map(id => CARD_LIBRARY.find(c => c.id === id)).filter(c => c && c.rarity !== 'common').length;
+  const rest = CARD_LIBRARY.filter(c => !deck.includes(c.id));
   root.innerHTML = `
-  <div class="dk-top"><button class="dk-back" aria-label="Retour">‹</button><h2>Mon Deck</h2><span class="dk-count">${deck.length}/${DECK_MAX_SIZE}</span></div>
-  <div class="dk-panel"><div class="dk-label"><span>DECK DE COMBAT</span><span>★ ${rare} rare${rare > 1 ? 's' : ''}+</span></div>
-    <div class="dk-slots">${slots.map((c, i) => `<button class="dk-card ${i === selSlot ? 'sel' : ''}" data-slot="${i}">${c ? img(c) : ''}<span class="n">${i + 1}</span></button>`).join('')}</div>
-    <div class="dk-next">Main : <i>4 cartes</i> + prochaine carte <i>aléatoire</i></div></div>
-  <div class="dk-coll"><div class="dk-label" style="color:#fff;text-shadow:0 1px #0006"><span>COLLECTION</span><span>${CARD_LIBRARY.filter(c => (state.cardCollection[c.id] || 0) > 0).length}/${CARD_LIBRARY.length}</span></div>
-    <div class="dk-grid">${CARD_LIBRARY.map(c => { const have = (state.cardCollection[c.id] || 0) > 0, inDeck = deck.includes(c.id);
-      return `<button class="dk-card ${inDeck ? 'in' : ''} ${have ? '' : 'lock'}" data-card="${c.id}">${img(c)}</button>`; }).join('')}</div>
-    <p class="dk-hint">Touche un emplacement, puis une carte pour l’échanger.</p></div>
+  <div class="dk-top"><button class="dk-back" aria-label="Retour">‹</button><h2>Mon Deck</h2><span class="dk-count" style="${valid() ? '' : 'background:#c0462f'}">${deck.length}/${DECK_MAX_SIZE}</span></div>
+  <div class="dk-panel"><div class="dk-label"><span>DECK DE COMBAT</span><span>⚖ Lest ${lest}/${LEST_CAPACITY}</span></div>
+    <div class="dk-slots">${slots.map((c, i) => c ? `<button class="dk-card" data-slot="${c.id}">${img(c)}<span class="lw">${cardLest(c)}</span></button>` : `<div class="empty">+</div>`).join('')}</div>
+    <div class="dk-lest ${lest >= LEST_CAPACITY ? 'full' : ''}"><i style="width:${Math.min(100, lest / LEST_CAPACITY * 100)}%"></i></div>
+    <div class="dk-next">Main : <i>4 cartes</i> · la cale ne peut pas tout porter !</div></div>
+  <div class="dk-coll"><div class="dk-label" style="color:#fff;text-shadow:0 1px #0006"><span>COLLECTION</span><span>${rest.length} en réserve</span></div>
+    <div class="dk-grid">${rest.map(c => { const have = (state.cardCollection[c.id] || 0) > 0;
+      return `<button class="dk-card ${have ? '' : 'lock'}" data-card="${c.id}">${img(c)}<span class="lw">${cardLest(c)}</span></button>`; }).join('') || '<p class="dk-hint" style="grid-column:1/-1">Toutes tes cartes sont dans le deck.</p>'}</div>
+    <p class="dk-hint">Touche une carte du deck pour la ranger, ou une carte de la collection pour l’utiliser.</p></div>
   <div class="dk-sheet" hidden></div>`;
   root.querySelector('.dk-back').onclick = close;
-  root.querySelectorAll('[data-slot]').forEach(b => b.onclick = () => { selSlot = +b.dataset.slot; render(); });
+  root.querySelectorAll('[data-slot]').forEach(b => b.onclick = () => {
+    draft = draft.filter(id => id !== b.dataset.slot); commit(); render();
+    if (draft.length < DECK_MIN_SIZE) say(`Il faut au moins ${DECK_MIN_SIZE} cartes pour partir.`);
+  });
   root.querySelectorAll('[data-card]').forEach(b => b.onclick = () => { detail = b.dataset.card; openSheet(); });
 }
 
 function openSheet() {
   const { state } = ctx, card = CARD_LIBRARY.find(c => c.id === detail); if (!card) return;
-  const have = (state.cardCollection[card.id] || 0) > 0, inDeck = state.deck.includes(card.id);
+  const have = (state.cardCollection[card.id] || 0) > 0;
+  const full = draft.length >= DECK_MAX_SIZE, over = deckLest(draft) + cardLest(card) > LEST_CAPACITY;
+  const label = !have ? 'À TROUVER EN BOOSTER' : full ? 'DECK COMPLET' : over ? 'CALE TROP CHARGÉE' : 'UTILISER';
   const sheet = root.querySelector('.dk-sheet'); sheet.hidden = false;
-  sheet.innerHTML = `<div><div class="dk-card">${img(card)}</div><div><h3>${card.name}</h3><span class="tag ${card.rarity}">${(RARITY[card.rarity] || '').toUpperCase()}</span><p>${card.description}</p>
-    <button class="dk-act ${have && !inDeck ? '' : 'off'}">${!have ? 'À TROUVER EN BOOSTER' : inDeck ? 'DÉJÀ DANS LE DECK' : `UTILISER (EMPLACEMENT ${selSlot + 1})`}</button></div></div>`;
+  sheet.innerHTML = `<div><div class="dk-card">${img(card)}</div><div><h3>${card.name}</h3><span class="tag ${card.rarity}">${(RARITY[card.rarity] || '').toUpperCase()} · LEST ${cardLest(card)}</span><p>${card.description}</p>
+    <button class="dk-act ${have && !full && !over ? '' : 'off'}">${label}</button></div></div>`;
   sheet.onclick = e => { if (e.target === sheet) sheet.hidden = true; };
   sheet.querySelector('.dk-act').onclick = () => {
-    if (!have || inDeck) { sheet.hidden = true; return; }
-    const next = [...state.deck]; next[selSlot] = card.id;
-    if (state.setDeck(next)) say(`${card.name} équipée !`); else say('Deck invalide.');
-    sheet.hidden = true; render(); ctx.onChange?.();
+    if (have && !full && !over) { draft.push(card.id); commit(); say(`${card.name} équipée !`); }
+    else if (have) say(full ? 'Deck complet : range une carte d’abord.' : 'La cale est trop chargée : range une carte.');
+    sheet.hidden = true; render();
   };
 }
 
-function close() { root.hidden = true; ctx.onClose?.(); }
+function close() {
+  if (!valid()) return say(draft.length < DECK_MIN_SIZE ? `Il faut au moins ${DECK_MIN_SIZE} cartes.` : 'La cale est trop chargée.');
+  commit(); root.hidden = true; ctx.onClose?.();
+}
 /** Ouvre l'écran Deck plein écran (indépendant du tiroir de jeu). */
-export function openDeckScreen(options) { ctx = options; build(); selSlot = 0; render(); root.hidden = false; }
+export function openDeckScreen(options) { ctx = options; build(); draft = [...options.state.deck]; render(); root.hidden = false; }

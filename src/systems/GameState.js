@@ -1,4 +1,4 @@
-import { createHand, CARD_LIBRARY, DEFAULT_DECK, DECK_MIN_SIZE, DECK_MAX_SIZE, shuffle } from '../data/cards.js';
+import { createHand, CARD_LIBRARY, DEFAULT_DECK, DECK_MIN_SIZE, DECK_MAX_SIZE, LEST_CAPACITY, deckLest, shuffle } from '../data/cards.js';
 import { WEAPONS } from '../data/weapons.js';
 
 const IDENTITY_KEY = 'deck2fortune.identity';
@@ -82,7 +82,7 @@ export class GameState {
       const savedDeck = JSON.parse(localStorage.getItem('deck2fortune.deck') || 'null');
       this.deck = Array.isArray(savedDeck) ? savedDeck.filter(id => CARD_LIBRARY.some(card => card.id === id)).slice(0, DECK_MAX_SIZE) : [...DEFAULT_DECK];
     } catch { this.deck = [...DEFAULT_DECK]; }
-    if (this.deck.length < DECK_MIN_SIZE || this.deck.some(id => this.deck.filter(x => x === id).length > (this.cardCollection[id] || 0))) {
+    if (this.deck.length < DECK_MIN_SIZE || deckLest(this.deck) > LEST_CAPACITY || this.deck.some(id => this.deck.filter(x => x === id).length > (this.cardCollection[id] || 0))) {
       this.deck = DEFAULT_DECK.filter(id => (this.cardCollection[id] || 0) > 0).slice(0, DECK_MAX_SIZE);
     }
     this.drawPile = [];
@@ -101,7 +101,7 @@ export class GameState {
     this.listeners = new Set();
   }
   setDeck(ids) {
-    if (!Array.isArray(ids) || ids.length !== DECK_MAX_SIZE) return false;
+    if (!Array.isArray(ids) || ids.length < DECK_MIN_SIZE || ids.length > DECK_MAX_SIZE || deckLest(ids) > LEST_CAPACITY) return false;
     const counts = {};
     for (const id of ids) {
       if (!CARD_LIBRARY.some(card => card.id === id)) return false;
