@@ -16,7 +16,7 @@ body{position:fixed;inset:0}
 .status-icon{color:#c67a50}
 .bottom-nav{bottom:calc(env(safe-area-inset-bottom) + 70px);width:min(360px,calc(100% - 26px));background:linear-gradient(145deg,#fff1d4,#e7c995);border:2px solid #c18b53;box-shadow:0 5px 0 #91623e,0 9px 20px #164b4b55,inset 0 0 0 2px #fff9e9}
 .nav-button{color:#765438}.nav-icon{color:#a36c3f}.nav-button.active{background:linear-gradient(145deg,#d9a86a,#b87948);color:#fff7e8;box-shadow:inset 0 1px #fff8}.nav-button.active .nav-icon{color:#fff1c9}
-.hand-panel{position:absolute;left:7px;right:7px;bottom:calc(env(safe-area-inset-bottom) + 137px);padding:9px 8px 10px;border:2px solid #c18b53;border-radius:17px;background:linear-gradient(145deg,#fff4dcf2,#e8ce9ff5);box-shadow:0 5px 0 #91623e,0 8px 20px #164b4b55,inset 0 0 0 2px #fff9e9}
+.hand-panel{position:absolute;left:7px;right:7px;bottom:calc(env(safe-area-inset-bottom) + 137px);padding:16px 18px 14px;border:0;border-radius:0;background:transparent url('../assets/ui/hand-panel-wood.png') center center / 100% 100% no-repeat;box-shadow:none}
 .hand-heading{display:flex;justify-content:space-between;align-items:center;padding:0 3px 7px;color:#795234;font-size:8px;font-weight:900;letter-spacing:1.1px}.hand-heading small{font-size:7px;letter-spacing:0;color:#a27e55;font-weight:700}
 .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:2px 2px 5px}
 .card{position:relative;min-width:0;min-height:84px;padding:7px 3px 6px;border:1.5px solid #d2a56b;border-radius:11px;background:linear-gradient(155deg,#fffdf3,#f1dfbd);color:#68482f;box-shadow:0 3px 0 #c09a68,0 4px 7px #7c593222;transition:transform .16s,box-shadow .16s,border-color .16s}
