@@ -635,3 +635,61 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 #hand-panel #cards .card.image-card:active{
   transform:rotate(var(--fan-angle)) translateY(-14px) scale(1.02)!important;
 }
+
+
+/* Main de cartes façon Clash Royale : file d'attente à gauche + cartes chevauchées */
+#hand-panel.hand-panel{
+  display:flex!important;align-items:flex-end!important;
+  left:-5vw!important;right:-5vw!important;width:110vw!important;
+  bottom:-4vh!important;height:calc(clamp(220px,38vh,340px) + 4vh)!important;
+  padding:0 5vw calc(4vh + 7px)!important;
+  background:transparent url('../assets/ui/hand-panel-wood.png') center bottom/100% 100% no-repeat!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  overflow:visible!important;
+}
+#hand-panel .hand-heading{display:none!important}
+#hand-panel::before,#hand-panel::after{display:none!important;content:none!important}
+#next-card-preview{
+  position:relative;flex:0 0 17%;height:clamp(88px,14vh,122px);
+  align-self:flex-end;margin:0 -1% 4px 0;z-index:1;overflow:visible;
+}
+#next-card-preview .queued-card{
+  position:absolute;left:0;bottom:0;width:72%;height:100%;
+  border-radius:10px;overflow:hidden;
+  filter:grayscale(1) brightness(.72);opacity:.52;
+  transform:scale(.78) translate(-8px,5px);transform-origin:bottom left;
+}
+#next-card-preview .queued-card-0{z-index:3;opacity:.9;filter:grayscale(.72) brightness(.78);transform:scale(.88) translate(4px,0)}
+#next-card-preview .queued-card-1{z-index:2;transform:scale(.76) translate(-8px,2px);opacity:.58}
+#next-card-preview .queued-card-2{z-index:1;transform:scale(.64) translate(-18px,4px);opacity:.36}
+#next-card-preview .queued-card img{display:block;width:100%;height:100%;object-fit:contain;border-radius:10px;clip-path:inset(0 round 10px)}
+#hand-panel #cards{
+  position:relative;flex:1 1 83%;min-width:0;width:auto!important;
+  display:flex!important;align-items:flex-end!important;justify-content:flex-start!important;
+  gap:0!important;padding:0 0 0 1%!important;overflow:visible!important;
+}
+#hand-panel #cards .card.image-card{
+  flex:0 0 auto;width:clamp(64px,20vw,94px)!important;
+  height:clamp(94px,18vh,142px)!important;max-height:none!important;
+  aspect-ratio:3/4.2;min-width:0;margin-left:clamp(-15px,-3.4vw,-8px);
+  padding:0!important;border:0!important;border-radius:12px!important;
+  background:transparent!important;box-shadow:none!important;
+  overflow:hidden!important;clip-path:inset(0 round 12px);
+  transform:translateY(13px) scale(.92)!important;
+  transform-origin:50% 100%;z-index:2;filter:none!important;
+}
+#hand-panel #cards .card.image-card:first-child{margin-left:0}
+#hand-panel #cards .card.image-card img{
+  display:block;width:100%;height:100%;object-fit:contain;
+  border:0!important;border-radius:12px!important;clip-path:inset(0 round 12px);
+}
+#hand-panel #cards .card.image-card.selected{
+  transform:translateY(-16px) scale(1.02)!important;
+  z-index:10!important;filter:none!important;clip-path:inset(0 round 12px);
+}
+#hand-panel #cards .card.image-card:active{transform:translateY(-12px) scale(1)!important}
+@media(max-height:650px){
+  #hand-panel.hand-panel{height:calc(clamp(185px,36vh,240px) + 4vh)!important}
+  #hand-panel #cards .card.image-card{height:clamp(82px,18vh,118px)!important}
+  #next-card-preview{height:clamp(76px,13vh,98px)}
+}
