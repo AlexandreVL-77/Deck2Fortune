@@ -1,5 +1,6 @@
 import { openMapScreen } from './mapScreen.js';
 import { openComptoir } from './comptoirScreen.js';
+import { cardFace } from './cardFace.js';
 import { makeTile, hexDistance } from '../systems/HexGrid.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
@@ -25,7 +26,7 @@ export function renderCards(state){
   // les images restent montées et leur décodage ne clignote plus.
   const handKey=state.hand.map(c=>c.id+'|'+c.image).join('||');
   if(cards.dataset.handKey!==handKey){
-    cards.innerHTML=state.hand.map((c,i)=>`<button class="card image-card" data-card="${i}" aria-label="${c.name}" title="${c.name}"><img class="card-art-image" src="${c.image}" alt="${c.name}" draggable="false" loading="eager" decoding="async"></button>`).join('');
+    cards.innerHTML=state.hand.map((c,i)=>`<button class="card image-card" data-card="${i}" aria-label="${c.name}" title="${c.name}">${cardFace(c)}</button>`).join('');
     cards.dataset.handKey=handKey;
   }
   cards.querySelectorAll('[data-card]').forEach((button,i)=>button.classList.toggle('selected',i===state.selectedCard));

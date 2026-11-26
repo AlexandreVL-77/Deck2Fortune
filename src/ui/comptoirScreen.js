@@ -24,7 +24,7 @@ function build() {
 }
 function render() {
   const total = state.treasures.reduce((s, t) => s + t.value, 0);
-  root.innerHTML = `<div class="top"><button class="back" aria-label="Retour">‹</button><h2>Comptoir</h2><span class="gold">🪙 ${state.gold} or</span></div>
+  root.innerHTML = `<div class="top"><button class="back" aria-label="Retour">‹</button><h2>Comptoir</h2><span class="gold"><img src="./assets/ui/icon-gold.webp" style="width:20px;vertical-align:-5px"> ${state.gold} or</span></div>
   <div class="panel merchant"><b>🧔</b><div>« Amène-moi tes trésors, capitaine, et je te les paie en bon or sonnant ! »</div></div>
   <div class="list">${state.treasures.length ? state.treasures.map((t, i) => `<div class="row"><span class="i">${t.icon}</span><span class="n">${t.name}</span><button data-i="${i}">+${t.value} or</button></div>`).join('') : '<p class="empty">Ta cale est vide.<br>Fouille les îles et les volcans pour trouver des trésors !</p>'}</div>
   <button class="all" ${state.treasures.length ? '' : 'disabled'}>TOUT VENDRE${total ? ` · +${total} or` : ''}</button>`;
