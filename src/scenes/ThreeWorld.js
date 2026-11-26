@@ -256,7 +256,8 @@ export class ThreeWorld {
     const base=this.archipelagoOutline(cells);
     const centers=cells.map(([q,r])=>[HEX_SIZE*Math.sqrt(3)*(q+r/2),HEX_SIZE*1.5*r]);
     const cx=centers.reduce((s,c)=>s+c[0],0)/centers.length,cz=centers.reduce((s,c)=>s+c[1],0)/centers.length;
-    const toShape=pts=>{const s=new THREE.Shape();s.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)s.lineTo(pts[i][0],pts[i][1]);s.closePath();return s;};
+    // rotateX(-90°) envoie le y du Shape sur -z : on injecte donc -z pour que la silhouette colle aux cases.
+    const toShape=pts=>{const s=new THREE.Shape();s.moveTo(pts[0][0],-pts[0][1]);for(let i=1;i<pts.length;i++)s.lineTo(pts[i][0],-pts[i][1]);s.closePath();return s;};
     const flat=(pts,y,mat,order=0)=>{const g=new THREE.ShapeGeometry(toShape(pts));g.rotateX(-Math.PI/2);const m=new THREE.Mesh(g,mat);m.position.y=y;m.renderOrder=order;return m;};
     const slab=(pts,depth,bevel,y,mat)=>{
       const g=new THREE.ExtrudeGeometry(toShape(pts),{depth,bevelEnabled:true,bevelSegments:2,bevelSize:bevel,bevelThickness:bevel*.8,curveSegments:1});
@@ -268,7 +269,7 @@ export class ThreeWorld {
     const lagoonMat=new THREE.MeshBasicMaterial({color:'#aef0e0',transparent:true,opacity:.5,depthWrite:false});
     land.add(flat(this.offsetOutline(base,-.12,2),-.285,lagoonMat,1));
     const foamPts=this.offsetOutline(base,.10,2),foamIn=this.offsetOutline(base,.30,2);
-    const foamShape=toShape(foamPts);foamShape.holes.push(new THREE.Path(foamIn.map(p=>new THREE.Vector2(p[0],p[1]))));
+    const foamShape=toShape(foamPts);foamShape.holes.push(new THREE.Path(foamIn.map(p=>new THREE.Vector2(p[0],-p[1]))));
     const foamGeo=new THREE.ShapeGeometry(foamShape);foamGeo.rotateX(-Math.PI/2);
     const foam=new THREE.Mesh(foamGeo,this.foamMat);foam.position.set(cx,-.2,cz);foam.userData.phase=tile.q+tile.r*.7;
     foam.geometry.translate(-cx,0,-cz);group.add(foam);this.foams.push(foam);
@@ -326,10 +327,10 @@ export class ThreeWorld {
       if(!inside(grassPts,x,z))continue;house(x,z,1.05+rng()*.12,ang+Math.PI);placed++;
     }
     if(!placed)house(0,0,.8,dir);
-    const px=dp[0]+Math.sin(dir)*.2,pz=dp[1]+Math.cos(dir)*.2;
+    const px=dp[0]-Math.sin(dir)*.12,pz=dp[1]-Math.cos(dir)*.12;
     const dock=new THREE.Group();dock.position.set(px,-.12,pz);dock.rotation.y=dir;land.add(dock);
-    const plank=new THREE.Mesh(new THREE.BoxGeometry(.32,.06,.7),wood);plank.position.z=.12;plank.castShadow=true;dock.add(plank);
-    for(const x of [-.14,.14])for(const z of [-.14,.34]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.03,.04,.5,6),darkWood);post.position.set(x,-.25,z);dock.add(post);}
+    const plank=new THREE.Mesh(new THREE.BoxGeometry(.32,.06,.8),wood);plank.position.z=.28;plank.castShadow=true;dock.add(plank);
+    for(const x of [-.14,.14])for(const z of [-.14,.34]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.03,.04,.5,6),darkWood);post.position.set(x,-.25,z+.14);dock.add(post);}
     const boat=new THREE.Group();boat.position.set(.34,-.25,.3);dock.add(boat);
     boat.add(new THREE.Mesh(new THREE.BoxGeometry(.16,.07,.34),this.material('#b2703f',true)));
     const sail=new THREE.Mesh(new THREE.PlaneGeometry(.2,.24),new THREE.MeshToonMaterial({color:'#fff4d6',side:THREE.DoubleSide,gradientMap:this.toonGradient}));sail.position.y=.17;sail.rotation.y=Math.PI/2;boat.add(sail);

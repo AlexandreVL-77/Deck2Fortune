@@ -1,4 +1,4 @@
-import { createHand, CARD_LIBRARY, DEFAULT_DECK, DECK_MIN_SIZE, DECK_MAX_SIZE, LEST_CAPACITY, deckLest, shuffle } from '../data/cards.js';
+import { CARD_LIBRARY, DEFAULT_DECK, DECK_MIN_SIZE, DECK_MAX_SIZE, DECK_POINT_LIMIT, deckPoints, shuffle } from '../data/cards.js';
 import { WEAPONS } from '../data/weapons.js';
 
 const IDENTITY_KEY = 'deck2fortune.identity';
@@ -88,18 +88,19 @@ export class GameState {
     this.inStorm = !!saved?.inStorm && !this.sunk;
     this.enemy = { q: 2, r: -1, hp: 18, maxHp: 18, name: 'Corsaire des Brumes' };
     this.cardCollection = Object.fromEntries(CARD_LIBRARY.map(card => [card.id, safeInteger(saved?.cardCollection?.[card.id], 0, 0, Number.MAX_SAFE_INTEGER)]));
-    CARD_LIBRARY.forEach(card => { if (this.cardCollection[card.id] === 0) this.cardCollection[card.id] = 1; });
+    DEFAULT_DECK.forEach(id => { if (this.cardCollection[id] === 0) this.cardCollection[id] = 1; });
     try {
       const savedDeck = JSON.parse(localStorage.getItem('deck2fortune.deck') || 'null');
       this.deck = Array.isArray(savedDeck) ? savedDeck.filter(id => CARD_LIBRARY.some(card => card.id === id)).slice(0, DECK_MAX_SIZE) : [...DEFAULT_DECK];
     } catch { this.deck = [...DEFAULT_DECK]; }
-    if (this.deck.length < DECK_MIN_SIZE || deckLest(this.deck) > LEST_CAPACITY || this.deck.some(id => this.deck.filter(x => x === id).length > (this.cardCollection[id] || 0))) {
+    if (this.deck.length < DECK_MIN_SIZE || deckPoints(this.deck) > DECK_POINT_LIMIT || this.deck.some(id => this.deck.filter(x => x === id).length > (this.cardCollection[id] || 0))) {
       this.deck = DEFAULT_DECK.filter(id => (this.cardCollection[id] || 0) > 0).slice(0, DECK_MAX_SIZE);
     }
-    this.drawPile = [];
-    this.discardPile = [];
-    this.hand = createHand(this.deck);
+    this.hand = [];
+    this.dealHand();
     this.luckBoostTurns = 0;
+    this.luckMalusTurns = 0;
+    this.luckMalusAmount = 0;
     this.negativeEffects = [];
     this.selectedCard = 0;
     this.inCombat = false;
@@ -112,7 +113,7 @@ export class GameState {
     this.listeners = new Set();
   }
   setDeck(ids) {
-    if (!Array.isArray(ids) || ids.length < DECK_MIN_SIZE || ids.length > DECK_MAX_SIZE || deckLest(ids) > LEST_CAPACITY) return false;
+    if (!Array.isArray(ids) || ids.length < DECK_MIN_SIZE || ids.length > DECK_MAX_SIZE || deckPoints(ids) > DECK_POINT_LIMIT) return false;
     const counts = {};
     for (const id of ids) {
       if (!CARD_LIBRARY.some(card => card.id === id)) return false;
@@ -122,10 +123,14 @@ export class GameState {
     this.deck = [...ids];
     try { localStorage.setItem('deck2fortune.deck', JSON.stringify(this.deck)); } catch {}
     if (!this.inCombat) {
-      this.drawPile = []; this.discardPile = [];
-      this.hand = createHand(this.deck); this.selectedCard = 0;
+      this.dealHand(); this.selectedCard = 0;
     }
     this.emit(); return true;
+  }
+  /** Mélange le deck et distribue 4 cartes : la pioche existe toujours, en combat comme en exploration. */
+  dealHand() {
+    this.drawPile = shuffle(this.deck); this.discardPile = [];
+    this.hand = this.drawFromDeck(4);
   }
   drawFromDeck(count = 1) {
     const drawn = [];
@@ -202,8 +207,7 @@ export class GameState {
     this.sunk = false;
     this.inCombat = false;
     this.enemy.hp = this.enemy.maxHp;
-    this.drawPile = []; this.discardPile = [];
-    this.hand = createHand(this.deck);
+    this.dealHand();
     this.selectedCard = 0;
     this.saveProgress();
   }
@@ -227,7 +231,7 @@ export class GameState {
     this.emit();
   }
   startCombat() { if (this.sunk || this.inCombat) return; this.enemy.hp = this.enemy.maxHp; this.inCombat = true; this.drawPile = shuffle(this.deck); this.discardPile = []; this.hand = this.drawFromDeck(4); this.selectedCard = 0; this.turn = 1; this.luckBoostTurns = 0; this.emit(); }
-  endCombat() { this.inCombat = false; this.enemy.hp = this.enemy.maxHp; this.drawPile = []; this.discardPile = []; this.luckBoostTurns = 0; this.emit(); }
+  endCombat() { this.inCombat = false; this.enemy.hp = this.enemy.maxHp; this.luckBoostTurns = 0; this.luckMalusTurns = 0; this.emit(); }
   spendGold(amount) {
     const cost = finiteNumber(amount, -1, 0, Number.MAX_SAFE_INTEGER);
     if (cost < 0 || this.gold < cost) return false;
