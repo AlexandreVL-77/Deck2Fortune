@@ -22,14 +22,23 @@ function cardTypeLabel(card){return card.type==='attack'?'ATTAQUE':card.type==='
 export function renderCards(state){
   const handInfo=document.querySelector('.hand-heading small');if(handInfo)handInfo.textContent=state.inCombat?`Pioche ${state.drawPile.length} · Défausse ${state.discardPile.length}`:'4 cartes · touche pour sélectionner';
   const cards=$('cards');
-  // Ne recrée pas les éléments <img> à chaque déplacement/émission d'état :
-  // les images restent montées et leur décodage ne clignote plus.
+  // Garde les images de la main montées pour éviter les clignotements.
   const handKey=state.hand.map(c=>c.id+'|'+c.image).join('||');
   if(cards.dataset.handKey!==handKey){
     cards.innerHTML=state.hand.map((c,i)=>`<button class="card image-card" data-card="${i}" aria-label="${c.name}" title="${c.name}">${cardFace(c)}</button>`).join('');
     cards.dataset.handKey=handKey;
   }
   cards.querySelectorAll('[data-card]').forEach((button,i)=>button.classList.toggle('selected',i===state.selectedCard));
+  // Trois cartes à venir : la prochaine est devant, les suivantes restent grisées derrière.
+  const preview=$('next-card-preview');
+  if(preview){
+    const upcoming=(state.drawPile||[]).slice(-3).reverse();
+    const previewKey=upcoming.map(c=>c.id+'|'+c.image).join('||');
+    if(preview.dataset.key!==previewKey){
+      preview.innerHTML=upcoming.map((card,i)=>`<div class="queued-card queued-card-${i}" aria-hidden="true">${cardFace(card)}</div>`).join('');
+      preview.dataset.key=previewKey;
+    }
+  }
   $('hp').textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;
   const stormWarning=$('storm-warning');if(stormWarning)stormWarning.classList.toggle('visible',state.inStorm&&!state.sunk);
   $('hud').classList.toggle('ship-sunk',!!state.sunk);$('gold').textContent=state.gold;$('hp').textContent=`${Math.ceil(state.hp)} / ${Math.ceil(state.maxHp)}`;
