@@ -693,3 +693,78 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
   #hand-panel #cards .card.image-card{height:clamp(82px,18vh,118px)!important}
   #next-card-preview{height:clamp(76px,13vh,98px)}
 }
+
+
+/* Correction ciblée de la main : conserver l'illustration originale sans l'étirer */
+#hand-panel.hand-panel{
+  left:-2vw!important;right:-2vw!important;width:104vw!important;
+  bottom:-2vh!important;height:clamp(178px,29vh,248px)!important;
+  padding:0 2vw calc(2vh + 5px)!important;
+  background-color:transparent!important;
+  background-image:url('../assets/ui/hand-panel-wood.png')!important;
+  background-position:center bottom!important;
+  background-size:auto 100%!important;background-repeat:no-repeat!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+#hand-panel.hand-panel .hand-heading,
+#hand-panel.hand-panel::before,#hand-panel.hand-panel::after{display:none!important;content:none!important}
+/* Retire l'ancienne bande rose/beige et tout fond de carte : seule l'image reste visible */
+#hand-panel #cards .card.image-card::before,
+#hand-panel #cards .card.image-card::after{display:none!important;content:none!important}
+#hand-panel #cards .card.image-card,
+#hand-panel #cards .card.image-card.selected{
+  background:transparent!important;background-image:none!important;
+  border:0!important;box-shadow:none!important;outline:0!important;
+  border-radius:13px!important;overflow:hidden!important;
+  -webkit-mask-image:-webkit-radial-gradient(white,black);
+  clip-path:inset(0 round 13px);
+}
+#hand-panel #cards .card.image-card .card-face,
+#hand-panel #cards .card.image-card .card-inner,
+#hand-panel #cards .card.image-card .card-art,
+#hand-panel #cards .card.image-card .card-art-image{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  border-radius:13px!important;overflow:hidden!important;
+}
+#hand-panel #cards .card.image-card img{
+  display:block!important;width:100%!important;height:100%!important;
+  object-fit:contain!important;border:0!important;border-radius:13px!important;
+  clip-path:inset(0 round 13px)!important;background:transparent!important;
+}
+/* Réduire la taille sans modifier l'ordre ni l'espacement horizontal des cartes de la main */
+#hand-panel #cards .card.image-card{
+  width:clamp(55px,16vw,78px)!important;
+  height:clamp(82px,14.5vh,112px)!important;
+  transform:translateY(10px) scale(.94)!important;
+}
+#hand-panel #cards .card.image-card.selected{
+  transform:translateY(-9px) scale(1.02)!important;z-index:12!important;
+}
+/* File de pioche : la prochaine carte est visible en premier, les suivantes plus petites et grisées */
+#next-card-preview{
+  flex:0 0 clamp(48px,13vw,66px)!important;
+  height:clamp(82px,14.5vh,112px)!important;
+  margin:0 2px 5px 0!important;position:relative!important;
+  align-self:flex-end!important;overflow:visible!important;
+}
+#next-card-preview .queued-card{
+  position:absolute!important;left:0!important;bottom:0!important;
+  width:100%!important;height:100%!important;
+  overflow:hidden!important;border-radius:10px!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  clip-path:inset(0 round 10px)!important;
+  filter:grayscale(1) brightness(.62)!important;opacity:.48!important;
+}
+#next-card-preview .queued-card-0{
+  z-index:3!important;transform:scale(.86) translate(5px,0)!important;
+  filter:grayscale(.65) brightness(.72)!important;opacity:.88!important;
+}
+#next-card-preview .queued-card-1{z-index:2!important;transform:scale(.72) translate(-8px,5px)!important;opacity:.5!important}
+#next-card-preview .queued-card-2{z-index:1!important;transform:scale(.58) translate(-16px,8px)!important;opacity:.3!important}
+#next-card-preview .queued-card *{border-radius:10px!important}
+#next-card-preview .queued-card img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;background:transparent!important;clip-path:inset(0 round 10px)!important}
+@media(max-height:650px){
+ #hand-panel.hand-panel{height:clamp(158px,27vh,205px)!important}
+ #hand-panel #cards .card.image-card{height:clamp(74px,14vh,96px)!important}
+ #next-card-preview{height:clamp(74px,14vh,96px)!important}
+}
