@@ -156,7 +156,7 @@ export class GameState {
     this.listeners.forEach(fn => fn(this));
   }
   /** Marque les cases autour du navire comme cartographiées (rayon 3). */
-  explore(q = this.player.q, r = this.player.r, radius = 3) {
+  explore(q = this.player.q, r = this.player.r, radius = 6) {
     for (let dq = -radius; dq <= radius; dq++) for (let dr = Math.max(-radius, -dq - radius); dr <= Math.min(radius, -dq + radius); dr++) this.explored.add((q + dq) + ',' + (r + dr));
   }
   saveTreasures() { try { localStorage.setItem(TREASURE_KEY, JSON.stringify(this.treasures)); } catch {} }

@@ -1,11 +1,12 @@
 import { openMapScreen } from './mapScreen.js';
+import { makeTile, hexDistance } from '../systems/HexGrid.js';
 import { openComptoir } from './comptoirScreen.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
 import { CARD_LIBRARY, DECK_MIN_SIZE, DECK_MAX_SIZE } from '../data/cards.js';
 const $=id=>document.getElementById(id);
 let toastTimer;
-const SHOWN=/trésor|[+]\s?\d+\s?or/i;
+const SHOWN=/comptoir|trésor|[+]\s?\d+\s?or/i;
 function toast(message){if(!SHOWN.test(String(message)))return;const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);}
 const art={
   broadside:'<svg viewBox="0 0 32 32"><path d="M5 19h22l-3 5H8z"/><path d="M8 18l2-8h12l2 8M13 10V6h6v4"/><path d="M4 14l4-2m16 2 4-2M13 24l-2 3m8-3 2 3"/></svg>',
@@ -17,9 +18,16 @@ const art={
 };
 function cardArt(card){if(card.image)return `<img class="card-art-image" src="${card.image}" alt="${card.name}" loading="lazy" decoding="async" fetchpriority="low">`;if(art[card.id])return art[card.id];return art.cutlass;}
 function cardTypeLabel(card){return card.type==='attack'?'ATTAQUE':card.type==='move'?'MOUVEMENT':card.type==='blessing'?'BÉNÉDICTION':card.type==='utility'?'EXPLORATION':'SOUTIEN';}
-export function renderCards(state){
+let preloaded=false;
+function preloadCards(){if(preloaded)return;preloaded=true;for(const c of CARD_LIBRARY){if(c.image){const i=new Image();i.decoding='sync';i.src=c.image;}}}
+export function renderCards(state){preloadCards();
   const handInfo=document.querySelector('.hand-heading small');if(handInfo)handInfo.textContent=state.inCombat?`Pioche ${state.drawPile.length} · Défausse ${state.discardPile.length}`:'4 cartes · touche pour sélectionner';
-  $('cards').innerHTML=state.hand.map((c,i)=>`<button class="card image-card ${i===state.selectedCard?'selected':''}" data-card="${i}" aria-label="${c.name}" title="${c.name}"><img class="card-art-image" src="${c.image}" alt="${c.name}" draggable="false" loading="lazy" decoding="async"></button>`).join('');
+  const box=$('cards'),sig=state.hand.map(c=>c.id).join('|');
+  if(box.dataset.sig!==sig){
+    box.dataset.sig=sig;
+    box.innerHTML=state.hand.map((c,i)=>`<button class="card image-card" data-card="${i}" aria-label="${c.name}" title="${c.name}"><img class="card-art-image" src="${c.image}" alt="${c.name}" draggable="false" decoding="sync"></button>`).join('');
+  }
+  box.querySelectorAll('.card').forEach((el,i)=>el.classList.toggle('selected',i===state.selectedCard));
   $('hp').textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;
   const stormWarning=$('storm-warning');if(stormWarning)stormWarning.classList.toggle('visible',state.inStorm&&!state.sunk);
   $('hud').classList.toggle('ship-sunk',!!state.sunk);$('gold').textContent=state.gold;$('ship').textContent=state.shipName;
@@ -114,4 +122,12 @@ export function bindUI(state,game){
   });
   window.addEventListener('pirate-toast',e=>toast(e.detail));
   window.addEventListener('pirate-comptoir',()=>openComptoir(state,toast));
+  // Bouton « Comptoir » : visible dès que le navire est au contact d'un port marchand.
+  const portBtn=document.createElement('button');portBtn.id='comptoir-button';portBtn.hidden=true;portBtn.textContent='⚓ Comptoir';
+  portBtn.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--lift,0px) + 250px);z-index:20;padding:10px 18px;border-radius:18px;border:3px solid #fff8;background:linear-gradient(#ffe39a,#e9a94b);box-shadow:0 4px #8a5a2b;color:#5a3a1f;font:900 14px Fredoka,sans-serif;letter-spacing:1px';
+  document.body.appendChild(portBtn);portBtn.onclick=()=>openComptoir(state,toast);
+  const nearPort=()=>{const p=state.player;if(state.inCombat||state.sunk)return false;
+    for(let dq=-3;dq<=3;dq++)for(let dr=-3;dr<=3;dr++){const t=makeTile(state.seed,p.q+dq,p.r+dr);const o=t.archipelagoOrigin;
+      if(t.kind==='archipelago'&&o?.comptoir&&hexDistance(t,p)<=1)return true;}return false;};
+  state.subscribe(()=>{portBtn.hidden=document.getElementById('hud')?.classList.contains('hidden')||!nearPort();});
 }
