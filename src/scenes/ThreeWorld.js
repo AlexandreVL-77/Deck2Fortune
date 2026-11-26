@@ -208,7 +208,7 @@ export class ThreeWorld {
     mesh(g.hill,this.material('#6cb868',true),-.10,.14,0,.55);
     mesh(g.rock,this.material('#cdbd9c',true),.52,.07,-.40);
     mesh(g.rock,this.material('#bfb090',true),-.45,.07,.46).scale.setScalar(.8);
-    this.addPalm(isle,-.18,-.02,.9,.22);
+    this.addPalm(isle,-.18,-.02,.9,.17);
     this.addPalm(isle,.28,.22,.62,.15);
   }
   /** Contour fermé de l'archipel (union des hexagones) dans le repère local de la tuile d'origine. */

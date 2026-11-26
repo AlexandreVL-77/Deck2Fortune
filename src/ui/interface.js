@@ -1,6 +1,6 @@
 import { openMapScreen } from './mapScreen.js';
-import { makeTile, hexDistance } from '../systems/HexGrid.js';
 import { openComptoir } from './comptoirScreen.js';
+import { makeTile, hexDistance } from '../systems/HexGrid.js';
 import { CombatSystem } from '../systems/CombatSystem.js';
 import { ShopSystem } from '../systems/ShopSystem.js';
 import { CARD_LIBRARY, DECK_MIN_SIZE, DECK_MAX_SIZE } from '../data/cards.js';
@@ -18,19 +18,20 @@ const art={
 };
 function cardArt(card){if(card.image)return `<img class="card-art-image" src="${card.image}" alt="${card.name}" loading="lazy" decoding="async" fetchpriority="low">`;if(art[card.id])return art[card.id];return art.cutlass;}
 function cardTypeLabel(card){return card.type==='attack'?'ATTAQUE':card.type==='move'?'MOUVEMENT':card.type==='blessing'?'BÉNÉDICTION':card.type==='utility'?'EXPLORATION':'SOUTIEN';}
-let preloaded=false;
-function preloadCards(){if(preloaded)return;preloaded=true;for(const c of CARD_LIBRARY){if(c.image){const i=new Image();i.decoding='sync';i.src=c.image;}}}
-export function renderCards(state){preloadCards();
+export function renderCards(state){
   const handInfo=document.querySelector('.hand-heading small');if(handInfo)handInfo.textContent=state.inCombat?`Pioche ${state.drawPile.length} · Défausse ${state.discardPile.length}`:'4 cartes · touche pour sélectionner';
-  const box=$('cards'),sig=state.hand.map(c=>c.id).join('|');
-  if(box.dataset.sig!==sig){
-    box.dataset.sig=sig;
-    box.innerHTML=state.hand.map((c,i)=>`<button class="card image-card" data-card="${i}" aria-label="${c.name}" title="${c.name}"><img class="card-art-image" src="${c.image}" alt="${c.name}" draggable="false" decoding="sync"></button>`).join('');
+  const cards=$('cards');
+  // Ne recrée pas les éléments <img> à chaque déplacement/émission d'état :
+  // les images restent montées et leur décodage ne clignote plus.
+  const handKey=state.hand.map(c=>c.id+'|'+c.image).join('||');
+  if(cards.dataset.handKey!==handKey){
+    cards.innerHTML=state.hand.map((c,i)=>`<button class="card image-card" data-card="${i}" aria-label="${c.name}" title="${c.name}"><img class="card-art-image" src="${c.image}" alt="${c.name}" draggable="false" loading="eager" decoding="async"></button>`).join('');
+    cards.dataset.handKey=handKey;
   }
-  box.querySelectorAll('.card').forEach((el,i)=>el.classList.toggle('selected',i===state.selectedCard));
+  cards.querySelectorAll('[data-card]').forEach((button,i)=>button.classList.toggle('selected',i===state.selectedCard));
   $('hp').textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;
   const stormWarning=$('storm-warning');if(stormWarning)stormWarning.classList.toggle('visible',state.inStorm&&!state.sunk);
-  $('hud').classList.toggle('ship-sunk',!!state.sunk);$('gold').textContent=state.gold;$('ship').textContent=state.shipName;
+  $('hud').classList.toggle('ship-sunk',!!state.sunk);$('gold').textContent=state.gold;$('hp').textContent=`${Math.ceil(state.hp)} / ${Math.ceil(state.maxHp)}`;
   const fill=$('health-fill');if(fill)fill.style.width=`${state.hp/state.maxHp*100}%`;
   $('enemy-name').textContent=state.enemy.name;$('enemy-hp').textContent=`${state.enemy.hp} ♥`;
   $('enemy-bar-fill').style.width=`${state.enemy.hp/state.enemy.maxHp*100}%`;
@@ -113,6 +114,7 @@ export function bindUI(state,game){
     if(result.ok&&playedCard?.type==='move')game.syncShipToPlayer();
     toast(result.message);
   });
+  $('open-map').onclick=()=>openMapScreen(state);
   $('end-turn').onclick=()=>{combat.endTurn();toast(state.hp===0?'Ton navire est à la dérive…':'Au tour des corsaires !');};
   $('flee').onclick=()=>{state.endCombat();toast('Tu as pris le large.');};
   document.querySelectorAll('[data-tab]').forEach(btn=>btn.onclick=()=>{
@@ -129,5 +131,5 @@ export function bindUI(state,game){
   const nearPort=()=>{const p=state.player;if(state.inCombat||state.sunk)return false;
     for(let dq=-3;dq<=3;dq++)for(let dr=-3;dr<=3;dr++){const t=makeTile(state.seed,p.q+dq,p.r+dr);const o=t.archipelagoOrigin;
       if(t.kind==='archipelago'&&o?.comptoir&&hexDistance(t,p)<=1)return true;}return false;};
-  state.subscribe(()=>{portBtn.hidden=document.getElementById('hud')?.classList.contains('hidden')||!nearPort();});
+  state.subscribe(()=>{portBtn.hidden=!nearPort();});
 }
