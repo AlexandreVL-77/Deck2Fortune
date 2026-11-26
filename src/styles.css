@@ -579,3 +579,34 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
   #hand-panel.hand-panel{height:clamp(125px,24vh,170px)}
   #hand-panel #cards .card.image-card{max-height:19vh}
 }
+
+
+/* Panneau original volontairement surdimensionné : déborde légèrement des bords */
+#hand-panel.hand-panel{
+  left:-5vw!important;right:-5vw!important;
+  width:110vw!important;
+  bottom:-4vh!important;
+  height:calc(clamp(220px,38vh,340px) + 4vh)!important;
+  box-sizing:border-box;
+  padding:0 5vw calc(4vh + 12px)!important;
+  background-image:url('../assets/ui/hand-panel-wood.png')!important;
+  background-position:center bottom!important;
+  background-size:100% 100%!important;
+  background-repeat:no-repeat!important;
+  overflow:visible!important;
+}
+#hand-panel #cards{
+  width:100%;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:0!important;padding:0 2%!important;align-items:end;overflow:visible;
+}
+#hand-panel #cards .card.image-card{
+  max-height:none!important;
+  height:clamp(118px,22vh,190px)!important;
+  width:auto!important;max-width:100%;
+  aspect-ratio:1064/1478;
+  justify-self:center;
+}
+@media(max-height:650px){
+  #hand-panel.hand-panel{height:calc(clamp(185px,36vh,240px) + 4vh)!important}
+  #hand-panel #cards .card.image-card{height:clamp(100px,22vh,145px)!important}
+}
