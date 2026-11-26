@@ -610,3 +610,28 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
   #hand-panel.hand-panel{height:calc(clamp(185px,36vh,240px) + 4vh)!important}
   #hand-panel #cards .card.image-card{height:clamp(100px,22vh,145px)!important}
 }
+
+
+/* Finition de la main : cartes plus basses, coins arrondis et sélection qui dépasse du bois */
+#hand-panel.hand-panel::before,
+#hand-panel.hand-panel::after{content:none!important;display:none!important}
+#hand-panel.hand-panel{padding-bottom:4px!important}
+#hand-panel #cards{align-items:end!important;padding-bottom:0!important}
+#hand-panel #cards .card.image-card{
+  overflow:hidden!important;
+  border-radius:11px!important;
+  clip-path:inset(0 round 11px);
+  transform:rotate(var(--fan-angle)) translateY(9px)!important;
+  transform-origin:50% 100%;
+}
+#hand-panel #cards .card.image-card img{
+  border-radius:11px!important;
+}
+#hand-panel #cards .card.image-card.selected{
+  transform:rotate(var(--fan-angle)) translateY(-18px) scale(1.06)!important;
+  z-index:8!important;
+  clip-path:inset(0 round 11px);
+}
+#hand-panel #cards .card.image-card:active{
+  transform:rotate(var(--fan-angle)) translateY(-14px) scale(1.02)!important;
+}
