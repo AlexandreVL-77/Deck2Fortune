@@ -5,7 +5,7 @@ export const CARD_LIBRARY = [
   { id:'rum-of-fortune', name:'Rhum de fortune', icon:'🍹', type:'heal', rarity:'common', image:'./assets/cards/Carte de rhum nautique fantastique.png?v=4', healRatio:.5, luckPenalty:10, description:'Soigne de 50% les dégâts du capitaine mais baisse de 10% ta Luck.' },
   { id:'spyglass', name:'Longue-vue', icon:'🔭', type:'utility', rarity:'rare', image:'./assets/cards/Longue-vue sur l’océan découvert.png?v=4', effect:'reveal', radius:3, description:'Révèle les cases sous les nuages dans un rayon de 3 hexagones.' }
 ];
-export const DEFAULT_DECK = ['sea-blessing','emergency-planks','golden-compass','rum-of-fortune'];
+export const DEFAULT_DECK = ['sea-blessing','emergency-planks','golden-compass','rum-of-fortune','spyglass'];
 export const DECK_MIN_SIZE = 4;
 export const DECK_MAX_SIZE = 6;
 
@@ -29,6 +29,9 @@ export const cardUse = card => card.use || (card.type === 'attack' || card.type 
 /** Points d'une carte = base de rareté + force de l'effet. `card.points` force une valeur précise. */
 export function cardPoints(card) {
   if (!card) return 0;
+  // Mode debug demandé : chaque carte coûte exactement 1 point.
+  return 1;
+  /* Calcul normal conservé ci-dessous pour pouvoir le réactiver après le debug.
   if (Number.isFinite(card.points)) return Math.max(1, Math.round(card.points));
   const strength = {
     attack: () => (card.power || 0) * 1.5 + Math.max(0, (card.range || 1) - 1) * 2,
@@ -39,6 +42,7 @@ export function cardPoints(card) {
     reveal: () => (card.radius || 3) * 2
   }[cardEffectId(card)];
   return Math.max(1, Math.round((RARITIES[card.rarity]?.base ?? 4) + (strength ? strength() : 3)));
+  */
 }
 export const getCard = id => CARD_LIBRARY.find(card => card.id === id);
 export const deckPoints = ids => ids.reduce((sum, id) => sum + cardPoints(getCard(id)), 0);
