@@ -19,8 +19,8 @@ assert.equal(s.hand.length, 4);
 // setDeck : budget de points + taille
 assert.equal(s.setDeck(cards.CARD_LIBRARY.map(c => c.id)), false);
 for (const c of cards.CARD_LIBRARY) s.cardCollection[c.id] = 1;
-assert.equal(s.setDeck(['sea-blessing', 'emergency-planks', 'golden-compass', 'rum-of-fortune', 'spyglass']), false, 'dépasse 50 pts');
-assert.equal(s.setDeck(['emergency-planks', 'golden-compass', 'rum-of-fortune', 'spyglass']), true);
+assert.equal(s.setDeck(['sea-blessing', 'emergency-planks', 'golden-compass', 'rum-of-fortune', 'spyglass']), true, '5 cartes à 1 point chacune');
+assert.equal(s.setDeck(['emergency-planks', 'golden-compass', 'rum-of-fortune']), false, 'un deck doit contenir au moins 5 cartes');
 
 // Jouer chaque carte hors combat : la main reste à 4 cartes et la pioche tourne.
 const combat = new CombatSystem(s);
