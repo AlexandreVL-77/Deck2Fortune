@@ -547,3 +547,35 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 
 /* Panneau image d'origine : aucun faux fond CSS ni SVG de remplacement. */
 #hand-panel.hand-panel{background:transparent url('../assets/ui/hand-panel-wood.png') center bottom / 100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;padding:12px 16px 16px;}
+
+
+/* Main de cartes en éventail sur le panneau de bois fourni */
+#hand-panel.hand-panel{
+  left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 5px);
+  height:clamp(150px,25vh,220px);box-sizing:border-box;
+  padding:0 10px 12px;
+  background-image:url('../assets/ui/hand-panel-wood.png');
+  background-position:center bottom;background-size:100% 100%;background-repeat:no-repeat;
+  border:0;border-radius:0;box-shadow:none;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+#hand-panel #cards{
+  width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:0;padding:0 3%;align-items:end;overflow:visible;
+}
+#hand-panel #cards .card.image-card{
+  width:100%;max-height:min(24vh,160px);min-width:0;
+  transform:rotate(var(--fan-angle)) translateY(var(--fan-lift));
+  transform-origin:50% 100%;z-index:1;
+}
+#hand-panel #cards .card.image-card:nth-child(1){--fan-angle:-7deg;--fan-lift:3px}
+#hand-panel #cards .card.image-card:nth-child(2){--fan-angle:-2.5deg;--fan-lift:0px}
+#hand-panel #cards .card.image-card:nth-child(3){--fan-angle:2.5deg;--fan-lift:0px}
+#hand-panel #cards .card.image-card:nth-child(4){--fan-angle:7deg;--fan-lift:3px}
+#hand-panel #cards .card.image-card.selected{
+  transform:rotate(var(--fan-angle)) translateY(-10px) scale(1.045);z-index:3;
+}
+@media(max-height:650px){
+  #hand-panel.hand-panel{height:clamp(125px,24vh,170px)}
+  #hand-panel #cards .card.image-card{max-height:19vh}
+}
