@@ -12,12 +12,12 @@ const css = `
 #deck-screen .dk-count{padding:6px 12px;border-radius:14px;background:#2d4f5d;color:#ffe8a8;font-weight:800;font-size:13px;border:2px solid #fff3}
 #deck-screen .dk-panel{border-radius:22px;background:linear-gradient(#f9e9bd,#ecd194);border:3px solid #b57a43;box-shadow:0 5px #7a4a2b,inset 0 0 0 2px #fff6;padding:10px}
 #deck-screen .dk-label{display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:11px;letter-spacing:2px;color:#7a4a2b;margin:0 2px 8px}
-#deck-screen .dk-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 14%}
-#deck-screen .dk-slots .empty{aspect-ratio:5/7;border-radius:10px;border:2px dashed #b57a43;display:grid;place-items:center;color:#b57a43;font-weight:900;font-size:20px}
+#deck-screen .dk-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 6%}
+#deck-screen .dk-slots .empty{aspect-ratio:1064/1478;border-radius:10px;border:2px dashed #b57a43;display:grid;place-items:center;color:#b57a43;font-weight:900;font-size:20px}
 #deck-screen .dk-lest{height:12px;border-radius:8px;background:#0003;overflow:hidden;margin-top:9px}#deck-screen .dk-lest i{display:block;height:100%;background:linear-gradient(90deg,#f6d38c,#e29a4a);transition:width .25s}#deck-screen .dk-lest.full i{background:linear-gradient(90deg,#f08a6a,#d24b3a)}
 #deck-screen .lw{position:absolute;right:3px;top:3px;min-width:18px;height:18px;border-radius:9px;background:#2d4f5d;color:#ffe8a8;font-size:10px;font-weight:900;display:grid;place-items:center;padding:0 4px}
-#deck-screen .dk-card{position:relative;aspect-ratio:5/7;border-radius:10px;overflow:hidden;border:0;padding:0;background:#0003;box-shadow:0 3px 6px #0004;transition:transform .15s}
-#deck-screen .dk-card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+#deck-screen .dk-card{position:relative;aspect-ratio:1064/1478;border-radius:7px;overflow:hidden;border:0;padding:0;background:none;box-shadow:0 3px 6px #0005;transition:transform .15s}
+#deck-screen .dk-card img{width:100%;height:100%;object-fit:fill;display:block;pointer-events:none}
 #deck-screen .dk-slots .dk-card.sel{outline:3px solid #ffd45a;transform:translateY(-6px) scale(1.04);box-shadow:0 0 14px #ffd45a}
 #deck-screen .dk-slots .dk-card .n{position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#2d4f5d;color:#fff;font-size:10px;font-weight:900;display:grid;place-items:center}
 #deck-screen .dk-next{display:flex;gap:6px;align-items:center;margin-top:9px;font-size:11px;font-weight:800;color:#7a4a2b}
