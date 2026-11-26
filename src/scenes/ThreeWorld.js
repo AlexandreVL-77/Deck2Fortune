@@ -295,7 +295,7 @@ export class ThreeWorld {
     for(let i=0;i<palms;i++){
       const k=Math.floor(rng()*grassPts.length),p=grassPts[k];
       const x=p[0]+(cx-p[0])*.14,z=p[1]+(cz-p[1])*.14;
-      this.addPalm(land,x,z,.26+rng()*.1,GY+.02);
+      this.addPalm(land,x,z,.55+rng()*.2,GY+.02);
     }
     for(let i=0;i<4;i++){const p=sandPts[Math.floor(rng()*sandPts.length)];add(new THREE.DodecahedronGeometry(.07+rng()*.05,0),i%2?rock:rockDark,p[0]+(cx-p[0])*.08,-.02,p[1]+(cz-p[1])*.08);}
     if(tile.archipelagoOrigin?.comptoir)this.addComptoir(land,{GY,sandPts,grassPts,inside,rng,add});
@@ -327,10 +327,10 @@ export class ThreeWorld {
     }
     if(!placed)house(0,0,.8,dir);
     const px=dp[0]+Math.sin(dir)*.2,pz=dp[1]+Math.cos(dir)*.2;
-    const dock=new THREE.Group();dock.position.set(px,-.02,pz);dock.rotation.y=dir;land.add(dock);
+    const dock=new THREE.Group();dock.position.set(px,-.12,pz);dock.rotation.y=dir;land.add(dock);
     const plank=new THREE.Mesh(new THREE.BoxGeometry(.32,.06,.7),wood);plank.position.z=.12;plank.castShadow=true;dock.add(plank);
-    for(const x of [-.14,.14])for(const z of [-.14,.34]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.03,.04,.3,6),darkWood);post.position.set(x,-.08,z);dock.add(post);}
-    const boat=new THREE.Group();boat.position.set(.3,-.2,.3);dock.add(boat);
+    for(const x of [-.14,.14])for(const z of [-.14,.34]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.03,.04,.5,6),darkWood);post.position.set(x,-.25,z);dock.add(post);}
+    const boat=new THREE.Group();boat.position.set(.34,-.25,.3);dock.add(boat);
     boat.add(new THREE.Mesh(new THREE.BoxGeometry(.16,.07,.34),this.material('#b2703f',true)));
     const sail=new THREE.Mesh(new THREE.PlaneGeometry(.2,.24),new THREE.MeshToonMaterial({color:'#fff4d6',side:THREE.DoubleSide,gradientMap:this.toonGradient}));sail.position.y=.17;sail.rotation.y=Math.PI/2;boat.add(sail);
     // Étal marchand rayé, tonneaux et pavillon doré pour reconnaître le comptoir de loin.
@@ -537,7 +537,7 @@ export class ThreeWorld {
   }
   resetWorld(){
     for(const group of this.chunks.values()){this.scene.remove(group);this.disposeChunk(group);}
-    this.chunks.clear();this.tiles=[];this.tileByKey.clear();this.foams=[];this.smokes=[];this.cloudGroups=[];this.chunkCenter=null;
+    this.chunks.clear();this.tiles=[];this.tileByKey.clear();this.foams=[];this.smokes=[];this.cloudGroups=[];this.chunkCenter=null;this.releaseAllArchipelagos();
     this.target.set(0,0,0);this.cameraPanOffset.set(0,0,0);this.shipTarget.copy(this.tilePosition(0,0));this.ship.position.copy(this.shipTarget);this.ship.position.y=SHIP_Y;this.ship.rotation.set(0,0,0);this.ship.scale.setScalar(1);this.heading=0;this.sinkingStartedAt=null;this.sunkOverlay.classList.remove('visible');this.state.camera={x:0,z:0};this.updateChunks(true);this.updateHighlights();this.updateCamera();
   }
   createHighlights(){
@@ -606,7 +606,9 @@ export class ThreeWorld {
     this.ray.setFromCamera(this.pointer,this.camera);
     const hit=this.ray.intersectObjects(this.tiles,false)[0];if(!hit)return;
     const tile=hit.object.userData.tile;
-    if(hexDistance(tile,this.state.player)>1)return;
+    const pl=this.state.player,og=tile.archipelagoOrigin;
+    const reachable=hexDistance(tile,pl)<=1||(tile.kind==='archipelago'&&og?.shape?.some(([dq,dr])=>hexDistance({q:og.q+dq,r:og.r+dr},pl)<=1));
+    if(!reachable)return;
     if(tile.kind==='sea'||tile.kind==='storm'){
       if(this.state.sunk)return;
       const from=this.shipTarget.clone();
@@ -632,8 +634,10 @@ export class ThreeWorld {
       }
     }else{
       const origin=tile.archipelagoOrigin,rewardKey=this.key(tile.q,tile.r);
-      if(tile.kind==='archipelago'&&origin?.comptoir&&tile.q===origin.q&&tile.r===origin.r){
+      const isPort=tile.kind==='archipelago'&&origin?.comptoir;
+      if(isPort){
         window.dispatchEvent(new CustomEvent('pirate-comptoir'));
+        if(!this.state.visited.has(rewardKey)){this.state.visited.add(rewardKey);const treasure=rollTreasure('archipelago');if(treasure){this.state.addTreasure(treasure);window.dispatchEvent(new CustomEvent('pirate-toast',{detail:`Trésor découvert : ${treasure.icon} ${treasure.name} !`}));}}
       }else if(!this.state.visited.has(rewardKey)){
         this.state.visited.add(rewardKey);
         const treasure=rollTreasure(tile.kind);
