@@ -537,3 +537,10 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 .map-medallion{overflow:hidden;}
 .map-medallion img{display:block;width:49px;height:49px;object-fit:contain;}
 @media(max-width:370px){.resource-icon-frame{flex-basis:34px;width:34px;height:34px}.resource-icon-frame img{width:31px;height:31px}.resource-chip>strong{font-size:12px}.navigation-resources{gap:7px}.map-medallion img{width:44px;height:44px}}
+
+/* Les illustrations HUD possèdent déjà leur propre médaillon doré : ne pas ajouter un second cadre autour. */
+.resource-icon-frame{border:0;background:transparent;box-shadow:none;overflow:visible;width:43px;height:43px;flex-basis:43px;}
+.resource-icon-frame img{width:43px;height:43px;object-fit:contain;}
+.map-medallion{border:0;background:transparent;box-shadow:none;overflow:visible;width:58px;height:58px;flex-basis:58px;}
+.map-medallion img{width:58px;height:58px;object-fit:contain;}
+@media(max-width:370px){.resource-icon-frame{width:38px;height:38px;flex-basis:38px}.resource-icon-frame img{width:38px;height:38px}.map-medallion{width:52px;height:52px;flex-basis:52px}.map-medallion img{width:52px;height:52px}}
