@@ -545,5 +545,5 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 .map-medallion img{width:58px;height:58px;object-fit:contain;}
 @media(max-width:370px){.resource-icon-frame{width:38px;height:38px;flex-basis:38px}.resource-icon-frame img{width:38px;height:38px}.map-medallion{width:52px;height:52px;flex-basis:52px}.map-medallion img{width:52px;height:52px}}
 
-/* Panneau en bois fourni pour soutenir visuellement la main de cartes. */
-#hand-panel.hand-panel{background-color:#a85f32;background-image:url('../assets/ui/hand-panel-wood.png'),repeating-linear-gradient(90deg,#ffffff0a 0 2px,transparent 2px 10px),linear-gradient(180deg,#c78349 0%,#9b542d 48%,#713d25 100%);background-position:center bottom,center,center;background-size:100% 100%,100% 100%,100% 100%;background-repeat:no-repeat;border:2px solid #6e4027;border-radius:14px;box-shadow:0 4px 0 #59331f,inset 0 0 0 2px #efb76b88;padding:12px 16px 16px;}
+/* Panneau image d'origine : aucun faux fond CSS ni SVG de remplacement. */
+#hand-panel.hand-panel{background:transparent url('../assets/ui/hand-panel-wood.png') center bottom / 100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;padding:12px 16px 16px;}
