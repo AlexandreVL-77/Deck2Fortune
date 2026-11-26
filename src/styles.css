@@ -768,3 +768,68 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
  #hand-panel #cards .card.image-card{height:clamp(74px,14vh,96px)!important}
  #next-card-preview{height:clamp(74px,14vh,96px)!important}
 }
+
+
+/* Ajustement demandé : retrouver la taille d'origine et centrer la main légèrement à droite.
+   L'aperçu de pioche est en position absolue pour ne pas déplacer les cartes de la main. */
+#hand-panel.hand-panel{
+  display:flex!important;align-items:flex-end!important;justify-content:center!important;
+  left:-2vw!important;right:-2vw!important;width:104vw!important;
+  bottom:-2vh!important;height:clamp(178px,29vh,248px)!important;
+  padding:0 2vw calc(2vh + 5px)!important;
+  background-image:url('../assets/ui/hand-panel-wood.png')!important;
+  background-position:center bottom!important;background-size:auto 100%!important;
+  background-repeat:no-repeat!important;
+}
+#next-card-preview{
+  position:absolute!important;left:5%!important;bottom:calc(2vh + 5px)!important;
+  width:clamp(54px,16vw,76px)!important;height:clamp(82px,14.5vh,112px)!important;
+  margin:0!important;z-index:1!important;pointer-events:none!important;
+}
+#next-card-preview .queued-card{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  overflow:hidden!important;border:0!important;border-radius:12px!important;
+  background:transparent!important;box-shadow:none!important;
+  filter:grayscale(1) brightness(.72)!important;opacity:.82!important;
+  clip-path:inset(0 round 12px)!important;
+}
+#next-card-preview .queued-card img{
+  display:block!important;width:100%!important;height:100%!important;
+  object-fit:contain!important;border:0!important;border-radius:12px!important;
+  clip-path:inset(0 round 12px)!important;background:transparent!important;
+}
+#next-card-preview .empty-draw-preview{
+  display:grid;place-items:center;width:100%;height:100%;padding:4px;
+  border:1px dashed #f2c35b;border-radius:10px;background:#34271dcc;
+  color:#fff0c7;text-align:center;font-size:8px;font-weight:900;line-height:1.1;
+}
+#hand-panel #cards{
+  position:relative!important;flex:1 1 auto!important;min-width:0!important;width:100%!important;
+  display:flex!important;align-items:flex-end!important;justify-content:center!important;
+  gap:0!important;padding:0 0 0 4vw!important;margin:0!important;
+  overflow:visible!important;
+}
+#hand-panel #cards .card.image-card{
+  flex:0 0 auto!important;width:clamp(64px,20vw,94px)!important;
+  height:clamp(94px,18vh,142px)!important;max-height:none!important;
+  aspect-ratio:1064/1478!important;min-width:0!important;
+  margin-left:clamp(-15px,-3.4vw,-8px)!important;
+  padding:0!important;border:0!important;border-radius:12px!important;
+  background:transparent!important;box-shadow:none!important;
+  overflow:hidden!important;clip-path:inset(0 round 12px)!important;
+  transform:translateY(10px) scale(1)!important;
+  transform-origin:50% 100%;z-index:2!important;filter:none!important;
+}
+#hand-panel #cards .card.image-card:first-child{margin-left:0!important}
+#hand-panel #cards .card.image-card img{
+  display:block!important;width:100%!important;height:100%!important;
+  object-fit:contain!important;border:0!important;border-radius:12px!important;
+  clip-path:inset(0 round 12px)!important;
+}
+#hand-panel #cards .card.image-card.selected{
+  transform:translateY(-16px) scale(1.02)!important;z-index:10!important;
+}
+@media(max-height:650px){
+  #hand-panel #cards .card.image-card{height:clamp(82px,18vh,118px)!important}
+  #next-card-preview{height:clamp(76px,13vh,98px)!important}
+}
