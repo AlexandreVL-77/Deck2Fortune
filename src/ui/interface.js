@@ -32,10 +32,13 @@ export function renderCards(state){
   // Trois cartes à venir : la prochaine est devant, les suivantes restent grisées derrière.
   const preview=$('next-card-preview');
   if(preview){
-    const upcoming=(state.drawPile||[]).slice(-3).reverse();
-    const previewKey=upcoming.map(c=>c.id+'|'+c.image).join('||');
+    // drawFromDeck() utilise pop() : le prochain tirage est donc à la fin du tableau.
+    const nextCard=(state.drawPile||[]).at(-1);
+    const previewKey=nextCard?nextCard.id+'|'+nextCard.image:'empty';
     if(preview.dataset.key!==previewKey){
-      preview.innerHTML=upcoming.map((card,i)=>`<div class="queued-card queued-card-${i}" aria-hidden="true">${cardFace(card)}</div>`).join('');
+      preview.innerHTML=nextCard
+        ? `<div class="queued-card queued-card-0" aria-hidden="true">${cardFace(nextCard)}</div>`
+        : '<div class="empty-draw-preview" aria-hidden="true">PIOCHE VIDE</div>';
       preview.dataset.key=previewKey;
     }
   }
