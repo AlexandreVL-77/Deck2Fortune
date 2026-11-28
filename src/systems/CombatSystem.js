@@ -12,10 +12,11 @@ export class CombatSystem {
     if (!card) return 'Aucune carte à jouer.';
     if (s.sunk) return 'Ton navire a coulé.';
     if (cardUse(card) === 'combat' && !s.inCombat) return 'Cette carte se joue pendant un combat.';
-    if (card.type === 'attack') {
+    if (card.type === 'attack' && cardEffectId(card) === 'attack') {
       const weapon = card.weapon === 'melee' ? s.melee : s.ranged;
       if (weapon.cooldown > 0) return `${weapon.name} recharge encore (${weapon.cooldown} tour${weapon.cooldown > 1 ? 's' : ''}).`;
     }
+    if (s.fogTurns > 0 && card.type === 'attack' && (card.weapon || 'ranged') !== 'melee' && cardEffectId(card) !== 'volley') return 'La brume t’empêche de tirer.';
     return null;
   }
   playCard(index) {
@@ -31,8 +32,10 @@ export class CombatSystem {
   enemyTurn() {
     const s = this.state;
     if (!s.inCombat || s.sunk) return;
-    if (hexDistance(s.player, s.enemy) <= 2 && Math.random() < .72) s.damagePlayer(4);
+    const reach = s.fogTurns > 0 ? 1 : 2; // la brume protège des tirs à distance
+    if (hexDistance(s.player, s.enemy) <= reach && Math.random() < .72) s.damagePlayer(4);
     for (const weapon of [s.melee, s.ranged]) weapon.cooldown = Math.max(0, weapon.cooldown - 1);
+    if (s.fogTurns > 0) s.fogTurns--;
     if (s.luckBoostTurns > 0) s.luckBoostTurns--;
     if (s.luckMalusTurns > 0) s.luckMalusTurns--;
     s.turn++; s.emit();

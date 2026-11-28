@@ -100,6 +100,7 @@ export class GameState {
     this.dealHand();
     this.luckBoostTurns = 0;
     this.luckMalusTurns = 0;
+    this.fogTurns = 0;
     this.luckMalusAmount = 0;
     this.negativeEffects = [];
     this.selectedCard = 0;
@@ -239,7 +240,7 @@ export class GameState {
     this.emit();
   }
   startCombat() { if (this.sunk || this.inCombat) return; this.enemy.hp = this.enemy.maxHp; this.inCombat = true; this.drawPile = shuffle(this.deck); this.discardPile = []; this.hand = this.drawFromDeck(4); this.selectedCard = 0; this.turn = 1; this.luckBoostTurns = 0; this.emit(); }
-  endCombat() { this.inCombat = false; this.enemy.hp = this.enemy.maxHp; this.luckBoostTurns = 0; this.luckMalusTurns = 0; this.emit(); }
+  endCombat() { this.inCombat = false; this.enemy.hp = this.enemy.maxHp; this.luckBoostTurns = 0; this.luckMalusTurns = 0; this.fogTurns = 0; this.emit(); }
   spendGold(amount) {
     const cost = finiteNumber(amount, -1, 0, Number.MAX_SAFE_INTEGER);
     if (cost < 0 || this.gold < cost) return false;

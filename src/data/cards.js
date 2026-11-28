@@ -3,7 +3,10 @@ export const CARD_LIBRARY = [
   { id:'emergency-planks', name:'Planches de secours', icon:'🪵', type:'heal', rarity:'common', image:'./assets/cards/Planches de secours en mer.webp?v=4', description:'Répare immédiatement 6 points de coque.', power:6 },
   { id:'golden-compass', name:'Boussole dorée', icon:'🧭', type:'utility', rarity:'rare', image:'./assets/cards/Boussole dorée du trésor geschniegelt.png?v=4', effect:'compass', description:'Indique la direction du trésor le plus proche et rapporte +15 Or si jouée près d’une île.' },
   { id:'rum-of-fortune', name:'Rhum de fortune', icon:'🍹', type:'heal', rarity:'common', image:'./assets/cards/Carte de rhum nautique fantastique.png?v=4', healRatio:.5, luckPenalty:10, description:'Soigne de 50% les dégâts du capitaine mais baisse de 10% ta Luck.' },
-  { id:'spyglass', name:'Longue-vue', icon:'🔭', type:'utility', rarity:'rare', image:'./assets/cards/Longue-vue sur l’océan découvert.png?v=4', effect:'reveal', radius:3, description:'Révèle les cases sous les nuages dans un rayon de 3 hexagones.' }
+  { id:'spyglass', name:'Longue-vue', icon:'🔭', type:'utility', rarity:'rare', image:'./assets/cards/Longue-vue sur l’océan découvert.png?v=4', effect:'reveal', radius:3, description:'Révèle les cases sous les nuages dans un rayon de 3 hexagones.' },
+  { id:'fog-veil', name:'Brume de dissimulation', icon:'🌫️', type:'utility', use:'combat', effect:'fog', turns:1, rarity:'rare', image:'./assets/cards/brume-de-dissimulation.webp?v=1', description:'Rend le navire intouchable aux attaques à distance ennemies pendant 1 tour, mais empêche de tirer.' },
+  { id:'deck-gatling', name:'Mitraille de pont', icon:'💥', type:'attack', effect:'volley', power:5, range:1, rarity:'rare', image:'./assets/cards/mitraille-de-pont.webp?v=1', description:'Inflige 5 dégâts à tous les ennemis situés sur les cases adjacentes directes.' },
+  { id:'heavy-shot', name:'Boulet Lourd', icon:'⚫', type:'attack', effect:'heavy-shot', power:9, range:4, rarity:'epic', image:'./assets/cards/boulet-lourd.webp?v=1', description:'Un tir lourd qui inflige 9 dégâts et repousse le navire ennemi touché d’une case en arrière.' }
 ];
 export const DEFAULT_DECK = ['sea-blessing','emergency-planks','golden-compass','rum-of-fortune','spyglass'];
 export const DECK_MIN_SIZE = 5;

@@ -85,3 +85,30 @@ registerEffect('reveal', ({ state: s, card }) => {
   }
   return { ok: true, fx: 'scout', message: `Longue-vue : ${revealed} case(s) sous les nuages révélée(s) !` };
 });
+
+// --- Cartes de combat avancées ---
+registerEffect('fog', ({ state: s, card }) => {
+  s.fogTurns = card.turns || 1;
+  return { ok: true, fx: 'bless', message: `Brume : intouchable à distance ${s.fogTurns} tour, mais tu ne peux plus tirer.` };
+});
+
+registerEffect('volley', ({ state: s, card }) => {
+  if (hexDistance(s.player, s.enemy) > 1) return { ok: false, message: 'Aucun ennemi sur une case adjacente.' };
+  s.damageEnemy(card.power);
+  return { ok: true, fx: 'hit', message: `Mitraille ! ${card.power} dégâts.` };
+});
+
+registerEffect('heavy-shot', ({ state: s, card }) => {
+  if (hexDistance(s.player, s.enemy) > card.range) return { ok: false, message: 'L’ennemi est hors de portée.' };
+  s.damageEnemy(card.power);
+  // Repousse l'ennemi d'une case (la plus éloignée du joueur, sur l'eau).
+  let best = null, bestDistance = hexDistance(s.player, s.enemy);
+  for (const [dq, dr] of DIRECTIONS) {
+    const c = { q: s.enemy.q + dq, r: s.enemy.r + dr };
+    if (LAND.includes(makeTile(s.seed, c.q, c.r, true).kind)) continue;
+    const d = hexDistance(s.player, c);
+    if (d > bestDistance) { best = c; bestDistance = d; }
+  }
+  if (best && s.enemy.hp > 0) { s.enemy.q = best.q; s.enemy.r = best.r; }
+  return { ok: true, fx: 'hit', message: `Boulet lourd ! ${card.power} dégâts et l’ennemi est repoussé.` };
+});
