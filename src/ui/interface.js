@@ -22,24 +22,22 @@ function cardTypeLabel(card){return card.type==='attack'?'ATTAQUE':card.type==='
 export function renderCards(state){
   const handInfo=document.querySelector('.hand-heading small');if(handInfo)handInfo.textContent=state.inCombat?`Pioche ${state.drawPile.length} · Défausse ${state.discardPile.length}`:'4 cartes · touche pour sélectionner';
   const cards=$('cards');
-  // Garde les images de la main montées pour éviter les clignotements.
-  const handKey=state.hand.map(c=>c.id+'|'+c.image).join('||');
-  if(cards.dataset.handKey!==handKey){
-    cards.innerHTML=state.hand.map((c,i)=>`<button class="card image-card" data-card="${i}" aria-label="${c.name}" title="${c.name}">${cardFace(c)}</button>`).join('');
-    cards.dataset.handKey=handKey;
-  }
-  cards.querySelectorAll('[data-card]').forEach((button,i)=>button.classList.toggle('selected',i===state.selectedCard));
-  // Trois cartes à venir : la prochaine est devant, les suivantes restent grisées derrière.
+  // 4 slots fixes : seul le slot dont la carte change est redessiné, les autres ne bougent jamais.
+  if(cards.children.length!==4)cards.innerHTML=[0,1,2,3].map(i=>`<button class="card image-card" data-card="${i}"></button>`).join('');
+  cards.querySelectorAll('[data-card]').forEach((button,i)=>{
+    const c=state.hand[i],sig=c?c.id:'';
+    if(button.dataset.sig===sig)return;
+    button.dataset.sig=sig;button.setAttribute('aria-label',c?c.name:'');
+    button.innerHTML=c?cardFace(c):'';
+    if(button.dataset.init){button.classList.remove('dealt');void button.offsetWidth;button.classList.add('dealt');}
+    button.dataset.init='1';
+  });
   const preview=$('next-card-preview');
   if(preview){
-    // drawFromDeck() utilise pop() : le prochain tirage est donc à la fin du tableau.
-    const nextCard=(state.drawPile||[]).at(-1);
-    const previewKey=nextCard?nextCard.id+'|'+nextCard.image:'empty';
-    if(preview.dataset.key!==previewKey){
-      preview.innerHTML=nextCard
-        ? `<div class="queued-card queued-card-0" aria-hidden="true">${cardFace(nextCard)}</div>`
-        : '<div class="empty-draw-preview" aria-hidden="true">PIOCHE VIDE</div>';
-      preview.dataset.key=previewKey;
+    const next=state.nextCard,key=next?next.id:'empty';
+    if(preview.dataset.key!==key){
+      preview.dataset.key=key;
+      preview.innerHTML=`<span class="nx-label">SUIVANTE</span><div class="nx-frame">${next?cardFace(next):''}</div>`;
     }
   }
   $('hp').textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;
@@ -115,18 +113,44 @@ export function renderDrawer(state){
   } else drawer.innerHTML='';
   drawer.classList.toggle('hidden',!drawer.dataset.tab||drawer.dataset.tab==='map');
 }
+function bindCardDrag(state,combat,game){
+  const cards=$('cards'),panel=$('hand-panel');
+  let drag=null;
+  const overBoard=y=>y<panel.getBoundingClientRect().top-8;
+  cards.addEventListener('pointerdown',e=>{
+    const btn=e.target.closest('[data-card]');if(!btn||drag||!state.hand[btn.dataset.card])return;
+    const rect=btn.getBoundingClientRect();
+    const ghost=document.createElement('div');ghost.className='drag-ghost';ghost.innerHTML=btn.innerHTML;
+    Object.assign(ghost.style,{width:rect.width+'px',height:rect.height+'px',left:rect.left+'px',top:rect.top+'px'});
+    document.body.appendChild(ghost);
+    drag={btn,ghost,id:e.pointerId,index:Number(btn.dataset.card),dx:e.clientX-rect.left,dy:e.clientY-rect.top,startY:e.clientY};
+    btn.classList.add('lifted');document.body.classList.add('dragging-card');
+    btn.setPointerCapture(e.pointerId);e.preventDefault();
+  });
+  cards.addEventListener('pointermove',e=>{
+    if(!drag||e.pointerId!==drag.id)return;
+    drag.ghost.style.transform=`translate(${e.clientX-drag.dx-parseFloat(drag.ghost.style.left)}px,${e.clientY-drag.dy-parseFloat(drag.ghost.style.top)}px) scale(1.08)`;
+    document.body.classList.toggle('drop-ready',overBoard(e.clientY));
+  });
+  const end=(e,cancel)=>{
+    if(!drag||e.pointerId!==drag.id)return;
+    const d=drag;drag=null;
+    const play=!cancel&&overBoard(e.clientY);
+    d.ghost.remove();d.btn.classList.remove('lifted');document.body.classList.remove('dragging-card','drop-ready');
+    if(play){
+      const card=state.hand[d.index];
+      const result=combat.playCard(d.index);
+      if(result.ok&&card?.type==='move')game.syncShipToPlayer();
+      toast(result.message);
+    }else if(!cancel&&Math.abs(e.clientY-d.startY)<8)toast('Glisse la carte vers le bateau pour la jouer.');
+  };
+  cards.addEventListener('pointerup',e=>end(e,false));
+  cards.addEventListener('pointercancel',e=>end(e,true));
+}
 export function bindUI(state,game){
   const combat=new CombatSystem(state);
   state.subscribe(()=>{renderCards(state);renderDrawer(state);});
-  $('cards').addEventListener('click',e=>{
-    const btn=e.target.closest('[data-card]');if(!btn)return;
-    const index=Number(btn.dataset.card);
-    if(state.selectedCard!==index){state.selectedCard=index;renderCards(state);return;}
-    const playedCard=state.hand[index];
-    const result=combat.playCard(index);
-    if(result.ok&&playedCard?.type==='move')game.syncShipToPlayer();
-    toast(result.message);
-  });
+  bindCardDrag(state,combat,game);
   $('open-map').onclick=()=>openMapScreen(state);
   $('end-turn').onclick=()=>{combat.endTurn();toast(state.hp===0?'Ton navire est à la dérive…':'Au tour des corsaires !');};
   $('flee').onclick=()=>{state.endCombat();toast('Tu as pris le large.');};
