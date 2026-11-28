@@ -88,7 +88,9 @@ export class GameState {
     this.inStorm = !!saved?.inStorm && !this.sunk;
     this.enemy = { q: 2, r: -1, hp: 18, maxHp: 18, name: 'Corsaire des Brumes' };
     this.cardCollection = Object.fromEntries(CARD_LIBRARY.map(card => [card.id, safeInteger(saved?.cardCollection?.[card.id], 0, 0, Number.MAX_SAFE_INTEGER)]));
-    DEFAULT_DECK.forEach(id => { if (this.cardCollection[id] === 0) this.cardCollection[id] = 1; });
+    // Toutes les cartes sont débloquées (passer à false pour revenir à la progression par boosters).
+    const UNLOCK_ALL = true;
+    (UNLOCK_ALL ? CARD_LIBRARY.map(c => c.id) : DEFAULT_DECK).forEach(id => { if (this.cardCollection[id] === 0) this.cardCollection[id] = 1; });
     try {
       const savedDeck = JSON.parse(localStorage.getItem('deck2fortune.deck') || 'null');
       this.deck = Array.isArray(savedDeck) ? savedDeck.filter(id => CARD_LIBRARY.some(card => card.id === id)).slice(0, DECK_MAX_SIZE) : [...DEFAULT_DECK];
