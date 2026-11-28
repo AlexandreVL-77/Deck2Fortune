@@ -43,3 +43,16 @@ const nx = combat.playCard(0); assert.ok(nx.ok === false || s.hand.length === 4,
 // Boosters : 5 cartes, au moins une non commune.
 s.gold = 500; const r = new ShopSystem(s).buyBooster(); assert.equal(r.cards.length, 5); assert.ok(r.cards.some(c => c.rarity !== 'common'));
 console.log('cartes : OK');
+// Nouvelles cartes : brume, mitraille, boulet lourd.
+{
+  const g = new GameState(), c = new CombatSystem(g);
+  for (const id of ['fog-veil', 'deck-gatling', 'heavy-shot']) assert.ok(EFFECTS[cards.cardEffectId(cards.getCard(id))], id);
+  g.startCombat(); g.player = { q: 0, r: 0 }; g.enemy.q = 1; g.enemy.r = 0; g.enemy.hp = 18;
+  g.hand[0] = { ...cards.getCard('deck-gatling') }; assert.ok(c.playCard(0).ok); assert.equal(g.enemy.hp, 13);
+  g.enemy.q = 3; g.enemy.r = 0; g.hand[0] = { ...cards.getCard('deck-gatling') }; assert.equal(c.playCard(0).ok, false);
+  g.hand[0] = { ...cards.getCard('heavy-shot') }; assert.ok(c.playCard(0).ok); assert.equal(g.enemy.hp, 4); assert.ok(g.enemy.q + g.enemy.r !== 3 || g.enemy.q > 3);
+  g.hand[0] = { ...cards.getCard('fog-veil') }; assert.ok(c.playCard(0).ok); assert.equal(g.fogTurns, 1);
+  g.ranged.cooldown = 0; g.hand[0] = { ...cards.getCard('heavy-shot') }; assert.equal(c.playCard(0).ok, false);
+  c.enemyTurn(); assert.equal(g.fogTurns, 0);
+}
+console.log('nouvelles cartes : OK');
