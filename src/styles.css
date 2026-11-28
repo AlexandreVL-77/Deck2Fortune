@@ -532,3 +532,4 @@ body.drop-ready::after{content:'Relâche pour jouer !';background:#2fa24fdd;colo
 .drag-ghost img,.drag-ghost .cf{width:100%;height:100%;object-fit:fill;display:block;border-radius:6px}
 body.dragging-card::after{content:'Dépose sur le bateau';position:fixed;left:50%;top:38%;transform:translateX(-50%);padding:6px 14px;border-radius:14px;background:#2d4f5dcc;color:#ffe8a8;font:800 13px 'Fredoka',system-ui,sans-serif;z-index:998;pointer-events:none}
 body.drop-ready::after{content:'Relâche pour jouer !';background:#2fa24fdd;color:#fff}
+#cards .card.image-card::before,#cards .card.image-card::after{display:none;content:none}
