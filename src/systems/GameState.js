@@ -145,11 +145,19 @@ export class GameState {
     }
     return drawn;
   }
+  /** Carte jouée : le slot reste en place et reçoit la carte suivante ; la carte jouée repart au bout de la file (comme Clash Royale). */
   discardCard(index) {
-    const [card] = this.hand.splice(index, 1);
-    if (card) this.discardPile.push(card.id);
-    this.hand.push(...this.drawFromDeck(1));
-    this.selectedCard = Math.min(this.selectedCard, Math.max(0, this.hand.length - 1));
+    const card = this.hand[index];
+    if (!card) return;
+    this.drawPile.unshift(card.id);
+    const [next] = this.drawFromDeck(1);
+    this.hand[index] = next || card;
+  }
+  /** Prochaine carte qui sera piochée (null si la file est vide). */
+  get nextCard() {
+    const id = this.drawPile.at(-1);
+    const card = id && CARD_LIBRARY.find(c => c.id === id);
+    return card ? { ...card } : null;
   }
   get gold() { return this._gold; }
   set gold(value) {

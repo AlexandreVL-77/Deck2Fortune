@@ -16,7 +16,6 @@ body{position:fixed;inset:0}
 .status-icon{color:#c67a50}
 .bottom-nav{bottom:calc(env(safe-area-inset-bottom) + 70px);width:min(360px,calc(100% - 26px));background:linear-gradient(145deg,#fff1d4,#e7c995);border:2px solid #c18b53;box-shadow:0 5px 0 #91623e,0 9px 20px #164b4b55,inset 0 0 0 2px #fff9e9}
 .nav-button{color:#765438}.nav-icon{color:#a36c3f}.nav-button.active{background:linear-gradient(145deg,#d9a86a,#b87948);color:#fff7e8;box-shadow:inset 0 1px #fff8}.nav-button.active .nav-icon{color:#fff1c9}
-.hand-panel{position:absolute;left:7px;right:7px;bottom:calc(env(safe-area-inset-bottom) + 137px);padding:16px 18px 14px;border:0;border-radius:0;background:transparent url('../assets/ui/hand-panel-wood.png') center center / 100% 100% no-repeat;box-shadow:none}
 .hand-heading{display:flex;justify-content:space-between;align-items:center;padding:0 3px 7px;color:#795234;font-size:8px;font-weight:900;letter-spacing:1.1px}.hand-heading small{font-size:7px;letter-spacing:0;color:#a27e55;font-weight:700}
 .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:2px 2px 5px}
 .card{position:relative;min-width:0;min-height:84px;padding:7px 3px 6px;border:1.5px solid #d2a56b;border-radius:11px;background:linear-gradient(155deg,#fffdf3,#f1dfbd);color:#68482f;box-shadow:0 3px 0 #c09a68,0 4px 7px #7c593222;transition:transform .16s,box-shadow .16s,border-color .16s}
@@ -28,8 +27,8 @@ body{position:fixed;inset:0}
 #drawer{bottom:calc(env(safe-area-inset-bottom) + 215px);max-height:30%;background:linear-gradient(145deg,#fff5df,#ecd4a6);border-color:#c18b53}
 .map-hint{bottom:calc(env(safe-area-inset-bottom) + 115px);color:#fff9e8;text-shadow:0 2px 5px #1c666b}
 #toast{top:120px;background:#fff4dc;border:1px solid #c18b53;color:#68482f}
-@media(max-height:700px){.hand-panel{bottom:calc(env(safe-area-inset-bottom) + 125px)}.bottom-nav{bottom:calc(env(safe-area-inset-bottom) + 60px)}.card{min-height:70px}.card-art{width:27px;height:27px}}
-@media(orientation:landscape) and (max-height:520px){#game-shell{height:100dvh}.hand-panel{bottom:calc(env(safe-area-inset-bottom) + 100px)}}
+@media(max-height:700px){.bottom-nav{bottom:calc(env(safe-area-inset-bottom) + 60px)}.card{min-height:70px}.card-art{width:27px;height:27px}}
+@media(orientation:landscape) and (max-height:520px){#game-shell{height:100dvh}}
 
 /* ===== Cozy Nintendo pass : bois clair sculpté, parchemin, liserés dorés ===== */
 :root{--wood:#d9a566;--wood-dark:#a8693c;--wood-edge:#7d4c2d;--parch:#fff6e0;--parch2:#f3dfb4;--gold2:#f2c35b;--ink:#6a4630}
@@ -45,13 +44,6 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 .start-button{background:linear-gradient(180deg,#ffe29a,#e0a24f);border:2px solid #fff1c4;color:#6a4020;box-shadow:0 5px 0 #8a5632,0 12px 22px #0a4a5a66,inset 0 2px #fffbe8}
 .continue-button{background:#fff6e0cc;border:2px solid #d9a566;color:#7d4c2d}
 .home-top,.home-footer{color:#fff;text-shadow:0 1px 4px #0a4a5a}
-/* Cadres en bois clair avec veinures + liseré doré intérieur */
-.topbar,.status-pill,.bottom-nav,.hand-panel{
-  background:
-    repeating-linear-gradient(92deg,#ffffff10 0 2px,transparent 2px 9px),
-    linear-gradient(180deg,#e8b878,#c98c52);
-  border:2px solid var(--wood-edge);color:var(--ink);
-  box-shadow:0 5px 0 #6b3f25,0 10px 18px #0a4a5a44,inset 0 2px #fff3cf,inset 0 0 0 3px #f2c35b55}
 .topbar{border-radius:20px}
 .brand strong{color:#fff8e2;text-shadow:0 2px #7d4c2d}.brand strong span{color:#ffe18a}
 .brand small{color:#fff0cc}.eyebrow{color:#fff3c8}
@@ -78,8 +70,6 @@ body{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
 .wood-button:active,.quiet-button:active,.shop-item button:active{transform:translateY(3px);box-shadow:0 1px 0 #6b3f25}
 .quiet-button{background:#fff6e0;border:2px solid #d9a566;color:#7d4c2d}
 .shop-item button{background:linear-gradient(180deg,#e8b878,#c98c52);border:2px solid #7d4c2d;box-shadow:0 3px 0 #6b3f25}
-/* Main de 4 cartes : sages et alignées, seule la carte choisie se lève */
-.hand-panel{border-radius:22px;padding:9px 8px 11px}
 .hand-heading{color:#fff8e2;text-shadow:0 1px #7d4c2d}.hand-heading small{color:#ffeebf}
 .card{border:2px solid #c9964f;border-radius:13px;background:
   linear-gradient(180deg,#fffdf3 0%,#fff6e0 55%,#f3dfb4 100%);
@@ -417,40 +407,6 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
     height:clamp(52px,9vh,72px);
   }
 }
-
-
-/* Cartes illustrées uniquement : l'illustration constitue toute la carte. */
-#cards{grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;gap:8px;padding:4px 2px 10px}
-#cards .card.image-card{
-  display:block;
-  position:relative;
-  width:100%;
-  min-width:0;
-  min-height:0;
-  aspect-ratio:3/4.2;
-  padding:0;
-  overflow:visible;
-  border:0;
-  border-radius:0;
-  background:transparent;
-  box-shadow:none;
-  line-height:0;
-  transform:none;
-  -webkit-tap-highlight-color:transparent;
-}
-#cards .card.image-card img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  border:0;
-  border-radius:0;
-  box-shadow:none;
-  pointer-events:none;
-}
-#cards .card.image-card.selected{transform:translateY(-5px)}
-#cards .card.image-card.selected img{filter:drop-shadow(0 0 5px #f5d18a) drop-shadow(0 4px 3px #39201488)}
-#cards .card.image-card:active{transform:translateY(-2px) scale(.98)}
 .deck-image-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:7px 0 12px}
 .deck-image-slot,.deck-library-image{
   display:block;
@@ -519,13 +475,10 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 .map-medallion span{font-size:27px;line-height:1;filter:drop-shadow(0 2px 1px #80502c66)}
 .map-medallion:active{transform:translateY(2px);box-shadow:0 2px 0 #603b25,inset 0 0 0 2px #fff1c5}
 .map-medallion:focus-visible{outline:3px solid #fff0b5;outline-offset:3px}
-#hand-panel.hand-panel{left:7px;right:7px;bottom:calc(env(safe-area-inset-bottom) + 8px);padding:5px 7px 7px;border-radius:17px;background:linear-gradient(145deg,#fff4dcf2,#e8ce9ff5);}
-#hand-panel .cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:0;align-items:end}
-#cards .card.image-card{width:100%;max-height:min(24vh,166px);}
 #combat-panel{top:calc(env(safe-area-inset-top) + 76px);bottom:auto;max-height:34%;}
 #drawer{bottom:calc(env(safe-area-inset-bottom) + 125px);max-height:42%}
 @media(max-width:370px){.resource-chip{padding:5px 7px;gap:4px}.hull-resource{min-width:108px}.future-resource{width:28px;min-width:28px}.map-medallion{width:49px;height:49px;flex-basis:49px}.map-medallion span{font-size:24px}}
-@media(max-height:650px){#hand-panel.hand-panel{bottom:calc(env(safe-area-inset-bottom) + 5px)}#cards .card.image-card{max-height:19vh}#combat-panel{max-height:29%}}
+@media(max-height:650px){#combat-panel{max-height:29%}}
 
 /* Icônes circulaires illustrées pour les ressources et la carte. */
 .resource-chip{display:flex;align-items:center;justify-content:flex-start;gap:7px;min-height:0;padding:0;border:0;background:transparent;box-shadow:none;color:#fff0c7;}
@@ -545,291 +498,37 @@ body.is-loading #home-screen,body.is-loading #hud{pointer-events:none}
 .map-medallion img{width:58px;height:58px;object-fit:contain;}
 @media(max-width:370px){.resource-icon-frame{width:38px;height:38px;flex-basis:38px}.resource-icon-frame img{width:38px;height:38px}.map-medallion{width:52px;height:52px;flex-basis:52px}.map-medallion img{width:52px;height:52px}}
 
-/* Panneau image d'origine : aucun faux fond CSS ni SVG de remplacement. */
-#hand-panel.hand-panel{background:transparent url('../assets/ui/hand-panel-wood.png') center bottom / 100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;padding:12px 16px 16px;}
 
 
-/* Main de cartes en éventail sur le panneau de bois fourni */
-#hand-panel.hand-panel{
-  left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 5px);
-  height:clamp(150px,25vh,220px);box-sizing:border-box;
-  padding:0 10px 12px;
-  background-image:url('../assets/ui/hand-panel-wood.png');
-  background-position:center bottom;background-size:100% 100%;background-repeat:no-repeat;
-  border:0;border-radius:0;box-shadow:none;
-  display:flex;align-items:flex-end;justify-content:center;
-}
-#hand-panel #cards{
-  width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:0;padding:0 3%;align-items:end;overflow:visible;
-}
-#hand-panel #cards .card.image-card{
-  width:100%;max-height:min(24vh,160px);min-width:0;
-  transform:rotate(var(--fan-angle)) translateY(var(--fan-lift));
-  transform-origin:50% 100%;z-index:1;
-}
-#hand-panel #cards .card.image-card:nth-child(1){--fan-angle:-7deg;--fan-lift:3px}
-#hand-panel #cards .card.image-card:nth-child(2){--fan-angle:-2.5deg;--fan-lift:0px}
-#hand-panel #cards .card.image-card:nth-child(3){--fan-angle:2.5deg;--fan-lift:0px}
-#hand-panel #cards .card.image-card:nth-child(4){--fan-angle:7deg;--fan-lift:3px}
-#hand-panel #cards .card.image-card.selected{
-  transform:rotate(var(--fan-angle)) translateY(-10px) scale(1.045);z-index:3;
-}
-@media(max-height:650px){
-  #hand-panel.hand-panel{height:clamp(125px,24vh,170px)}
-  #hand-panel #cards .card.image-card{max-height:19vh}
-}
 
 
-/* Panneau original volontairement surdimensionné : déborde légèrement des bords */
-#hand-panel.hand-panel{
-  left:-5vw!important;right:-5vw!important;
-  width:110vw!important;
-  bottom:-4vh!important;
-  height:calc(clamp(220px,38vh,340px) + 4vh)!important;
-  box-sizing:border-box;
-  padding:0 5vw calc(4vh + 12px)!important;
-  background-image:url('../assets/ui/hand-panel-wood.png')!important;
-  background-position:center bottom!important;
-  background-size:100% 100%!important;
-  background-repeat:no-repeat!important;
-  overflow:visible!important;
-}
-#hand-panel #cards{
-  width:100%;grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:0!important;padding:0 2%!important;align-items:end;overflow:visible;
-}
-#hand-panel #cards .card.image-card{
-  max-height:none!important;
-  height:clamp(118px,22vh,190px)!important;
-  width:auto!important;max-width:100%;
-  aspect-ratio:1064/1478;
-  justify-self:center;
-}
-@media(max-height:650px){
-  #hand-panel.hand-panel{height:calc(clamp(185px,36vh,240px) + 4vh)!important}
-  #hand-panel #cards .card.image-card{height:clamp(100px,22vh,145px)!important}
-}
+@keyframes dealIn{from{transform:translateY(24px) scale(.8);opacity:0}to{transform:none;opacity:1}}
+#next-card-preview{position:absolute;left:14px;bottom:calc(100% - 8px);width:50px;z-index:3;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px}
+#next-card-preview .nx-label{font:900 8px 'Fredoka',system-ui,sans-serif;letter-spacing:1px;color:#fff6d8;text-shadow:0 1px 2px #000a}
+#next-card-preview .nx-frame{width:100%;aspect-ratio:1064/1478;border-radius:6px;border:2px dashed #fff8;background:#0004;overflow:hidden;filter:grayscale(.85) brightness(.75)}
+#next-card-preview .nx-frame img,#next-card-preview .nx-frame .cf{width:100%;height:100%;object-fit:fill;display:block}
+.drag-ghost{position:fixed!important;z-index:999;pointer-events:none;margin:0!important;opacity:.95;filter:drop-shadow(0 10px 10px #0008)}
+.drag-ghost img{width:100%;height:100%;object-fit:contain;display:block}
+body.dragging-card::after{content:'Dépose sur le bateau';position:fixed;left:50%;top:38%;transform:translateX(-50%);padding:6px 14px;border-radius:14px;background:#2d4f5dcc;color:#ffe8a8;font:800 13px 'Fredoka',system-ui,sans-serif;z-index:998;pointer-events:none}
+body.drop-ready::after{content:'Relâche pour jouer !';background:#2fa24fdd;color:#fff}
 
-
-/* Finition de la main : cartes plus basses, coins arrondis et sélection qui dépasse du bois */
-#hand-panel.hand-panel::before,
-#hand-panel.hand-panel::after{content:none!important;display:none!important}
-#hand-panel.hand-panel{padding-bottom:4px!important}
-#hand-panel #cards{align-items:end!important;padding-bottom:0!important}
-#hand-panel #cards .card.image-card{
-  overflow:hidden!important;
-  border-radius:11px!important;
-  clip-path:inset(0 round 11px);
-  transform:rotate(var(--fan-angle)) translateY(9px)!important;
-  transform-origin:50% 100%;
-}
-#hand-panel #cards .card.image-card img{
-  border-radius:11px!important;
-}
-#hand-panel #cards .card.image-card.selected{
-  transform:rotate(var(--fan-angle)) translateY(-18px) scale(1.06)!important;
-  z-index:8!important;
-  clip-path:inset(0 round 11px);
-}
-#hand-panel #cards .card.image-card:active{
-  transform:rotate(var(--fan-angle)) translateY(-14px) scale(1.02)!important;
-}
-
-
-/* Main de cartes façon Clash Royale : file d'attente à gauche + cartes chevauchées */
-#hand-panel.hand-panel{
-  display:flex!important;align-items:flex-end!important;
-  left:-5vw!important;right:-5vw!important;width:110vw!important;
-  bottom:-4vh!important;height:calc(clamp(220px,38vh,340px) + 4vh)!important;
-  padding:0 5vw calc(4vh + 7px)!important;
-  background:transparent url('../assets/ui/hand-panel-wood.png') center bottom/100% 100% no-repeat!important;
-  border:0!important;border-radius:0!important;box-shadow:none!important;
-  overflow:visible!important;
-}
-#hand-panel .hand-heading{display:none!important}
-#hand-panel::before,#hand-panel::after{display:none!important;content:none!important}
-#next-card-preview{
-  position:relative;flex:0 0 17%;height:clamp(88px,14vh,122px);
-  align-self:flex-end;margin:0 -1% 4px 0;z-index:1;overflow:visible;
-}
-#next-card-preview .queued-card{
-  position:absolute;left:0;bottom:0;width:72%;height:100%;
-  border-radius:10px;overflow:hidden;
-  filter:grayscale(1) brightness(.72);opacity:.52;
-  transform:scale(.78) translate(-8px,5px);transform-origin:bottom left;
-}
-#next-card-preview .queued-card-0{z-index:3;opacity:.9;filter:grayscale(.72) brightness(.78);transform:scale(.88) translate(4px,0)}
-#next-card-preview .queued-card-1{z-index:2;transform:scale(.76) translate(-8px,2px);opacity:.58}
-#next-card-preview .queued-card-2{z-index:1;transform:scale(.64) translate(-18px,4px);opacity:.36}
-#next-card-preview .queued-card img{display:block;width:100%;height:100%;object-fit:contain;border-radius:10px;clip-path:inset(0 round 10px)}
-#hand-panel #cards{
-  position:relative;flex:1 1 83%;min-width:0;width:auto!important;
-  display:flex!important;align-items:flex-end!important;justify-content:flex-start!important;
-  gap:0!important;padding:0 0 0 1%!important;overflow:visible!important;
-}
-#hand-panel #cards .card.image-card{
-  flex:0 0 auto;width:clamp(64px,20vw,94px)!important;
-  height:clamp(94px,18vh,142px)!important;max-height:none!important;
-  aspect-ratio:3/4.2;min-width:0;margin-left:clamp(-15px,-3.4vw,-8px);
-  padding:0!important;border:0!important;border-radius:12px!important;
-  background:transparent!important;box-shadow:none!important;
-  overflow:hidden!important;clip-path:inset(0 round 12px);
-  transform:translateY(13px) scale(.92)!important;
-  transform-origin:50% 100%;z-index:2;filter:none!important;
-}
-#hand-panel #cards .card.image-card:first-child{margin-left:0}
-#hand-panel #cards .card.image-card img{
-  display:block;width:100%;height:100%;object-fit:contain;
-  border:0!important;border-radius:12px!important;clip-path:inset(0 round 12px);
-}
-#hand-panel #cards .card.image-card.selected{
-  transform:translateY(-16px) scale(1.02)!important;
-  z-index:10!important;filter:none!important;clip-path:inset(0 round 12px);
-}
-#hand-panel #cards .card.image-card:active{transform:translateY(-12px) scale(1)!important}
-@media(max-height:650px){
-  #hand-panel.hand-panel{height:calc(clamp(185px,36vh,240px) + 4vh)!important}
-  #hand-panel #cards .card.image-card{height:clamp(82px,18vh,118px)!important}
-  #next-card-preview{height:clamp(76px,13vh,98px)}
-}
-
-
-/* Correction ciblée de la main : conserver l'illustration originale sans l'étirer */
-#hand-panel.hand-panel{
-  left:-2vw!important;right:-2vw!important;width:104vw!important;
-  bottom:-2vh!important;height:clamp(178px,29vh,248px)!important;
-  padding:0 2vw calc(2vh + 5px)!important;
-  background-color:transparent!important;
-  background-image:url('../assets/ui/hand-panel-wood.png')!important;
-  background-position:center bottom!important;
-  background-size:auto 100%!important;background-repeat:no-repeat!important;
-  border:0!important;border-radius:0!important;box-shadow:none!important;
-}
-#hand-panel.hand-panel .hand-heading,
-#hand-panel.hand-panel::before,#hand-panel.hand-panel::after{display:none!important;content:none!important}
-/* Retire l'ancienne bande rose/beige et tout fond de carte : seule l'image reste visible */
-#hand-panel #cards .card.image-card::before,
-#hand-panel #cards .card.image-card::after{display:none!important;content:none!important}
-#hand-panel #cards .card.image-card,
-#hand-panel #cards .card.image-card.selected{
-  background:transparent!important;background-image:none!important;
-  border:0!important;box-shadow:none!important;outline:0!important;
-  border-radius:13px!important;overflow:hidden!important;
-  -webkit-mask-image:-webkit-radial-gradient(white,black);
-  clip-path:inset(0 round 13px);
-}
-#hand-panel #cards .card.image-card .card-face,
-#hand-panel #cards .card.image-card .card-inner,
-#hand-panel #cards .card.image-card .card-art,
-#hand-panel #cards .card.image-card .card-art-image{
-  background:transparent!important;border:0!important;box-shadow:none!important;
-  border-radius:13px!important;overflow:hidden!important;
-}
-#hand-panel #cards .card.image-card img{
-  display:block!important;width:100%!important;height:100%!important;
-  object-fit:contain!important;border:0!important;border-radius:13px!important;
-  clip-path:inset(0 round 13px)!important;background:transparent!important;
-}
-/* Réduire la taille sans modifier l'ordre ni l'espacement horizontal des cartes de la main */
-#hand-panel #cards .card.image-card{
-  width:clamp(55px,16vw,78px)!important;
-  height:clamp(82px,14.5vh,112px)!important;
-  transform:translateY(10px) scale(.94)!important;
-}
-#hand-panel #cards .card.image-card.selected{
-  transform:translateY(-9px) scale(1.02)!important;z-index:12!important;
-}
-/* File de pioche : la prochaine carte est visible en premier, les suivantes plus petites et grisées */
-#next-card-preview{
-  flex:0 0 clamp(48px,13vw,66px)!important;
-  height:clamp(82px,14.5vh,112px)!important;
-  margin:0 2px 5px 0!important;position:relative!important;
-  align-self:flex-end!important;overflow:visible!important;
-}
-#next-card-preview .queued-card{
-  position:absolute!important;left:0!important;bottom:0!important;
-  width:100%!important;height:100%!important;
-  overflow:hidden!important;border-radius:10px!important;
-  background:transparent!important;border:0!important;box-shadow:none!important;
-  clip-path:inset(0 round 10px)!important;
-  filter:grayscale(1) brightness(.62)!important;opacity:.48!important;
-}
-#next-card-preview .queued-card-0{
-  z-index:3!important;transform:scale(.86) translate(5px,0)!important;
-  filter:grayscale(.65) brightness(.72)!important;opacity:.88!important;
-}
-#next-card-preview .queued-card-1{z-index:2!important;transform:scale(.72) translate(-8px,5px)!important;opacity:.5!important}
-#next-card-preview .queued-card-2{z-index:1!important;transform:scale(.58) translate(-16px,8px)!important;opacity:.3!important}
-#next-card-preview .queued-card *{border-radius:10px!important}
-#next-card-preview .queued-card img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;background:transparent!important;clip-path:inset(0 round 10px)!important}
-@media(max-height:650px){
- #hand-panel.hand-panel{height:clamp(158px,27vh,205px)!important}
- #hand-panel #cards .card.image-card{height:clamp(74px,14vh,96px)!important}
- #next-card-preview{height:clamp(74px,14vh,96px)!important}
-}
-
-
-/* Ajustement demandé : retrouver la taille d'origine et centrer la main légèrement à droite.
-   L'aperçu de pioche est en position absolue pour ne pas déplacer les cartes de la main. */
-#hand-panel.hand-panel{
-  display:flex!important;align-items:flex-end!important;justify-content:center!important;
-  left:-2vw!important;right:-2vw!important;width:104vw!important;
-  bottom:-2vh!important;height:clamp(178px,29vh,248px)!important;
-  padding:0 2vw calc(2vh + 5px)!important;
-  background-image:url('../assets/ui/hand-panel-wood.png')!important;
-  background-position:center bottom!important;background-size:auto 100%!important;
-  background-repeat:no-repeat!important;
-}
-#next-card-preview{
-  position:absolute!important;left:5%!important;bottom:calc(2vh + 5px)!important;
-  width:clamp(54px,16vw,76px)!important;height:clamp(82px,14.5vh,112px)!important;
-  margin:0!important;z-index:1!important;pointer-events:none!important;
-}
-#next-card-preview .queued-card{
-  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
-  overflow:hidden!important;border:0!important;border-radius:12px!important;
-  background:transparent!important;box-shadow:none!important;
-  filter:grayscale(1) brightness(.72)!important;opacity:.82!important;
-  clip-path:inset(0 round 12px)!important;
-}
-#next-card-preview .queued-card img{
-  display:block!important;width:100%!important;height:100%!important;
-  object-fit:contain!important;border:0!important;border-radius:12px!important;
-  clip-path:inset(0 round 12px)!important;background:transparent!important;
-}
-#next-card-preview .empty-draw-preview{
-  display:grid;place-items:center;width:100%;height:100%;padding:4px;
-  border:1px dashed #f2c35b;border-radius:10px;background:#34271dcc;
-  color:#fff0c7;text-align:center;font-size:8px;font-weight:900;line-height:1.1;
-}
-#hand-panel #cards{
-  position:relative!important;flex:1 1 auto!important;min-width:0!important;width:100%!important;
-  display:flex!important;align-items:flex-end!important;justify-content:center!important;
-  gap:0!important;padding:0 0 0 4vw!important;margin:0!important;
-  overflow:visible!important;
-}
-#hand-panel #cards .card.image-card{
-  flex:0 0 auto!important;width:clamp(64px,20vw,94px)!important;
-  height:clamp(94px,18vh,142px)!important;max-height:none!important;
-  aspect-ratio:1064/1478!important;min-width:0!important;
-  margin-left:clamp(-15px,-3.4vw,-8px)!important;
-  padding:0!important;border:0!important;border-radius:12px!important;
-  background:transparent!important;box-shadow:none!important;
-  overflow:hidden!important;clip-path:inset(0 round 12px)!important;
-  transform:translateY(10px) scale(1)!important;
-  transform-origin:50% 100%;z-index:2!important;filter:none!important;
-}
-#hand-panel #cards .card.image-card:first-child{margin-left:0!important}
-#hand-panel #cards .card.image-card img{
-  display:block!important;width:100%!important;height:100%!important;
-  object-fit:contain!important;border:0!important;border-radius:12px!important;
-  clip-path:inset(0 round 12px)!important;
-}
-#hand-panel #cards .card.image-card.selected{
-  transform:translateY(-16px) scale(1.02)!important;z-index:10!important;
-}
-@media(max-height:650px){
-  #hand-panel #cards .card.image-card{height:clamp(82px,18vh,118px)!important}
-  #next-card-preview{height:clamp(76px,13vh,98px)!important}
-}
+/* ===== Main de cartes (Clash Royale) : un seul bloc de référence ===== */
+#hand-panel{position:absolute;left:0;right:0;bottom:0;z-index:20;box-sizing:border-box;
+ padding:34px 0 calc(18px + env(safe-area-inset-bottom));
+ border-style:solid;border-width:0 52px;border-image:url(../assets/ui/hand-bar.webp) 0 125 fill / 0 52px stretch;
+ filter:drop-shadow(0 -3px 6px #0005);touch-action:none;user-select:none;-webkit-user-select:none}
+#cards{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:-12px}
+#cards .card.image-card{position:relative;display:block;width:100%;aspect-ratio:1064/1478;padding:0;border:0;background:none;
+ touch-action:none;-webkit-tap-highlight-color:transparent;line-height:0;transition:opacity .15s}
+#cards .card.image-card img,#cards .card.image-card .cf{width:100%;height:100%;object-fit:fill;display:block;border-radius:6px;box-shadow:0 3px 6px #0007;pointer-events:none}
+#cards .card.image-card.lifted{opacity:.25}
+#cards .card.image-card.dealt{animation:dealIn .28s cubic-bezier(.2,1.4,.4,1)}
+@keyframes dealIn{from{transform:translateY(24px) scale(.8);opacity:0}to{transform:none;opacity:1}}
+#next-card-preview{position:absolute;left:12px;bottom:calc(100% - 14px);width:46px;z-index:3;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px}
+#next-card-preview .nx-label{font:900 8px 'Fredoka',system-ui,sans-serif;letter-spacing:1px;color:#fff6d8;text-shadow:0 1px 2px #000a}
+#next-card-preview .nx-frame{width:100%;aspect-ratio:1064/1478;border-radius:6px;border:2px dashed #fff9;background:#0005;overflow:hidden;filter:grayscale(.85) brightness(.75)}
+#next-card-preview .nx-frame img,#next-card-preview .nx-frame .cf{width:100%;height:100%;object-fit:fill;display:block}
+.drag-ghost{position:fixed!important;z-index:999;pointer-events:none;opacity:.96;filter:drop-shadow(0 10px 10px #0008)}
+.drag-ghost img,.drag-ghost .cf{width:100%;height:100%;object-fit:fill;display:block;border-radius:6px}
+body.dragging-card::after{content:'Dépose sur le bateau';position:fixed;left:50%;top:38%;transform:translateX(-50%);padding:6px 14px;border-radius:14px;background:#2d4f5dcc;color:#ffe8a8;font:800 13px 'Fredoka',system-ui,sans-serif;z-index:998;pointer-events:none}
+body.drop-ready::after{content:'Relâche pour jouer !';background:#2fa24fdd;color:#fff}
